@@ -4,16 +4,17 @@
 
 const CACHE_NAME = 'money-with-basel-v1';
 const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/dashboard.html',
-    '/transactions.html',
-    '/accounts.html',
-    '/settings.html',
-    '/js/ui.js',
-    '/js/charts.js',
-    '/js/automation.js',
-    '/js/db.js',
+    '/MoneyWithBasel/',
+    '/MoneyWithBasel/index.html',
+    '/MoneyWithBasel/dashboard.html',
+    '/MoneyWithBasel/transactions.html',
+    '/MoneyWithBasel/accounts.html',
+    '/MoneyWithBasel/settings.html',
+    '/MoneyWithBasel/js/ui.js',
+    '/MoneyWithBasel/js/charts.js',
+    '/MoneyWithBasel/js/automation.js',
+    '/MoneyWithBasel/js/db.js',
+    // باقي الروابط الخارجية تبقى كما هي
     'https://cdn.tailwindcss.com',
     'https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap',
     'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap'
