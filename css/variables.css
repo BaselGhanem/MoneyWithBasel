@@ -1,0 +1,91 @@
+:root {
+  --bg-primary: #0a0a12;
+  --bg-secondary: #0f0f1a;
+  --bg-tertiary: #1e1e30;
+  --bg-variant: #1a1a28;
+
+  --text-primary: #e8e0f0;
+  --text-secondary: #a098b0;
+  --text-inverse: #0a0a12;
+
+  --color-primary: #ff2d78;
+  --color-primary-dim: #ff80aa;
+  --color-primary-container: #b3004e;
+
+  --color-secondary: #00ffcc;
+  --color-secondary-container: #004d3d;
+
+  --color-tertiary: #ffe04a;
+  --color-tertiary-container: #665200;
+
+  --color-error: #ff4444;
+  --color-error-container: #3d0f0f;
+
+  --color-success: #39FF14;
+  --color-warning: #ffa726;
+
+  --color-outline: #5a5068;
+  --color-outline-variant: #302840;
+
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-full: 28px;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  --font-family-primary: 'Almarai', sans-serif;
+  --font-family-mono: 'JetBrains Mono', monospace;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+  --font-size-3xl: 48px;
+
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
+
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+
+  --z-nav: 50;
+  --z-modal: 100;
+  --z-toast: 60;
+}
+
+html.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-tertiary: #efefef;
+  --bg-variant: #e8e8e8;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --text-inverse: #ffffff;
+  --color-outline: #cccccc;
+  --color-outline-variant: #e0e0e0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; direction: rtl; }
+
+body {
+  font-family: var(--font-family-primary);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+::selection { background-color: var(--color-primary); color: white; }

@@ -1,77 +1,69 @@
-// ============================================================
-// app.js — Money with Basel | Main Controller
-// ============================================================
-
-const app = {
-    // حالة المستخدم الحالية
-    user: null,
-    
-    // تهيئة التطبيق عند تحميل الصفحة
-    init: function() {
-        console.log("🚀 Money with Basel: Initializing...");
-        
-        // تسجيل الـ Service Worker للـ PWA
-        this.registerServiceWorker();
-        
-        // مراقبة حالة تسجيل الدخول
-        this.listenToAuth();
-    },
-
-    // تسجيل الخدمة الخلفية (لجعل التطبيق يعمل أوفلاين)
- registerServiceWorker: function() {
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-            // امسح أي كاش قديم (اختياري)
-            if (caches) {
-                const keys = await caches.keys();
-                await Promise.all(keys.map(key => caches.delete(key)));
-                console.log('🗑️ تم مسح الكاش القديم');
-            }
-            
-            // ✅ المسار الصحيح للملف
-            navigator.serviceWorker.register('/MoneyWithBasel/service-worker.js')
-                .then(() => console.log('✅ Service Worker registered'))
-                .catch(err => console.error('❌ Service Worker Error:', err));
-        });
-    }
-},
-
-    // مراقبة حالة المستخدم (مهم جداً للتحكم في الشاشات)
-    listenToAuth: function() {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                console.log("👤 User logged in:", user.email);
-                this.user = user;
-                // عند تسجيل الدخول، قم بإخفاء شاشة Auth وإظهار شاشة التطبيق
-                this.toggleScreens(true);
-                // استدعاء دالة لتحميل البيانات (من db.js أو ui.js)
-                if (typeof loadDashboard === 'function') {
-                    loadDashboard(user);
-                }
-            } else {
-                console.log("👋 User logged out");
-                this.user = null;
-                this.toggleScreens(false);
-            }
-        });
-    },
-
-    // التبديل بين شاشة تسجيل الدخول وشاشة التطبيق
-    toggleScreens: function(isLoggedIn) {
-        const authScreen = document.getElementById('auth-screen');
-        const appScreen = document.getElementById('app-screen');
-        
-        if (isLoggedIn) {
-            if (authScreen) authScreen.classList.add('hidden');
-            if (appScreen) appScreen.classList.remove('hidden');
-        } else {
-            if (authScreen) authScreen.classList.remove('hidden');
-            if (appScreen) appScreen.classList.add('hidden');
-        }
-    }
+const firebaseConfig = {
+    apiKey: "AIzaSyDUSHbMd1A98_OpE3JSNXPD-XT0do8FutM",
+    authDomain: "moneywithbasel.firebaseapp.com",
+    projectId: "moneywithbasel",
+    storageBucket: "moneywithbasel.firebasestorage.app",
+    messagingSenderId: "1000601907861",
+    appId: "1:1000601907861:web:6995a21e42d36c1981a19c"
 };
 
-// تشغيل التطبيق عند جاهزية المتصفح
-document.addEventListener('DOMContentLoaded', () => {
-    app.init();
-});
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+const app = {
+    user: null,
+    data: { transactions: [], accounts: [], categories: [], commitments: [] }
+};
+
+function initTheme() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.classList.toggle('dark',  saved === 'dark');
+    document.documentElement.classList.toggle('light', saved === 'light');
+}
+initTheme();
+
+function showToast(message, type = 'default') {
+    document.querySelector('.toast')?.remove();
+    const toast = document.createElement('div');
+    const bg    = type === 'error' ? '#ff4444' : type === 'success' ? '#39FF14' : '#28283e';
+    const color = type === 'success' ? '#0a0a12' : '#e8e0f0';
+    toast.className = 'toast';
+    toast.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+        background:${bg};color:${color};padding:12px 24px;border-radius:9999px;
+        font-family:Almarai,sans-serif;font-size:14px;font-weight:700;z-index:9999;
+        box-shadow:0 4px 20px rgba(0,0,0,0.4);white-space:nowrap;`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+function showModal(id)  { document.getElementById(id)?.classList.add('active'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
+
+function setLoading(show) {
+    document.getElementById('loading')?.classList.toggle('active', show);
+}
+
+function showError(message) {
+    const el = document.getElementById('error-message');
+    if (!el) return;
+    el.textContent = message;
+    el.classList.add('active');
+    setTimeout(() => el.classList.remove('active'), 5000);
+}
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+}
+
+window.app        = app;
+window.showToast  = showToast;
+window.showModal  = showModal;
+window.closeModal = closeModal;
+window.setLoading = setLoading;
+window.showError  = showError;

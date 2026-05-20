@@ -1,164 +1,355 @@
 <!DOCTYPE html>
 <html class="dark" dir="rtl" lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a12">
-    <title>سجل الحركات - Money with Basel</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        background: '#0a0a12',
-                        surface: '#0f0f1a',
-                        'surface-light': '#1e1e30',
-                        'surface-variant': '#1a1a28',
-                        primary: '#ff2d78', /* الوردي الزاهي */
-                        secondary: '#00ffcc', /* الأخضر الفيروزي */
-                        tertiary: '#ffe04a', /* الأصفر الدافئ */
-                        error: '#ff4444',
-                        success: '#4caf50',
-                        'on-surface': '#e8e0f0',
-                        'on-surface-variant': '#a098b0',
-                    },
-                    fontFamily: {
-                        sans: ['Almarai', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { 
-            font-family: 'Almarai', sans-serif; 
-            background-color: #0a0a12; 
-            color: #e8e0f0; 
-            -webkit-tap-highlight-color: transparent;
-        }
-        .number-font { font-family: 'JetBrains Mono', monospace; letter-spacing: -0.5px; }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
-        /* إخفاء شريط التمرير مع الحفاظ على وظيفته */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>الحركات - Money with Basel</title>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-container-low":"#111118","on-surface-variant":"#a098b0","on-surface":"#e8e0f0",error:"#ff4444",background:"#0a0a12","surface-container-high":"#1e1e30",tertiary:"#ffe04a","surface-bright":"#1a1a2e",outline:"#5a5068","primary-fixed":"#ffe0ec","error-container":"#3d0f0f","surface-container":"#141422","outline-variant":"#302840","on-primary-container":"#ffe0ec","surface-container-lowest":"#0a0a12","surface-tint":"#ff2d78",secondary:"#00ffcc","surface-dim":"#0f0f1a","primary-container":"#b3004e","on-background":"#e8e0f0","on-primary":"#1a0010","surface-container-highest":"#28283e","primary-fixed-dim":"#ff80aa","surface-variant":"#1e1e30",primary:"#ff2d78",surface:"#0f0f1a"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"container-padding":"24px",unit:"8px","section-margin":"40px",gutter:"16px","card-gap":"20px"},fontFamily:{"label-caps":["Almarai","sans-serif"],"headline-md":["Almarai","sans-serif"],"body-lg":["Almarai","sans-serif"],"number-sm":["Almarai","sans-serif"],"display-lg":["Almarai","sans-serif"],"body-md":["Almarai","sans-serif"],"number-lg":["Almarai","sans-serif"],"headline-lg":["Almarai","sans-serif"]},fontSize:{"label-caps":["12px",{lineHeight:"16px",fontWeight:"700"}],"headline-md":["24px",{lineHeight:"32px",fontWeight:"600"}],"body-lg":["18px",{lineHeight:"28px",fontWeight:"400"}],"number-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-lg":["48px",{lineHeight:"56px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],"number-lg":["24px",{lineHeight:"32px",fontWeight:"500"}],"headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.01em",fontWeight:"600"}]}}}};
+</script>
+<style>
+body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+.fill-icon{font-variation-settings:'FILL' 1;}
+.card-surface{background-color:#1E1E1E;border:1px solid #2D2D2D;border-radius:16px;}
+.scrollbar-hide::-webkit-scrollbar{display:none;}
+.scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:flex-end;justify-content:center;}
+.modal-overlay.active{display:flex;}
+.modal-sheet{background:#1E1E1E;border-radius:24px 24px 0 0;width:100%;max-width:640px;padding:24px;max-height:90vh;overflow-y:auto;}
+.toggle-track{background:#2D2D2D;width:48px;height:26px;border-radius:9999px;position:relative;cursor:pointer;transition:background 0.2s;}
+.toggle-track.on{background:#39FF14;}
+.toggle-thumb{position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:9999px;transition:transform 0.2s;}
+.toggle-track.on .toggle-thumb{transform:translateX(-22px);}
+.chip-active{background:rgba(179,0,78,0.2);border-color:#b3004e;color:#ffe0ec;}
+</style>
 </head>
-<body class="bg-background text-on-surface h-screen flex flex-col overflow-hidden md:pr-20">
-    <header class="flex items-center justify-between p-4 bg-surface border-b border-surface-variant sticky top-0 z-20">
-        <h1 class="text-xl font-bold">سجل الحركات</h1>
-        <button class="w-10 h-10 rounded-full bg-surface-variant text-on-surface flex items-center justify-center hover:bg-surface-light transition-colors active:scale-95">
-            <span class="material-symbols-outlined">search</span>
-        </button>
-    </header>
+<body class="bg-background text-on-background antialiased pb-[90px] md:pb-0">
 
-    <div class="px-4 py-3 bg-surface border-b border-surface-variant flex gap-2 overflow-x-auto no-scrollbar shrink-0">
-        <button class="px-4 py-1.5 rounded-full bg-primary text-white text-sm font-bold whitespace-nowrap shadow-lg shadow-primary/20">الكل</button>
-        <button class="px-4 py-1.5 rounded-full bg-surface-variant text-on-surface-variant hover:bg-surface-light hover:text-on-surface text-sm font-bold whitespace-nowrap transition-colors">الإيرادات</button>
-        <button class="px-4 py-1.5 rounded-full bg-surface-variant text-on-surface-variant hover:bg-surface-light hover:text-on-surface text-sm font-bold whitespace-nowrap transition-colors">المصاريف</button>
-        <button class="px-3 py-1.5 rounded-full bg-surface-variant text-on-surface-variant hover:bg-surface-light hover:text-on-surface text-sm font-bold whitespace-nowrap flex items-center gap-1 transition-colors mr-auto">
-            <span class="material-symbols-outlined text-[18px]">filter_alt</span>
-            تصفية
-        </button>
+<!-- TOP BAR -->
+<header class="sticky top-0 w-full bg-background border-b border-outline-variant/30 z-50">
+  <div class="flex flex-row-reverse justify-between items-center px-container-padding h-16 max-w-[1200px] mx-auto">
+    <h1 class="font-headline-md text-headline-md font-bold text-primary">سجل الحركات</h1>
+    <div class="flex items-center gap-2">
+      <button onclick="openAddModal()" class="flex items-center gap-1 px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:opacity-80 transition-opacity">
+        <span class="material-symbols-outlined text-[18px]">add</span> إضافة
+      </button>
     </div>
+  </div>
+</header>
 
-    <main class="flex-1 overflow-y-auto p-4 pb-28" id="transactions-container">
-        
-        <div class="mb-6">
-            <h2 class="text-xs text-on-surface-variant mb-3 font-bold flex items-center gap-2">
-                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
-                اليوم
-            </h2>
-            <div class="space-y-3">
-                <div class="bg-surface p-3.5 rounded-2xl flex items-center justify-between border border-surface-variant hover:border-surface-light transition-colors cursor-pointer group">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-11 h-11 rounded-full bg-error/10 text-error flex items-center justify-center group-hover:bg-error/20 transition-colors">
-                            <span class="material-symbols-outlined">restaurant</span>
-                        </div>
-                        <div>
-                            <p class="font-bold text-sm text-on-surface">غداء عمل</p>
-                            <p class="text-xs text-on-surface-variant mt-1 opacity-80">محفظة الكاش • طعام ومطاعم</p>
-                        </div>
-                    </div>
-                    <div class="text-left flex flex-col items-end">
-                        <p class="font-bold text-error number-font">- د.ا 15.50</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<main class="max-w-[1200px] mx-auto px-container-padding pt-6 flex flex-col gap-4">
 
-        <div class="mb-6">
-            <h2 class="text-xs text-on-surface-variant mb-3 font-bold flex items-center gap-2">
-                <span class="material-symbols-outlined text-[16px]">history</span>
-                أمس
-            </h2>
-            <div class="space-y-3">
-                <div class="bg-surface p-3.5 rounded-2xl flex items-center justify-between border border-surface-variant hover:border-surface-light transition-colors cursor-pointer group">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-11 h-11 rounded-full bg-success/10 text-success flex items-center justify-center group-hover:bg-success/20 transition-colors">
-                            <span class="material-symbols-outlined">payments</span>
-                        </div>
-                        <div>
-                            <p class="font-bold text-sm text-on-surface">الراتب الشهري</p>
-                            <p class="text-xs text-on-surface-variant mt-1 opacity-80">البنك العربي • راتب</p>
-                        </div>
-                    </div>
-                    <div class="text-left flex flex-col items-end">
-                        <p class="font-bold text-success number-font">+ د.ا 850.00</p>
-                    </div>
-                </div>
-                
-                <div class="bg-surface p-3.5 rounded-2xl flex items-center justify-between border border-surface-variant hover:border-surface-light transition-colors cursor-pointer group">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-11 h-11 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center group-hover:bg-tertiary/20 transition-colors">
-                            <span class="material-symbols-outlined">local_gas_station</span>
-                        </div>
-                        <div>
-                            <p class="font-bold text-sm text-on-surface">بنزين السيارة</p>
-                            <p class="text-xs text-on-surface-variant mt-1 opacity-80">بطاقة الائتمان • مواصلات</p>
-                        </div>
-                    </div>
-                    <div class="text-left flex flex-col items-end">
-                        <p class="font-bold text-on-surface number-font">- د.ا 30.00</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <!-- Search + Filters -->
+  <div class="relative w-full">
+    <input id="search-input" type="text" placeholder="ابحث في الحركات..." oninput="filterTransactions()"
+      class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl pr-4 pl-12 font-body-md text-body-md text-on-background placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container transition-all text-right"/>
+    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+  </div>
 
-    </main>
-<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen flex md:flex-col justify-around md:justify-center items-center px-2 py-2 pb-safe md:pb-0 z-50">
-    
-    <a href="dashboard.html" class="flex flex-col items-center text-on-surface-variant p-2 hover:text-primary transition-colors">
-        <span class="material-symbols-outlined">home</span>
-        <span class="text-[10px] md:hidden font-bold">الرئيسية</span>
-    </a>
-    
-    <a href="transactions.html" class="flex flex-col items-center text-primary p-2">
-        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
-        <span class="text-[10px] md:hidden font-bold">الحركات</span>
-    </a>
+  <!-- Filter Chips -->
+  <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1 flex-row-reverse">
+    <button onclick="setFilter('all')"     id="f-all"     class="chip chip-active whitespace-nowrap px-4 py-2 rounded-full border border-outline-variant font-label-caps text-label-caps transition-colors">الكل</button>
+    <button onclick="setFilter('expense')" id="f-expense" class="chip whitespace-nowrap px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps transition-colors hover:bg-surface-variant">مصروفات</button>
+    <button onclick="setFilter('income')"  id="f-income"  class="chip whitespace-nowrap px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps transition-colors hover:bg-surface-variant">دخل</button>
+    <button onclick="setFilter('recurring')" id="f-recurring" class="chip whitespace-nowrap px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps transition-colors hover:bg-surface-variant">ثابتة</button>
+  </div>
 
-    <button onclick="document.dispatchEvent(new CustomEvent('openAddModal'))" class="bg-primary text-background w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-lg active:scale-95">
-        <span class="material-symbols-outlined text-[28px]">add</span>
-    </button>
+  <!-- Month picker -->
+  <div class="flex items-center justify-between flex-row-reverse card-surface px-4 py-3">
+    <button onclick="prevMonth()" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">chevron_right</span></button>
+    <span id="month-label" class="font-body-lg text-body-lg font-bold text-on-surface"></span>
+    <button onclick="nextMonth()" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">chevron_left</span></button>
+  </div>
 
-    <a href="accounts.html" class="flex flex-col items-center text-on-surface-variant p-2 hover:text-primary transition-colors">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
-        <span class="text-[10px] md:hidden font-bold">الحسابات</span>
-    </a>
+  <!-- Summary bar -->
+  <div class="grid grid-cols-3 gap-3">
+    <div class="card-surface p-3 flex flex-col items-center gap-1">
+      <span class="font-label-caps text-label-caps text-on-surface-variant">دخل</span>
+      <span id="sum-income" class="font-body-md text-body-md font-bold text-[#39FF14]">—</span>
+    </div>
+    <div class="card-surface p-3 flex flex-col items-center gap-1">
+      <span class="font-label-caps text-label-caps text-on-surface-variant">مصروف</span>
+      <span id="sum-expense" class="font-body-md text-body-md font-bold text-error">—</span>
+    </div>
+    <div class="card-surface p-3 flex flex-col items-center gap-1">
+      <span class="font-label-caps text-label-caps text-on-surface-variant">صافي</span>
+      <span id="sum-net" class="font-body-md text-body-md font-bold text-on-surface">—</span>
+    </div>
+  </div>
 
-    <a href="settings.html" class="flex flex-col items-center text-on-surface-variant p-2 hover:text-primary transition-colors">
-        <span class="material-symbols-outlined">settings</span>
-        <span class="text-[10px] md:hidden font-bold">الإعدادات</span>
-    </a>
+  <!-- Transactions list -->
+  <div id="tx-list" class="flex flex-col gap-2"></div>
+  <div id="tx-empty" class="hidden text-center py-16 flex flex-col items-center gap-3">
+    <span class="text-5xl">💸</span>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">لا توجد حركات</p>
+    <button onclick="openAddModal()" class="px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps">إضافة أول حركة</button>
+  </div>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="md:hidden bg-surface-container-low fixed bottom-0 w-full rounded-t-xl border-t border-outline-variant shadow-[0_-4px_30px_rgba(0,0,0,0.4)] left-0 z-50 flex flex-row-reverse justify-around items-center px-4 py-3">
+  <a href="dashboard.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full"><span class="material-symbols-outlined">home</span></a>
+  <a href="transactions.html" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-2 scale-110"><span class="material-symbols-outlined fill-icon">receipt_long</span></a>
+  <button onclick="openAddModal()" class="flex flex-col items-center justify-center text-background bg-primary-container p-3 rounded-full shadow-lg transform -translate-y-4 ring-4 ring-background"><span class="material-symbols-outlined font-bold">add</span></button>
+  <a href="accounts.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full"><span class="material-symbols-outlined">account_balance_wallet</span></a>
+  <a href="settings.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full"><span class="material-symbols-outlined">settings</span></a>
 </nav>
 
-    </body>
+<!-- ADD MODAL -->
+<div id="add-modal" class="modal-overlay" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal-sheet">
+    <div class="flex justify-between items-center mb-6 flex-row-reverse">
+      <h2 class="font-headline-md text-headline-md text-on-surface">إضافة حركة</h2>
+      <button onclick="closeAddModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="flex rounded-full bg-surface-container-highest p-1 mb-4 gap-1">
+      <button id="type-expense" onclick="setTxType('expense')" class="flex-1 py-2 rounded-full font-label-caps text-label-caps bg-error text-white transition-colors">مصروف</button>
+      <button id="type-income"  onclick="setTxType('income')"  class="flex-1 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant transition-colors">دخل</button>
+    </div>
+    <input id="tx-amount" type="number" placeholder="0.00" inputmode="decimal" class="w-full h-14 bg-surface-container-highest border border-outline-variant rounded-xl px-4 text-display-lg font-bold text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container text-center mb-4"/>
+    <input id="tx-note" type="text" placeholder="ملاحظة" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container mb-4 text-right"/>
+    <select id="tx-account" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right appearance-none"></select>
+    <div id="tx-categories" class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 mb-4 flex-row-reverse"></div>
+    <input id="tx-date" type="date" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4"/>
+    <div class="flex items-center justify-between flex-row-reverse mb-4 p-4 bg-surface-container-highest rounded-xl">
+      <div class="flex flex-col items-end"><span class="font-body-md text-body-md text-on-surface">التزام ثابت</span></div>
+      <div id="recurring-toggle" class="toggle-track" onclick="toggleRecurring()"><div class="toggle-thumb"></div></div>
+    </div>
+    <div id="recurring-options" class="hidden flex flex-col gap-3 mb-4 p-4 bg-surface-container rounded-xl border border-outline-variant">
+      <div class="flex items-center justify-between flex-row-reverse">
+        <label class="font-body-md text-body-md text-on-surface-variant">يوم الشهر</label>
+        <input id="tx-day" type="number" min="1" max="31" value="1" class="w-20 h-10 bg-surface-container-highest border border-outline-variant rounded-xl px-3 text-center text-on-surface focus:outline-none"/>
+      </div>
+      <div class="flex items-center justify-between flex-row-reverse">
+        <label class="font-body-md text-body-md text-on-surface-variant">تاريخ الانتهاء</label>
+        <input id="tx-end-date" type="date" class="w-48 h-10 bg-surface-container-highest border border-outline-variant rounded-xl px-3 text-on-surface focus:outline-none"/>
+      </div>
+    </div>
+    <button onclick="submitTransaction()" class="w-full h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">حفظ</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal" class="modal-overlay" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal-sheet">
+    <div class="flex justify-between items-center mb-6 flex-row-reverse">
+      <h2 class="font-headline-md text-headline-md text-on-surface">تعديل الحركة</h2>
+      <button onclick="closeEditModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <input id="edit-amount" type="number" placeholder="0.00" class="w-full h-14 bg-surface-container-highest border border-outline-variant rounded-xl px-4 text-display-lg font-bold text-on-surface focus:outline-none focus:border-primary-container text-center mb-4"/>
+    <input id="edit-note" type="text" placeholder="ملاحظة" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right"/>
+    <select id="edit-account" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right appearance-none"></select>
+    <div id="edit-categories" class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 mb-4 flex-row-reverse"></div>
+    <input id="edit-date" type="date" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4"/>
+    <div class="flex gap-3">
+      <button onclick="deleteTransaction()" class="flex-1 h-14 bg-error/20 text-error font-headline-md font-bold rounded-full hover:bg-error/30 transition-colors">حذف</button>
+      <button onclick="submitEdit()" class="flex-1 h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/db.js"></script>
+<script>
+let state={txType:'expense',isRecurring:false,selectedCatId:null,categories:[],accounts:[],allTx:[],filtered:[],filter:'all',curYear:new Date().getFullYear(),curMonth:new Date().getMonth(),editTx:null,editCatId:null};
+
+auth.onAuthStateChanged(async u=>{
+  if(!u){window.location.href='index.html';return;}
+  app.user=u;
+  const [accs,cats]=await Promise.all([DB.getAccounts(u.uid),DB.getCategories(u.uid)]);
+  state.accounts=accs; state.categories=cats;
+  populateAccountSelects();
+  await loadMonth();
+});
+
+async function loadMonth(){
+  updateMonthLabel();
+  const s=new Date(state.curYear,state.curMonth,1);
+  const e=new Date(state.curYear,state.curMonth+1,0,23,59,59);
+  state.allTx=await DB.getTransactions(app.user.uid,{startDate:s,endDate:e});
+  filterTransactions();
+}
+
+function updateMonthLabel(){
+  document.getElementById('month-label').textContent=
+    new Date(state.curYear,state.curMonth,1).toLocaleDateString('ar-JO',{month:'long',year:'numeric'});
+}
+function prevMonth(){if(state.curMonth===0){state.curMonth=11;state.curYear--;}else state.curMonth--;loadMonth();}
+function nextMonth(){if(state.curMonth===11){state.curMonth=0;state.curYear++;}else state.curMonth++;loadMonth();}
+
+function setFilter(f){
+  state.filter=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('chip-active'));
+  document.querySelectorAll('.chip').forEach(c=>c.classList.add('text-on-surface-variant'));
+  const el=document.getElementById('f-'+f);
+  el.classList.add('chip-active'); el.classList.remove('text-on-surface-variant');
+  filterTransactions();
+}
+
+function filterTransactions(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  let tx=[...state.allTx];
+  if(state.filter==='expense')   tx=tx.filter(t=>t.type==='expense');
+  if(state.filter==='income')    tx=tx.filter(t=>t.type==='income');
+  if(state.filter==='recurring') tx=tx.filter(t=>t.isRecurring);
+  if(q) tx=tx.filter(t=>(t.note||'').toLowerCase().includes(q)||(getCatName(t.categoryId)||'').toLowerCase().includes(q));
+  state.filtered=tx;
+  renderSummary(tx);
+  renderList(tx);
+}
+
+function renderSummary(tx){
+  const inc=tx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const exp=tx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  document.getElementById('sum-income').textContent=fmt(inc)+' JOD';
+  document.getElementById('sum-expense').textContent=fmt(exp)+' JOD';
+  const net=inc-exp;
+  const el=document.getElementById('sum-net');
+  el.textContent=(net>=0?'+':'')+fmt(net)+' JOD';
+  el.className='font-body-md text-body-md font-bold '+(net>=0?'text-[#39FF14]':'text-error');
+}
+
+function renderList(tx){
+  const list=document.getElementById('tx-list');
+  const empty=document.getElementById('tx-empty');
+  if(!tx.length){list.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  // Group by date
+  const groups={};
+  tx.forEach(t=>{
+    const d=t.date?.toDate?t.date.toDate():new Date(t.date);
+    const key=d.toLocaleDateString('ar-JO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    if(!groups[key])groups[key]=[];
+    groups[key].push(t);
+  });
+  list.innerHTML=Object.entries(groups).map(([date,txs])=>`
+    <div class="flex flex-col gap-1">
+      <span class="font-label-caps text-label-caps text-on-surface-variant px-1 pt-2">${date}</span>
+      <div class="card-surface overflow-hidden">
+        ${txs.map(t=>txCard(t)).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function txCard(t){
+  const cat=state.categories.find(c=>c.id===t.categoryId);
+  const acc=state.accounts.find(a=>a.id===t.accountId);
+  const sign=t.type==='income'?'+':'-';
+  const color=t.type==='income'?'text-[#39FF14]':'text-on-surface';
+  const badge=t.isRecurring?'<span class="font-label-caps text-label-caps px-2 py-0.5 rounded-full bg-tertiary/20 text-tertiary ml-1">ثابت</span>':'';
+  return `<div class="flex flex-row-reverse items-center justify-between py-3 px-4 border-b border-surface-container-high last:border-0 hover:bg-surface-container/50 transition-colors cursor-pointer" onclick='openEditModal(${JSON.stringify({...t,date:t.date?.toDate?t.date.toDate().toISOString():t.date})})'>
+    <div class="flex flex-row-reverse items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-xl border border-outline-variant/30">
+        ${cat?.emoji||(t.type==='income'?'💵':'💸')}
+      </div>
+      <div class="flex flex-col items-end">
+        <div class="flex items-center gap-1 flex-row-reverse">
+          <span class="font-body-md text-body-md font-semibold text-on-surface">${t.note||cat?.name||'—'}</span>${badge}
+        </div>
+        <span class="font-body-md text-number-sm text-on-surface-variant">${acc?.name||''}</span>
+      </div>
+    </div>
+    <span class="font-body-md text-body-md font-medium ${color}">${sign}${fmt(t.amount)} JOD</span>
+  </div>`;
+}
+
+function fmt(n){return Number(n).toLocaleString('en-JO',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function getCatName(id){return state.categories.find(c=>c.id===id)?.name||'';}
+
+// ADD MODAL
+function openAddModal(type='expense'){
+  setTxType(type);
+  document.getElementById('tx-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('tx-amount').value='';
+  document.getElementById('tx-note').value='';
+  state.selectedCatId=null;
+  renderCategoryChips('tx-categories',state.txType,state.selectedCatId,id=>{state.selectedCatId=id;renderCategoryChips('tx-categories',state.txType,state.selectedCatId,arguments.callee);});
+  document.getElementById('add-modal').classList.add('active');
+}
+function closeAddModal(){document.getElementById('add-modal').classList.remove('active');}
+function setTxType(type){
+  state.txType=type;
+  document.getElementById('type-expense').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(type==='expense'?'bg-error text-white':'text-on-surface-variant');
+  document.getElementById('type-income').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(type==='income'?'bg-[#39FF14] text-background':'text-on-surface-variant');
+  renderCategoryChips('tx-categories',type,state.selectedCatId,id=>{state.selectedCatId=id;renderCategoryChips('tx-categories',type,state.selectedCatId,arguments.callee);});
+}
+function toggleRecurring(){
+  state.isRecurring=!state.isRecurring;
+  document.getElementById('recurring-toggle').classList.toggle('on',state.isRecurring);
+  document.getElementById('recurring-options').classList.toggle('hidden',!state.isRecurring);
+}
+function renderCategoryChips(containerId,type,selId,onSelect){
+  const cats=state.categories.filter(c=>c.type===type);
+  document.getElementById(containerId).innerHTML=cats.map(c=>`
+    <button onclick="(${onSelect.toString()})('${c.id}')" class="shrink-0 flex items-center gap-1 px-3 py-2 rounded-full border font-label-caps text-label-caps transition-colors ${selId===c.id?'border-primary-fixed bg-primary-container/20 text-primary-fixed':'border-outline-variant text-on-surface-variant hover:border-primary-fixed'}">
+      <span>${c.emoji}</span><span>${c.name}</span>
+    </button>`).join('');
+}
+function populateAccountSelects(){
+  ['tx-account','edit-account'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    sel.innerHTML='<option value="">اختر الحساب...</option>'+state.accounts.map(a=>`<option value="${a.id}">${a.icon||'💰'} ${a.name}</option>`).join('');
+  });
+}
+async function submitTransaction(){
+  const amount=parseFloat(document.getElementById('tx-amount').value);
+  const accountId=document.getElementById('tx-account').value;
+  const note=document.getElementById('tx-note').value;
+  const date=document.getElementById('tx-date').value;
+  if(!amount||amount<=0){showToast('أدخل مبلغاً صحيحاً','error');return;}
+  if(!accountId){showToast('اختر حساباً','error');return;}
+  try{
+    if(state.isRecurring){
+      await DB.addCommitment(app.user.uid,{accountId,categoryId:state.selectedCatId,name:note||'التزام ثابت',amount,type:state.txType,dayOfMonth:parseInt(document.getElementById('tx-day').value)||1,startDate:date,endDate:document.getElementById('tx-end-date').value||null});
+      showToast('تم إضافة الالتزام ✅');
+    }else{
+      await DB.addTransaction(app.user.uid,{accountId,categoryId:state.selectedCatId,amount,type:state.txType,date,note});
+      showToast('تم الحفظ ✅');
+    }
+    closeAddModal();
+    await loadMonth();
+  }catch(e){console.error(e);showToast('خطأ، حاول مرة أخرى','error');}
+}
+
+// EDIT MODAL
+function openEditModal(tx){
+  state.editTx=tx;
+  state.editCatId=tx.categoryId||null;
+  document.getElementById('edit-amount').value=tx.amount;
+  document.getElementById('edit-note').value=tx.note||'';
+  document.getElementById('edit-account').value=tx.accountId;
+  const d=tx.date?.seconds?new Date(tx.date.seconds*1000):new Date(tx.date);
+  document.getElementById('edit-date').value=d.toISOString().split('T')[0];
+  renderCategoryChips('edit-categories',tx.type,state.editCatId,id=>{state.editCatId=id;renderCategoryChips('edit-categories',tx.type,state.editCatId,arguments.callee);});
+  document.getElementById('edit-modal').classList.add('active');
+}
+function closeEditModal(){document.getElementById('edit-modal').classList.remove('active');}
+async function submitEdit(){
+  const tx=state.editTx;
+  const newData={accountId:document.getElementById('edit-account').value,categoryId:state.editCatId,amount:parseFloat(document.getElementById('edit-amount').value),type:tx.type,date:document.getElementById('edit-date').value,note:document.getElementById('edit-note').value};
+  try{
+    await DB.updateTransaction(tx.id,tx,newData);
+    showToast('تم التعديل ✅');
+    closeEditModal();
+    await loadMonth();
+  }catch(e){console.error(e);showToast('خطأ','error');}
+}
+async function deleteTransaction(){
+  if(!confirm('هل تريد حذف هذه الحركة؟'))return;
+  try{
+    await DB.deleteTransaction(state.editTx.id,state.editTx);
+    showToast('تم الحذف');
+    closeEditModal();
+    await loadMonth();
+  }catch(e){showToast('خطأ','error');}
+}
+</script>
+</body>
 </html>
