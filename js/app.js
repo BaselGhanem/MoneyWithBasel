@@ -29,7 +29,7 @@ const app = {
             }
             
             // ثم سجل الـ Service Worker الجديد
-            navigator.serviceWorker.register('MoneyWithBasel/service-worker.js')
+            navigator.serviceWorker.register('/service-worker.js')
                 .then(() => console.log('✅ Service Worker registered'))
                 .catch(err => console.error('❌ Service Worker Error:', err));
         });
