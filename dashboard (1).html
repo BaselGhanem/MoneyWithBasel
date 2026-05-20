@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html class="dark" dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Money with Basel - Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: {
+      "surface-container-low":"#111118","on-surface-variant":"#a098b0","on-surface":"#e8e0f0",
+      error:"#ff4444","secondary-container":"#004d3d",background:"#0a0a12",
+      "surface-container-high":"#1e1e30",tertiary:"#ffe04a","surface-bright":"#1a1a2e",
+      outline:"#5a5068","on-secondary":"#001a1a","primary-fixed":"#ffe0ec",
+      "error-container":"#3d0f0f","on-error-container":"#ffa0a0","surface-container":"#141422",
+      "outline-variant":"#302840","on-primary-container":"#ffe0ec","surface-container-lowest":"#0a0a12",
+      "on-error":"#1a0000","surface-tint":"#ff2d78","inverse-surface":"#e8e0f0",
+      secondary:"#00ffcc","inverse-on-surface":"#0a0a12","surface-dim":"#0f0f1a",
+      "inverse-primary":"#8c0038","primary-container":"#b3004e","on-secondary-container":"#c0fff4",
+      "on-background":"#e8e0f0","on-primary":"#1a0010","surface-container-highest":"#28283e",
+      "primary-fixed-dim":"#ff80aa","surface-variant":"#1e1e30",primary:"#ff2d78",surface:"#0f0f1a"
+    },
+    borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},
+    spacing:{"container-padding":"24px",unit:"8px","section-margin":"40px",gutter:"16px","card-gap":"20px"},
+    fontFamily:{
+      "label-caps":["Almarai","sans-serif"],"headline-md":["Almarai","sans-serif"],
+      "body-lg":["Almarai","sans-serif"],"number-sm":["Almarai","sans-serif"],
+      "display-lg":["Almarai","sans-serif"],"body-md":["Almarai","sans-serif"],
+      "number-lg":["Almarai","sans-serif"],"headline-lg":["Almarai","sans-serif"]
+    },
+    fontSize:{
+      "label-caps":["12px",{lineHeight:"16px",fontWeight:"700"}],
+      "headline-md":["24px",{lineHeight:"32px",fontWeight:"600"}],
+      "body-lg":["18px",{lineHeight:"28px",fontWeight:"400"}],
+      "number-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],
+      "display-lg":["48px",{lineHeight:"56px",letterSpacing:"-0.02em",fontWeight:"700"}],
+      "body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],
+      "number-lg":["24px",{lineHeight:"32px",fontWeight:"500"}],
+      "headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.01em",fontWeight:"600"}]
+    }
+  }}
+};
+</script>
+<style>
+  body { font-family:'Almarai',sans-serif; min-height:max(884px,100dvh); }
+  .number-font { font-family:'Almarai',sans-serif; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .fill-icon { font-variation-settings:'FILL' 1; }
+  .card-surface { background-color:#1E1E1E; border:1px solid #2D2D2D; border-radius:16px; }
+  .bento-grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:20px; }
+  .pill-button { background-color:#39FF14; color:#0A0A0A; border-radius:9999px; }
+  .progress-bg { background-color:#2D2D2D; }
+  .scrollbar-hide::-webkit-scrollbar { display:none; }
+  .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
+  /* Add Transaction Modal */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100; align-items:flex-end; justify-content:center; }
+  .modal-overlay.active { display:flex; }
+  .modal-sheet { background:#1E1E1E; border-radius:24px 24px 0 0; width:100%; max-width:640px; padding:24px; max-height:90vh; overflow-y:auto; }
+  .toggle-track { background:#2D2D2D; width:48px; height:26px; border-radius:9999px; position:relative; cursor:pointer; transition:background 0.2s; }
+  .toggle-track.on { background:#39FF14; }
+  .toggle-thumb { position:absolute; top:3px; right:3px; width:20px; height:20px; background:#fff; border-radius:9999px; transition:transform 0.2s; }
+  .toggle-track.on .toggle-thumb { transform:translateX(-22px); }
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .skeleton { background:linear-gradient(90deg,#1E1E1E 25%,#2D2D2D 50%,#1E1E1E 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+</style>
+</head>
+<body class="bg-background text-on-background antialiased pb-[90px] md:pb-0">
+
+<!-- ── TOP BAR ─────────────────────────────────────────────── -->
+<header class="hidden md:flex flex-row-reverse justify-between items-center px-container-padding h-16 w-full z-50 fixed top-0 bg-background border-b border-outline-variant/30">
+  <div class="flex items-center gap-4 flex-row-reverse">
+    <div id="hdr-avatar" class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant flex items-center justify-center">
+      <span class="material-symbols-outlined text-on-surface-variant">person</span>
+    </div>
+    <span class="font-headline-md text-headline-md font-bold text-primary">Money with Basel</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <button class="p-2 text-on-surface-variant hover:opacity-80 transition-opacity">
+      <span class="material-symbols-outlined">notifications</span>
+    </button>
+    <button onclick="openAddModal()" class="pill-button px-4 py-2 font-label-caps text-label-caps flex items-center gap-1">
+      <span class="material-symbols-outlined text-[18px]">add</span> إضافة حركة
+    </button>
+  </div>
+</header>
+
+<!-- ── MAIN ────────────────────────────────────────────────── -->
+<main class="w-full max-w-[1200px] mx-auto px-container-padding pt-6 md:pt-24 flex flex-col gap-card-gap">
+
+  <!-- Greeting -->
+  <section class="flex flex-col gap-1">
+    <h1 id="greeting" class="font-headline-lg text-headline-lg text-on-surface">أهلاً، جاري التحميل...</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">نظرة عامة على محفظتك اليوم.</p>
+  </section>
+
+  <!-- ── BENTO GRID ────────────────────────────────────────── -->
+  <div class="bento-grid">
+
+    <!-- Net Worth Hero -->
+    <div class="col-span-12 md:col-span-8 card-surface p-container-padding flex flex-col justify-between min-h-[280px] relative overflow-hidden group">
+      <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-container/5 to-transparent pointer-events-none"></div>
+      <div class="flex justify-between items-start w-full relative z-10 flex-row-reverse">
+        <div class="flex flex-col items-end">
+          <span class="font-label-caps text-label-caps text-on-surface-variant tracking-wider uppercase mb-2">صافي الثروة</span>
+          <div class="flex items-baseline gap-2 flex-row-reverse">
+            <span id="net-worth" class="number-font text-display-lg font-bold text-primary-fixed">—</span>
+            <span class="font-body-lg text-body-lg text-on-surface-variant">JOD</span>
+          </div>
+          <div id="net-worth-badge" class="hidden flex items-center gap-1 mt-2 text-primary-container flex-row-reverse bg-primary-container/10 px-2 py-1 rounded-full w-max">
+            <span class="material-symbols-outlined text-[16px]">trending_up</span>
+            <span id="net-worth-change" class="number-font text-number-sm"></span>
+          </div>
+        </div>
+        <button onclick="toggleBalanceVisibility()" id="vis-btn" class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:bg-surface-bright transition-colors">
+          <span class="material-symbols-outlined">visibility</span>
+        </button>
+      </div>
+      <!-- Mini Chart -->
+      <div class="w-full h-[100px] mt-4 relative z-10">
+        <canvas id="net-worth-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Month Summary Cards -->
+    <div class="col-span-12 md:col-span-4 flex flex-col gap-card-gap">
+      <div class="card-surface p-6 flex flex-col gap-2 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#39FF14]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="flex justify-between items-start">
+          <div class="px-2 py-1 bg-[#39FF14]/10 rounded text-[#39FF14] text-label-caps font-label-caps" id="income-badge">هذا الشهر</div>
+          <span class="material-symbols-outlined text-on-surface-variant">arrow_downward</span>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">إجمالي الدخل</p>
+        <p class="number-font text-headline-lg font-bold text-on-surface" id="month-income">—</p>
+      </div>
+      <div class="card-surface p-6 flex flex-col gap-2 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-error/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="flex justify-between items-start">
+          <div class="px-2 py-1 bg-error/10 rounded text-error text-label-caps font-label-caps" id="expense-badge">هذا الشهر</div>
+          <span class="material-symbols-outlined text-on-surface-variant">arrow_upward</span>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">إجمالي المصروفات</p>
+        <p class="number-font text-headline-lg font-bold text-on-surface" id="month-expense">—</p>
+      </div>
+    </div>
+
+    <!-- Accounts Row -->
+    <div class="col-span-12">
+      <div class="flex justify-between items-center flex-row-reverse mb-4">
+        <h2 class="font-headline-md text-headline-md text-on-surface">حساباتك</h2>
+        <a href="accounts.html" class="font-body-md text-body-md text-primary-fixed hover:opacity-80 transition-opacity">إدارة الحسابات</a>
+      </div>
+      <div id="accounts-row" class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+        <!-- Skeleton -->
+        <div class="skeleton w-48 h-24 shrink-0 rounded-2xl"></div>
+        <div class="skeleton w-48 h-24 shrink-0 rounded-2xl"></div>
+        <div class="skeleton w-48 h-24 shrink-0 rounded-2xl"></div>
+      </div>
+    </div>
+
+    <!-- Donut Chart + Budget Progress -->
+    <div class="col-span-12 md:col-span-5 card-surface p-container-padding flex flex-col gap-4">
+      <h2 class="font-headline-md text-headline-md text-on-surface text-right">توزيع المصروفات</h2>
+      <div class="flex items-center justify-center gap-6">
+        <div class="relative w-44 h-44 shrink-0">
+          <canvas id="donut-chart"></canvas>
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span class="font-label-caps text-label-caps text-on-surface-variant">المصروف</span>
+            <span id="donut-center" class="number-font text-number-lg font-bold text-on-surface">—</span>
+          </div>
+        </div>
+        <div id="donut-legend" class="flex flex-col gap-2 flex-grow min-w-0"></div>
+      </div>
+    </div>
+
+    <!-- Budget Progress Bars -->
+    <div class="col-span-12 md:col-span-7 card-surface p-container-padding flex flex-col gap-4">
+      <div class="flex justify-between items-center flex-row-reverse">
+        <h2 class="font-headline-md text-headline-md text-on-surface">الميزانية الشهرية</h2>
+        <span id="budget-month" class="font-body-md text-body-md text-on-surface-variant"></span>
+      </div>
+      <div id="budget-bars" class="flex flex-col gap-4">
+        <div class="skeleton h-10 rounded-xl"></div>
+        <div class="skeleton h-10 rounded-xl"></div>
+        <div class="skeleton h-10 rounded-xl"></div>
+      </div>
+      <!-- Net saved -->
+      <div class="flex justify-between items-center flex-row-reverse mt-2 border-t border-outline-variant pt-3">
+        <span class="font-body-md text-body-md text-on-surface-variant">صافي التوفير</span>
+        <span id="net-saved" class="number-font text-number-lg font-bold text-[#39FF14]">—</span>
+      </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="col-span-12 card-surface p-container-padding flex flex-col gap-4">
+      <div class="flex justify-between items-center flex-row-reverse">
+        <h2 class="font-headline-md text-headline-md text-on-surface">أحدث الحركات</h2>
+        <a href="transactions.html" class="font-body-md text-body-md text-primary-fixed hover:opacity-80 transition-opacity">عرض الكل</a>
+      </div>
+      <div id="recent-transactions" class="flex flex-col">
+        <div class="skeleton h-16 rounded-xl mb-2"></div>
+        <div class="skeleton h-16 rounded-xl mb-2"></div>
+        <div class="skeleton h-16 rounded-xl"></div>
+      </div>
+    </div>
+
+    <!-- Upcoming Commitments -->
+    <div class="col-span-12 md:col-span-6 card-surface p-container-padding flex flex-col gap-4">
+      <h2 class="font-headline-md text-headline-md text-on-surface text-right">الالتزامات القادمة</h2>
+      <div id="upcoming-commitments" class="flex flex-col gap-3">
+        <div class="skeleton h-14 rounded-xl"></div>
+        <div class="skeleton h-14 rounded-xl"></div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-span-12 md:col-span-6 card-surface p-container-padding flex flex-col gap-4">
+      <h2 class="font-headline-md text-headline-md text-on-surface text-right">إجراءات سريعة</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="openAddModal('expense')" class="flex flex-col items-center gap-2 p-4 bg-error/10 rounded-2xl hover:bg-error/20 transition-colors">
+          <span class="material-symbols-outlined text-error text-[28px]">remove_circle</span>
+          <span class="font-body-md text-body-md text-on-surface">مصروف جديد</span>
+        </button>
+        <button onclick="openAddModal('income')" class="flex flex-col items-center gap-2 p-4 bg-[#39FF14]/10 rounded-2xl hover:bg-[#39FF14]/20 transition-colors">
+          <span class="material-symbols-outlined text-[#39FF14] text-[28px]">add_circle</span>
+          <span class="font-body-md text-body-md text-on-surface">دخل جديد</span>
+        </button>
+        <a href="transactions.html" class="flex flex-col items-center gap-2 p-4 bg-surface-container-high rounded-2xl hover:bg-surface-bright transition-colors">
+          <span class="material-symbols-outlined text-on-surface-variant text-[28px]">receipt_long</span>
+          <span class="font-body-md text-body-md text-on-surface">الحركات</span>
+        </a>
+        <a href="settings.html" class="flex flex-col items-center gap-2 p-4 bg-surface-container-high rounded-2xl hover:bg-surface-bright transition-colors">
+          <span class="material-symbols-outlined text-on-surface-variant text-[28px]">settings</span>
+          <span class="font-body-md text-body-md text-on-surface">الإعدادات</span>
+        </a>
+      </div>
+    </div>
+
+  </div><!-- end bento -->
+</main>
+
+<!-- ── BOTTOM NAV (Mobile) ───────────────────────────────────── -->
+<nav class="md:hidden bg-surface-container-low fixed bottom-0 w-full rounded-t-xl border-t border-outline-variant shadow-[0_-4px_30px_rgba(0,0,0,0.4)] left-0 z-50 flex flex-row-reverse justify-around items-center px-4 py-3">
+  <a href="dashboard.html" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-2 scale-110">
+    <span class="material-symbols-outlined fill-icon">home</span>
+  </a>
+  <a href="transactions.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full hover:bg-surface-container-high transition-colors">
+    <span class="material-symbols-outlined">receipt_long</span>
+  </a>
+  <button onclick="openAddModal()" class="flex flex-col items-center justify-center text-background bg-primary-container p-3 rounded-full shadow-lg transform -translate-y-4 ring-4 ring-background hover:opacity-90 transition-opacity">
+    <span class="material-symbols-outlined font-bold">add</span>
+  </button>
+  <a href="accounts.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full hover:bg-surface-container-high transition-colors">
+    <span class="material-symbols-outlined">account_balance_wallet</span>
+  </a>
+  <a href="settings.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full hover:bg-surface-container-high transition-colors">
+    <span class="material-symbols-outlined">settings</span>
+  </a>
+</nav>
+
+<!-- ── ADD TRANSACTION MODAL ─────────────────────────────────── -->
+<div id="add-modal" class="modal-overlay" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal-sheet">
+    <div class="flex justify-between items-center mb-6 flex-row-reverse">
+      <h2 class="font-headline-md text-headline-md text-on-surface">إضافة حركة جديدة</h2>
+      <button onclick="closeAddModal()" class="text-on-surface-variant hover:opacity-80">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Type Toggle -->
+    <div class="flex rounded-full bg-surface-container-highest p-1 mb-6 gap-1">
+      <button id="type-expense" onclick="setTxType('expense')" class="flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors bg-error text-white">مصروف</button>
+      <button id="type-income"  onclick="setTxType('income')"  class="flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors text-on-surface-variant">دخل</button>
+    </div>
+
+    <!-- Amount -->
+    <div class="relative mb-4">
+      <input id="tx-amount" type="number" placeholder="0.00" inputmode="decimal"
+        class="w-full h-14 bg-surface-container-highest border border-outline-variant rounded-xl px-4 text-display-lg font-bold text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container text-center number-font"/>
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 font-body-md text-on-surface-variant">JOD</span>
+    </div>
+
+    <!-- Note -->
+    <input id="tx-note" type="text" placeholder="ملاحظة (اختياري)"
+      class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container mb-4 text-right"/>
+
+    <!-- Account -->
+    <select id="tx-account" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right appearance-none">
+      <option value="">اختر الحساب...</option>
+    </select>
+
+    <!-- Category -->
+    <div id="tx-categories" class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 mb-4 flex-row-reverse"></div>
+
+    <!-- Date -->
+    <input id="tx-date" type="date"
+      class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4"/>
+
+    <!-- Recurring Toggle -->
+    <div class="flex items-center justify-between flex-row-reverse mb-4 p-4 bg-surface-container-highest rounded-xl">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">التزام ثابت</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">تكرار شهري تلقائي</span>
+      </div>
+      <div id="recurring-toggle" class="toggle-track" onclick="toggleRecurring()">
+        <div class="toggle-thumb"></div>
+      </div>
+    </div>
+
+    <!-- Recurring Options (hidden by default) -->
+    <div id="recurring-options" class="hidden flex flex-col gap-3 mb-4 p-4 bg-surface-container rounded-xl border border-outline-variant">
+      <div class="flex items-center justify-between flex-row-reverse">
+        <label class="font-body-md text-body-md text-on-surface-variant">يوم الشهر</label>
+        <input id="tx-day" type="number" min="1" max="31" value="1" placeholder="1"
+          class="w-20 h-10 bg-surface-container-highest border border-outline-variant rounded-xl px-3 text-center number-font text-on-surface focus:outline-none focus:border-primary-container"/>
+      </div>
+      <div class="flex items-center justify-between flex-row-reverse">
+        <label class="font-body-md text-body-md text-on-surface-variant">تاريخ الانتهاء</label>
+        <input id="tx-end-date" type="date"
+          class="w-48 h-10 bg-surface-container-highest border border-outline-variant rounded-xl px-3 text-on-surface focus:outline-none focus:border-primary-container"/>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <button onclick="submitTransaction()" class="w-full h-14 pill-button font-headline-md text-headline-md font-bold hover:opacity-90 transition-opacity">
+      حفظ الحركة
+    </button>
+  </div>
+</div>
+
+<!-- ── SCRIPTS ──────────────────────────────────────────────── -->
+<script src="js/app.js"></script>
+<script src="js/db.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────
+let state = {
+  balanceVisible: true,
+  txType: 'expense',
+  selectedCategoryId: null,
+  isRecurring: false,
+  categories: [],
+  accounts: [],
+  netWorthChart: null,
+  donutChart: null
+};
+
+// ── Auth Guard ────────────────────────────────────────────
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'index.html'; return; }
+  app.user = user;
+  await DB.createUserProfile(user);
+  await loadDashboard(user);
+});
+
+// ── Load All Data ─────────────────────────────────────────
+async function loadDashboard(user) {
+  const [accounts, categories, commitments] = await Promise.all([
+    DB.getAccounts(user.uid),
+    DB.getCategories(user.uid),
+    DB.getCommitments(user.uid)
+  ]);
+
+  state.accounts   = accounts;
+  state.categories = categories;
+
+  const now    = new Date();
+  const stats  = await DB.getMonthlyStats(user.uid, now.getFullYear(), now.getMonth());
+  const nw     = await DB.getNetWorth(user.uid);
+
+  renderGreeting(user);
+  renderNetWorth(nw);
+  renderMonthSummary(stats);
+  renderAccounts(accounts);
+  renderDonut(stats, categories);
+  renderBudgetBars(stats, categories);
+  renderRecentTransactions(stats.transactions.slice(0, 8), categories, accounts);
+  renderUpcomingCommitments(commitments);
+  renderNetWorthChart();
+  populateModal(accounts, categories);
+
+  // Run automation
+  await runPendingCommitments(user.uid, commitments);
+}
+
+// ── Render Helpers ────────────────────────────────────────
+function renderGreeting(user) {
+  const name = user.displayName ? user.displayName.split(' ')[0] : 'يا صديق';
+  const h    = new Date().getHours();
+  const greet = h < 12 ? 'صباح الخير' : h < 17 ? 'مساء الخير' : 'مساء النور';
+  document.getElementById('greeting').textContent = `${greet}، ${name} 👋`;
+  const avatar = document.getElementById('hdr-avatar');
+  if (user.photoURL) {
+    avatar.innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover" alt=""/>`;
+  }
+}
+
+function fmt(n) {
+  return state.balanceVisible
+    ? Number(n).toLocaleString('en-JO', {minimumFractionDigits:2, maximumFractionDigits:2})
+    : '••••••';
+}
+
+function renderNetWorth(nw) {
+  document.getElementById('net-worth').textContent = fmt(nw);
+}
+
+function renderMonthSummary(stats) {
+  document.getElementById('month-income').textContent  = fmt(stats.income)  + ' JOD';
+  document.getElementById('month-expense').textContent = fmt(stats.expense) + ' JOD';
+  document.getElementById('net-saved').textContent     = fmt(stats.net)     + ' JOD';
+  document.getElementById('net-saved').className       = 'number-font text-number-lg font-bold ' +
+    (stats.net >= 0 ? 'text-[#39FF14]' : 'text-error');
+  const now = new Date();
+  document.getElementById('budget-month').textContent  =
+    now.toLocaleDateString('ar-JO', {month:'long', year:'numeric'});
+}
+
+function renderAccounts(accounts) {
+  const container = document.getElementById('accounts-row');
+  if (!accounts.length) {
+    container.innerHTML = `<div class="text-on-surface-variant font-body-md text-body-md">لا توجد حسابات. <a href="accounts.html" class="text-primary-fixed underline">أضف حساباً</a></div>`;
+    return;
+  }
+  container.innerHTML = accounts.map(a => `
+    <div class="card-surface p-4 shrink-0 w-52 flex flex-col gap-2 hover:bg-surface-container-high transition-colors cursor-pointer" onclick="window.location.href='accounts.html'">
+      <div class="flex justify-between items-center flex-row-reverse">
+        <span class="text-2xl">${a.icon || '💰'}</span>
+        <span class="font-label-caps text-label-caps text-on-surface-variant">${a.type === 'bank' ? 'بنك' : a.type === 'savings' ? 'توفير' : a.type === 'credit' ? 'بطاقة' : 'كاش'}</span>
+      </div>
+      <p class="font-body-md text-body-md text-on-surface text-right truncate">${a.name}</p>
+      <p class="number-font text-number-lg font-bold text-primary-fixed text-right">${fmt(a.balance)} <span class="text-on-surface-variant text-number-sm">JOD</span></p>
+    </div>
+  `).join('');
+}
+
+function renderDonut(stats, categories) {
+  const byCategory = stats.byCategory;
+  const catIds = Object.keys(byCategory).sort((a,b) => byCategory[b] - byCategory[a]).slice(0, 6);
+  if (!catIds.length) {
+    document.getElementById('donut-chart').parentElement.innerHTML =
+      '<p class="text-on-surface-variant font-body-md text-body-md text-center py-8">لا توجد مصروفات هذا الشهر</p>';
+    return;
+  }
+  const colors = ['#FF6B6B','#FF9F43','#FECA57','#48DBFB','#A29BFE','#FD79A8'];
+  const labels = catIds.map(id => categories.find(c=>c.id===id)?.name || id);
+  const data   = catIds.map(id => byCategory[id]);
+  const total  = data.reduce((s,v)=>s+v,0);
+  document.getElementById('donut-center').textContent = fmt(total);
+
+  if (state.donutChart) state.donutChart.destroy();
+  state.donutChart = new Chart(document.getElementById('donut-chart'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 8 }] },
+    options: { cutout:'70%', plugins:{ legend:{ display:false } }, responsive:true, maintainAspectRatio:true }
+  });
+
+  document.getElementById('donut-legend').innerHTML = catIds.map((id,i) => {
+    const cat = categories.find(c=>c.id===id);
+    const pct = ((byCategory[id]/total)*100).toFixed(0);
+    return `<div class="flex items-center justify-end gap-2 min-w-0">
+      <span class="font-number-sm text-number-sm text-on-surface-variant">${pct}%</span>
+      <span class="font-body-md text-number-sm text-on-surface truncate">${cat?.name || '—'}</span>
+      <span class="text-lg shrink-0">${cat?.emoji || '📦'}</span>
+      <span class="w-2 h-2 rounded-full shrink-0" style="background:${colors[i]}"></span>
+    </div>`;
+  }).join('');
+}
+
+function renderBudgetBars(stats, categories) {
+  const byCategory = stats.byCategory;
+  const top = Object.keys(byCategory).sort((a,b)=>byCategory[b]-byCategory[a]).slice(0,5);
+  const container = document.getElementById('budget-bars');
+  if (!top.length) { container.innerHTML = '<p class="text-on-surface-variant text-center py-4 font-body-md text-body-md">لا توجد بيانات</p>'; return; }
+  container.innerHTML = top.map(id => {
+    const cat   = categories.find(c=>c.id===id);
+    const spent = byCategory[id];
+    const pct   = Math.min(100, Math.round((spent / (stats.income || 1)) * 100));
+    const color = pct > 80 ? '#ff4444' : pct > 50 ? '#FF9F43' : '#39FF14';
+    return `<div class="flex flex-col gap-1">
+      <div class="flex justify-between items-center flex-row-reverse">
+        <div class="flex items-center gap-2 flex-row-reverse">
+          <span>${cat?.emoji || '📦'}</span>
+          <span class="font-body-md text-number-sm text-on-surface">${cat?.name || '—'}</span>
+        </div>
+        <span class="number-font text-number-sm text-on-surface-variant">${fmt(spent)} JOD</span>
+      </div>
+      <div class="progress-bg rounded-full h-2 w-full overflow-hidden">
+        <div class="h-2 rounded-full transition-all duration-700" style="width:${pct}%;background:${color}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderRecentTransactions(txs, categories, accounts) {
+  const container = document.getElementById('recent-transactions');
+  if (!txs.length) {
+    container.innerHTML = '<p class="text-on-surface-variant font-body-md text-body-md text-center py-6">لا توجد حركات بعد. <button onclick="openAddModal()" class="text-primary-fixed underline">أضف أول حركة</button></p>';
+    return;
+  }
+  container.innerHTML = txs.map(tx => {
+    const cat  = categories.find(c=>c.id===tx.categoryId);
+    const acc  = accounts.find(a=>a.id===tx.accountId);
+    const date = tx.date?.toDate ? tx.date.toDate() : new Date(tx.date);
+    const dateStr = date.toLocaleDateString('ar-JO', {month:'short', day:'numeric'});
+    const sign = tx.type === 'income' ? '+' : '-';
+    const color = tx.type === 'income' ? 'text-[#39FF14]' : 'text-on-surface';
+    return `<div class="flex flex-row-reverse items-center justify-between py-4 border-b border-surface-container-high last:border-0 hover:bg-surface-container/50 px-2 rounded-lg transition-colors cursor-pointer">
+      <div class="flex flex-row-reverse items-center gap-3">
+        <div class="w-11 h-11 rounded-full bg-surface-container-highest flex items-center justify-center text-xl border border-outline-variant/30">
+          ${cat?.emoji || (tx.type==='income'?'💵':'💸')}
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="font-body-md text-body-md font-semibold text-on-surface">${tx.note || cat?.name || '—'}</span>
+          <span class="font-body-md text-number-sm text-on-surface-variant">${dateStr} · ${acc?.name || ''}</span>
+        </div>
+      </div>
+      <span class="number-font text-body-md font-medium ${color}">${sign}${fmt(tx.amount)} JOD</span>
+    </div>`;
+  }).join('');
+}
+
+function renderUpcomingCommitments(commitments) {
+  const container = document.getElementById('upcoming-commitments');
+  const active = commitments.filter(c=>c.isActive).slice(0,4);
+  if (!active.length) {
+    container.innerHTML = '<p class="text-on-surface-variant font-body-md text-body-md text-center py-4">لا توجد التزامات ثابتة.</p>';
+    return;
+  }
+  container.innerHTML = active.map(c => {
+    const next = c.nextRunDate?.toDate ? c.nextRunDate.toDate() : new Date(c.nextRunDate);
+    const daysLeft = Math.ceil((next - new Date()) / 86400000);
+    const urgency = daysLeft <= 3 ? 'text-error' : daysLeft <= 7 ? 'text-tertiary' : 'text-on-surface-variant';
+    return `<div class="flex items-center justify-between flex-row-reverse p-3 bg-surface-container-highest rounded-xl">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">${c.name}</span>
+        <span class="font-number-sm text-number-sm ${urgency}">بعد ${daysLeft} يوم</span>
+      </div>
+      <span class="number-font text-number-lg font-bold text-on-surface">${fmt(c.amount)} JOD</span>
+    </div>`;
+  }).join('');
+}
+
+function renderNetWorthChart() {
+  const canvas = document.getElementById('net-worth-chart');
+  const months = [];
+  const values = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(d.toLocaleDateString('ar-JO',{month:'short'}));
+    values.push(Math.random() * 5000 + 10000); // placeholder — replace with real history
+  }
+  if (state.netWorthChart) state.netWorthChart.destroy();
+  state.netWorthChart = new Chart(canvas, {
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[{
+        data:values, borderColor:'#39FF14', borderWidth:2, pointRadius:0,
+        fill:true, backgroundColor:'rgba(57,255,20,0.07)', tension:0.4
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{display:false}, y:{display:false} }
+    }
+  });
+}
+
+// ── Balance Visibility ────────────────────────────────────
+function toggleBalanceVisibility() {
+  state.balanceVisible = !state.balanceVisible;
+  document.getElementById('vis-btn').querySelector('span').textContent =
+    state.balanceVisible ? 'visibility' : 'visibility_off';
+  // Re-render without fetching
+  document.getElementById('net-worth').textContent =
+    state.balanceVisible ? document.getElementById('net-worth').dataset.raw : '••••••';
+}
+
+// ── Add Transaction Modal ─────────────────────────────────
+function openAddModal(type = 'expense') {
+  setTxType(type);
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('tx-date').value = today;
+  document.getElementById('tx-amount').value = '';
+  document.getElementById('tx-note').value   = '';
+  state.selectedCategoryId = null;
+  document.getElementById('add-modal').classList.add('active');
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal').classList.remove('active');
+}
+
+function setTxType(type) {
+  state.txType = type;
+  const expBtn = document.getElementById('type-expense');
+  const incBtn = document.getElementById('type-income');
+  expBtn.className = 'flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors ' +
+    (type==='expense' ? 'bg-error text-white' : 'text-on-surface-variant');
+  incBtn.className = 'flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors ' +
+    (type==='income'  ? 'bg-[#39FF14] text-background' : 'text-on-surface-variant');
+  renderCategoryChips();
+}
+
+function toggleRecurring() {
+  state.isRecurring = !state.isRecurring;
+  const toggle = document.getElementById('recurring-toggle');
+  const opts   = document.getElementById('recurring-options');
+  toggle.classList.toggle('on', state.isRecurring);
+  opts.classList.toggle('hidden', !state.isRecurring);
+}
+
+function populateModal(accounts, categories) {
+  const sel = document.getElementById('tx-account');
+  sel.innerHTML = '<option value="">اختر الحساب...</option>' +
+    accounts.map(a=>`<option value="${a.id}">${a.icon||'💰'} ${a.name}</option>`).join('');
+  renderCategoryChips();
+}
+
+function renderCategoryChips() {
+  const filtered = state.categories.filter(c=>c.type===state.txType);
+  document.getElementById('tx-categories').innerHTML = filtered.map(c =>
+    `<button onclick="selectCategory('${c.id}')" id="cat-${c.id}"
+      class="shrink-0 flex items-center gap-1 px-3 py-2 rounded-full border font-label-caps text-label-caps transition-colors
+      ${state.selectedCategoryId===c.id ? 'border-primary-fixed bg-primary-container/20 text-primary-fixed' : 'border-outline-variant text-on-surface-variant hover:border-primary-fixed'}">
+      <span>${c.emoji}</span><span>${c.name}</span>
+    </button>`
+  ).join('');
+}
+
+function selectCategory(id) {
+  state.selectedCategoryId = id;
+  renderCategoryChips();
+}
+
+async function submitTransaction() {
+  const amount    = parseFloat(document.getElementById('tx-amount').value);
+  const accountId = document.getElementById('tx-account').value;
+  const note      = document.getElementById('tx-note').value;
+  const date      = document.getElementById('tx-date').value;
+
+  if (!amount || amount <= 0)  { showToast('أدخل مبلغاً صحيحاً', 'error'); return; }
+  if (!accountId)              { showToast('اختر حساباً', 'error'); return; }
+  if (!date)                   { showToast('اختر تاريخاً', 'error'); return; }
+
+  try {
+    if (state.isRecurring) {
+      const dayOfMonth = parseInt(document.getElementById('tx-day').value) || 1;
+      const endDate    = document.getElementById('tx-end-date').value;
+      await DB.addCommitment(app.user.uid, {
+        accountId, categoryId: state.selectedCategoryId,
+        name: note || 'التزام ثابت', amount, type: state.txType,
+        dayOfMonth, startDate: date, endDate: endDate || null
+      });
+      showToast('تم إضافة الالتزام الثابت ✅');
+    } else {
+      await DB.addTransaction(app.user.uid, {
+        accountId, categoryId: state.selectedCategoryId,
+        amount, type: state.txType, date, note
+      });
+      showToast('تم حفظ الحركة ✅');
+    }
+    closeAddModal();
+    await loadDashboard(app.user);
+  } catch (e) {
+    console.error(e);
+    showToast('حدث خطأ، حاول مرة أخرى', 'error');
+  }
+}
+
+// ── Automation ────────────────────────────────────────────
+async function runPendingCommitments(uid, commitments) {
+  const now = new Date();
+  const due = commitments.filter(c => {
+    if (!c.isActive) return false;
+    const next = c.nextRunDate?.toDate ? c.nextRunDate.toDate() : new Date(c.nextRunDate);
+    return next <= now;
+  });
+  for (const c of due) {
+    await DB.processCommitment(c);
+  }
+  if (due.length) showToast(`تم تنفيذ ${due.length} التزام تلقائياً ⚡`);
+}
+</script>
+</body>
+</html>
