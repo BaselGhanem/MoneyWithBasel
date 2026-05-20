@@ -18,15 +18,23 @@ const app = {
     },
 
     // تسجيل الخدمة الخلفية (لجعل التطبيق يعمل أوفلاين)
-    registerServiceWorker: function() {
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('MoneyWithBasel/service-worker.js')
-                    .then(() => console.log('✅ Service Worker registered'))
-                    .catch(err => console.error('❌ Service Worker Error:', err));
-            });
-        }
-    },
+   registerServiceWorker: function() {
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+            // 🔥 امسح أي كاش قديم فورًا (اختياري)
+            if (caches) {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(key => caches.delete(key)));
+                console.log('🗑️ تم مسح الكاش القديم');
+            }
+            
+            // ثم سجل الـ Service Worker الجديد
+            navigator.serviceWorker.register('MoneyWithBasel/service-worker.js')
+                .then(() => console.log('✅ Service Worker registered'))
+                .catch(err => console.error('❌ Service Worker Error:', err));
+        });
+    }
+},
 
     // مراقبة حالة المستخدم (مهم جداً للتحكم في الشاشات)
     listenToAuth: function() {
