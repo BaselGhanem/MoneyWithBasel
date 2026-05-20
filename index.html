@@ -361,254 +361,51 @@
 </nav>
 
 <!-- Firebase SDK from CDN -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-<script>
-    // ============ Firebase Configuration ============
-    const firebaseConfig = {
-        apiKey: "AIzaSyDUSHbMd1A98_OpE3JSNXPD-XT0do8FutM",
-        authDomain: "moneywithbasel.firebaseapp.com",
-        projectId: "moneywithbasel",
-        storageBucket: "moneywithbasel.firebasestorage.app",
-        messagingSenderId: "1000601907861",
-        appId: "1:1000601907861:web:6995a21e42d36c1981a19c"
-    };
+    <script>
+        // إعدادات Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUSHbMd1A98_OpE3JSNXPD-XT0do8FutM",
+            authDomain: "moneywithbasel.firebaseapp.com",
+            projectId: "moneywithbasel",
+            storageBucket: "moneywithbasel.firebasestorage.app",
+            messagingSenderId: "1000601907861",
+            appId: "1:1000601907861:web:6995a21e42d36c1981a19c"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+    </script>
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    <script src="js/db.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/automation.js"></script>
 
-    console.log("✅ Firebase Initialized!");
-    document.getElementById('firebase-status').textContent = '✅ Firebase متصل بنجاح';
-
-    // ============ App State ============
-    let currentUser = null;
-    let appState = {
-        user: null,
-        transactions: []
-    };
-
-    // ============ Auth State ============
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUser = user;
-            showAppScreen();
-            await loadUserData();
-        } else {
-            currentUser = null;
-            showAuthScreen();
-        }
-    });
-
-    function showAuthScreen() {
-        document.getElementById('auth-screen').classList.remove('hidden');
-        document.getElementById('app-screen').classList.add('hidden');
-    }
-
-    function showAppScreen() {
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('app-screen').classList.remove('hidden');
-    }
-
-    function updateGreeting() {
-        const name = currentUser?.email?.split('@')[0] || 'صديقي';
-        const hour = new Date().getHours();
-        let greeting = 'أهلاً وسهلاً';
-        
-        if (hour < 12) greeting = 'صباح الخير';
-        else if (hour < 17) greeting = 'مساء الخير';
-        else greeting = 'تصبح على خير';
-        
-        document.getElementById('greeting').textContent = greeting + ' ' + name;
-    }
-
-    // ============ Auth Buttons ============
-    
-    document.getElementById('auth-btn').addEventListener('click', async () => {
-        const email = document.getElementById('auth-email').value.trim();
-        const password = document.getElementById('auth-password').value.trim();
-
-        if (!email || !password) {
-            showToast('يرجى ملء جميع الحقول');
-            return;
+    <script>
+        // تفعيل الـ Service Worker للـ PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(() => console.log('✅ Service Worker تم تسجيله'))
+                    .catch((err) => console.log('❌ خطأ في Service Worker:', err));
+            });
         }
 
-        showLoading(true);
-
-        try {
-            await auth.createUserWithEmailAndPassword(email, password);
-            showToast('✅ تم التسجيل بنجاح!');
-        } catch (error) {
-            if (error.code === 'auth/email-already-in-use') {
-                try {
-                    await auth.signInWithEmailAndPassword(email, password);
-                    showToast('✅ تم تسجيل الدخول بنجاح!');
-                } catch (loginError) {
-                    showToast('❌ كلمة المرور غير صحيحة');
-                }
+        // التعامل مع حالة تسجيل الدخول
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                // استدعاء دالة لتحميل البيانات هنا إذا لزم الأمر
             } else {
-                showToast('❌ خطأ: ' + error.message);
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('app-screen').classList.add('hidden');
             }
-        }
-        showLoading(false);
-    });
-
-    document.getElementById('demo-btn').addEventListener('click', async () => {
-        showLoading(true);
-        try {
-            const demoEmail = 'demo@money-basel.com';
-            const demoPassword = 'Demo@123456';
-            
-            try {
-                await auth.signInWithEmailAndPassword(demoEmail, demoPassword);
-            } catch (e) {
-                if (e.code === 'auth/user-not-found') {
-                    await auth.createUserWithEmailAndPassword(demoEmail, demoPassword);
-                    await auth.signInWithEmailAndPassword(demoEmail, demoPassword);
-                }
-            }
-            
-            showToast('🎉 مرحباً في النسخة التجريبية!');
-        } catch (error) {
-            showToast('❌ خطأ: ' + error.message);
-        }
-        showLoading(false);
-    });
-
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-        try {
-            await auth.signOut();
-            currentUser = null;
-            showAuthScreen();
-            showToast('✅ تم تسجيل الخروج');
-            document.getElementById('auth-email').value = '';
-            document.getElementById('auth-password').value = '';
-        } catch (error) {
-            showToast('❌ خطأ في تسجيل الخروج');
-        }
-    });
-
-    // ============ Load Data ============
-    
-    async function loadUserData() {
-        try {
-            updateGreeting();
-            
-            const snapshot = await db.collection('transactions')
-                .where('userId', '==', currentUser.uid)
-                .orderBy('date', 'desc')
-                .limit(100)
-                .get();
-            
-            appState.transactions = [];
-            snapshot.forEach((doc) => {
-                appState.transactions.push({
-                    id: doc.id,
-                    ...doc.data()
-                });
-            });
-            
-            renderDashboard();
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-
-    // ============ Add Transaction ============
-    
-    document.getElementById('quick-add-btn').addEventListener('click', async () => {
-        const type = document.getElementById('quick-type').value;
-        const amount = parseFloat(document.getElementById('quick-amount').value);
-        const note = document.getElementById('quick-note').value;
-        const date = new Date().toISOString().split('T')[0];
-
-        if (!amount || amount <= 0) {
-            showToast('❌ أدخل مبلغاً صحيحاً');
-            return;
-        }
-
-        try {
-            await db.collection('transactions').add({
-                userId: currentUser.uid,
-                type: type,
-                amount: amount,
-                date: date,
-                note: note || 'بدون ملاحظة',
-                createdAt: new Date().toISOString()
-            });
-
-            showToast('✅ تمت إضافة العملية!');
-            document.getElementById('quick-amount').value = '';
-            document.getElementById('quick-note').value = '';
-            
-            await loadUserData();
-        } catch (error) {
-            showToast('❌ خطأ: ' + error.message);
-        }
-    });
-
-    // ============ Render Dashboard ============
-    
-    function renderDashboard() {
-        const income = appState.transactions
-            .filter(t => t.type === 'income')
-            .reduce((sum, t) => sum + t.amount, 0);
-        
-        const expenses = appState.transactions
-            .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + t.amount, 0);
-
-        document.getElementById('net-worth').textContent = 'د.ا ' + (income - expenses).toFixed(2);
-        document.getElementById('total-income').textContent = 'د.ا ' + income.toFixed(2);
-        document.getElementById('total-expenses').textContent = 'د.ا ' + expenses.toFixed(2);
-
-        const recentTxns = appState.transactions.slice(0, 5);
-        const recentDiv = document.getElementById('recent-transactions');
-        
-        if (recentTxns.length === 0) {
-            recentDiv.innerHTML = '<p class="text-on-surface-variant text-center py-4">لا توجد عمليات حتى الآن</p>';
-        } else {
-            recentDiv.innerHTML = recentTxns.map(txn => `
-                <div class="transaction-item">
-                    <div class="transaction-icon" style="background: ${txn.type === 'income' ? '#4caf5033' : '#ff444433'};">
-                        ${txn.type === 'income' ? '📈' : '📉'}
-                    </div>
-                    <div style="flex: 1;">
-                        <p style="color: #e8e0f0; font-size: 14px; font-weight: 600;">${txn.note}</p>
-                        <p style="color: #a098b0; font-size: 12px;">${txn.date}</p>
-                    </div>
-                    <p class="transaction-amount ${txn.type === 'income' ? 'amount-positive' : 'amount-negative'}">
-                        ${txn.type === 'income' ? '+' : '-'}د.ا ${txn.amount.toFixed(2)}
-                    </p>
-                </div>
-            `).join('');
-        }
-    }
-
-    // ============ Utilities ============
-    
-    function showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.animation = 'slideIn 0.3s ease reverse';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-
-    function showLoading(show) {
-        document.getElementById('auth-form').style.display = show ? 'none' : 'block';
-        document.getElementById('auth-loading').style.display = show ? 'block' : 'none';
-    }
-
-    console.log('✅ App Ready!');
-</script>
-
+        });
+    </script>
 </body>
 </html>
