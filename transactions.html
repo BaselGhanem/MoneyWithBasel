@@ -29,7 +29,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .chip-active{background:rgba(179,0,78,0.2);border-color:#b3004e;color:#ffe0ec;}
 </style>
 </head>
-<body class="bg-background text-on-background antialiased pb-[90px] md:pb-0">
+<body class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
 
 <!-- TOP BAR -->
 <header class="sticky top-0 w-full bg-background border-b border-outline-variant/30 z-50">
@@ -93,10 +93,10 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 </main>
 
 <!-- BOTTOM NAV -->
-<nav class="md:hidden bg-surface-container-low fixed bottom-0 w-full rounded-t-xl border-t border-outline-variant shadow-[0_-4px_30px_rgba(0,0,0,0.4)] left-0 z-50 flex flex-row-reverse justify-around items-center px-4 py-3">
+<nav class="bg-surface-container-low fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-[72px] md:h-screen z-50 md:border-l md:border-outline-variant flex md:flex-col justify-around items-center px-4 py-3 md:py-8 shadow-[0_-4px_30px_rgba(0,0,0,0.4)] md:shadow-none">
   <a href="dashboard.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full"><span class="material-symbols-outlined">home</span></a>
   <a href="transactions.html" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-2 scale-110"><span class="material-symbols-outlined fill-icon">receipt_long</span></a>
-  <button onclick="openAddModal()" class="flex flex-col items-center justify-center text-background bg-primary-container p-3 rounded-full shadow-lg transform -translate-y-4 ring-4 ring-background"><span class="material-symbols-outlined font-bold">add</span></button>
+  <button onclick="openAddModal()" class="flex flex-col items-center justify-center text-background bg-primary-container p-3 rounded-full shadow-lg md:hover:scale-105 transition-all transform md:translate-y-0 -translate-y-4 ring-4 ring-background"><span class="material-symbols-outlined font-bold">add</span></button>
   <a href="accounts.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full"><span class="material-symbols-outlined">account_balance_wallet</span></a>
   <a href="settings.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full"><span class="material-symbols-outlined">settings</span></a>
 </nav>
@@ -161,6 +161,7 @@ let state={txType:'expense',isRecurring:false,selectedCatId:null,categories:[],a
 
 auth.onAuthStateChanged(async u=>{
   if(!u){window.location.href='index.html';return;}
+  document.body.style.display = 'block';
   app.user=u;
   const [accs,cats]=await Promise.all([DB.getAccounts(u.uid),DB.getCategories(u.uid)]);
   state.accounts=accs; state.categories=cats;
