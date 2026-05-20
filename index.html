@@ -300,7 +300,7 @@
                 type: type,
                 amount: amount,
                 note: note || '',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                date: firebase.firestore.FieldValue.serverTimestamp()
             });
             showMessage('✅ تمت الإضافة بنجاح');
             quickAmount.value = '';
