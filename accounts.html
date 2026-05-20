@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html class="dark" dir="rtl" lang="ar">
+<html dir="rtl" lang="ar">
 <head>
+<script src="js/ui.js"></script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>الحسابات - Money with Basel</title>
@@ -43,7 +44,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
     <p class="font-body-md text-body-md text-on-surface-variant mb-1 text-right relative z-10">إجمالي الرصيد</p>
     <div class="flex items-baseline gap-2 flex-row-reverse relative z-10">
       <span id="total-balance" class="font-display-lg text-display-lg text-primary-fixed font-bold">—</span>
-      <span class="font-body-lg text-body-lg text-on-surface-variant">JOD</span>
+      <span class="font-body-lg text-body-lg text-on-surface-variant currency-unit">JOD</span>
     </div>
     <button onclick="openTransferModal()" class="mt-4 flex items-center gap-2 px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant hover:border-primary-fixed hover:text-primary-fixed transition-colors font-label-caps text-label-caps relative z-10">
       <span class="material-symbols-outlined text-[18px]">swap_horiz</span> تحويل بين الحسابات
@@ -70,23 +71,23 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 
 <!-- BOTTOM NAV -->
 <!-- استخدم هذا الـ Nav فقط -->
-<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around md:justify-center items-center px-2 py-2 pb-safe md:pb-0 shadow-[0_-4px_30px_rgba(0,0,0,0.4)] md:shadow-none">
-    <a href="dashboard.html" class="flex flex-col items-center text-on-surface-variant p-2 hover:text-primary transition-colors">
+<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0 shadow-[0_-4px_30px_rgba(0,0,0,0.4)] md:shadow-none">
+    <a href="dashboard.html" class="nav-link">
         <span class="material-symbols-outlined">home</span>
         <span class="text-[10px] md:hidden font-bold">الرئيسية</span>
     </a>
-    <a href="transactions.html" class="flex flex-col items-center text-on-surface-variant p-2 hover:text-primary transition-colors">
+    <a href="transactions.html" class="nav-link">
         <span class="material-symbols-outlined">receipt_long</span>
         <span class="text-[10px] md:hidden font-bold">الحركات</span>
     </a>
-    <button onclick="openAddModal()" class="bg-primary text-background w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-lg active:scale-95">
-        <span class="material-symbols-outlined text-[28px]">add</span>
+    <button onclick="openAddModal()" class="nav-main-btn">
+        <span class="material-symbols-outlined">add</span>
     </button>
-    <a href="accounts.html" class="flex flex-col items-center text-primary p-2">
-        <span class="material-symbols-outlined fill-icon">account_balance_wallet</span>
+    <a href="accounts.html" class="nav-link active">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
         <span class="text-[10px] md:hidden font-bold">الحسابات</span>
     </a>
-    <a href="settings.html" class="flex flex-col items-center text-on-surface-variant p-2 hover:text-primary transition-colors">
+    <a href="settings.html" class="nav-link">
         <span class="material-symbols-outlined">settings</span>
         <span class="text-[10px] md:hidden font-bold">الإعدادات</span>
     </a>
@@ -122,7 +123,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
     <div class="relative mb-4">
       <input id="acc-balance" type="number" placeholder="الرصيد الافتتاحي" inputmode="decimal"
         class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container text-right"/>
-      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-body-md text-body-md">JOD</span>
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-body-md text-body-md currency-unit">JOD</span>
     </div>
     <div id="edit-actions" class="hidden flex gap-3 mb-3">
       <button onclick="deleteAccount()" class="flex-1 h-12 bg-error/20 text-error font-label-caps text-label-caps rounded-full hover:bg-error/30 transition-colors">حذف الحساب</button>
@@ -146,7 +147,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
     <div class="relative mb-6">
       <input id="transfer-amount" type="number" placeholder="المبلغ" inputmode="decimal"
         class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container text-right"/>
-      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-body-md text-body-md">JOD</span>
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-body-md text-body-md currency-unit">JOD</span>
     </div>
     <button onclick="submitTransfer()" class="w-full h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">تحويل</button>
   </div>
@@ -162,12 +163,9 @@ auth.onAuthStateChanged(async u=>{
   if(!u){window.location.href='index.html';return;}
   app.user=u;
   await loadAccounts();
-});
-
-async function loadAccounts(){
-  state.accounts=await DB.getAccounts(app.user.uid);
+  UI.updateCurrencyUnits();
   renderAccounts();
-}
+});
 
 function renderAccounts(){
   const grid=document.getElementById('accounts-grid');
@@ -191,9 +189,15 @@ function renderAccounts(){
       </div>
       <div class="flex flex-col items-end">
         <span class="font-display-lg text-[32px] leading-tight font-bold ${(a.balance||0)>=0?'text-primary-fixed':'text-error'}">${fmt(a.balance||0)}</span>
-        <span class="font-body-md text-body-md text-on-surface-variant">JOD</span>
+        <span class="font-body-md text-body-md text-on-surface-variant currency-unit">JOD</span>
       </div>
     </div>`).join('');
+}
+
+async function loadAccounts(){
+  state.accounts = await DB.getAccounts(app.user.uid);
+  renderAccounts();
+  UI.updateCurrencyUnits();
 }
 
 function fmt(n){return Number(n).toLocaleString('en-JO',{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -262,7 +266,8 @@ async function deleteAccount(){
 
 // TRANSFER MODAL
 function openTransferModal(){
-  const opts='<option value="">اختر...</option>'+state.accounts.map(a=>`<option value="${a.id}">${a.icon||'💰'} ${a.name} — ${fmt(a.balance)} JOD</option>`).join('');
+  const currency = UI.getCurrency();
+  const opts='<option value="">اختر...</option>'+state.accounts.map(a=>`<option value="${a.id}">${a.icon||'💰'} ${a.name} — ${fmt(a.balance)} ${currency}</option>`).join('');
   document.getElementById('from-acc').innerHTML=opts;
   document.getElementById('to-acc').innerHTML=opts;
   document.getElementById('transfer-amount').value='';

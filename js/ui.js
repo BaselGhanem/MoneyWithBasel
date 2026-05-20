@@ -1,6 +1,9 @@
 // ui.js — Money with Basel
 // Global UI helpers used across all pages
 
+const DEFAULT_CURRENCY = 'JOD';
+const CURRENCY_LABELS = { JOD: 'JOD', USD: 'USD', EUR: 'EUR' };
+
 function initTheme() {
   const saved = localStorage.getItem('theme') || 'dark';
   setTheme(saved);
@@ -10,6 +13,21 @@ function setTheme(theme) {
   document.documentElement.classList.toggle('dark', theme === 'dark');
   document.documentElement.classList.toggle('light', theme === 'light');
   localStorage.setItem('theme', theme);
+}
+
+function getCurrency() {
+  return localStorage.getItem('currency') || DEFAULT_CURRENCY;
+}
+
+function setCurrency(currency) {
+  localStorage.setItem('currency', CURRENCY_LABELS[currency] ? currency : DEFAULT_CURRENCY);
+  updateCurrencyUnits();
+}
+
+function updateCurrencyUnits() {
+  document.querySelectorAll('.currency-unit').forEach(el => {
+    el.textContent = getCurrency();
+  });
 }
 
 function showToast(message, type = 'default') {
@@ -62,4 +80,7 @@ function setLoading(show) {
 
 // Override app.js showToast to use this one
 window.showToast = showToast;
-window.UI = { initTheme, setTheme, showToast, formatCurrency, formatDate, setLoading };
+window.UI = { initTheme, setTheme, getCurrency, setCurrency, updateCurrencyUnits, showToast, formatCurrency, formatDate, setLoading };
+initTheme();
+
+initTheme();
