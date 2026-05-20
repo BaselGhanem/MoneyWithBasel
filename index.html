@@ -49,6 +49,11 @@
         }
     </script>
     
+    <!-- Firebase SDK v9+ (CDK) -->
+    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -65,10 +70,6 @@
         
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        
-        .fill-icon {
-            font-variation-settings: 'FILL' 1;
         }
         
         .card {
@@ -98,42 +99,49 @@
             z-index: 40;
         }
         
-        .btn-fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(255, 45, 120, 0.6);
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Almarai', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
+        .btn-primary {
+            background: linear-gradient(135deg, #ff2d78, #ff5fa8);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 45, 120, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #1e1e30;
+            color: #e8e0f0;
+            border: 1px solid #2d2d3d;
+        }
+        
+        .input-field {
             width: 100%;
-            background: #0f0f1a;
-            border-top: 1px solid #2d2d3d;
-            display: flex;
-            justify-content: space-around;
-            height: 80px;
-            z-index: 50;
+            background: #1e1e30;
+            border: 1px solid #2d2d3d;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #e8e0f0;
+            font-family: 'Almarai', sans-serif;
+            font-size: 14px;
+            margin: 8px 0;
         }
         
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            color: #a098b0;
-            text-decoration: none;
-            font-size: 12px;
-            transition: all 0.2s ease;
-            flex: 1;
-        }
-        
-        .nav-item.active {
-            color: #ff2d78;
-        }
-        
-        .nav-item span:first-child {
-            font-size: 24px;
+        .input-field:focus {
+            outline: none;
+            border-color: #ff2d78;
+            box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.1);
         }
         
         .modal {
@@ -164,152 +172,18 @@
             overflow-y: auto;
         }
         
-        .input-field {
-            width: 100%;
-            background: #1e1e30;
-            border: 1px solid #2d2d3d;
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: #e8e0f0;
-            font-family: 'Almarai', sans-serif;
-            font-size: 14px;
-            margin: 8px 0;
-            transition: all 0.2s;
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 45, 120, 0.3);
+            border-top-color: #ff2d78;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
         
-        .input-field:focus {
-            outline: none;
-            border-color: #ff2d78;
-            box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.1);
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            font-family: 'Almarai', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #ff2d78, #ff5fa8);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 45, 120, 0.3);
-        }
-        
-        .btn-secondary {
-            background: #1e1e30;
-            color: #e8e0f0;
-            border: 1px solid #2d2d3d;
-        }
-        
-        .btn-secondary:hover {
-            background: #282840;
-        }
-        
-        .transaction-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-bottom: 1px solid #1a1a28;
-        }
-        
-        .transaction-item:last-child {
-            border-bottom: none;
-        }
-        
-        .transaction-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        
-        .transaction-amount {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            font-size: 14px;
-            margin-right: auto;
-        }
-        
-        .amount-positive {
-            color: #4caf50;
-        }
-        
-        .amount-negative {
-            color: #ff4444;
-        }
-        
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 250px;
-            margin: 20px 0;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #1a1a28;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff2d78, #ffa726);
-            transition: width 0.3s ease;
-        }
-        
-        .stat-card {
-            flex: 1;
-            min-width: 150px;
-        }
-        
-        @media (max-width: 768px) {
-            .desktop-only {
-                display: none;
-            }
-        }
-        
-        @media (min-width: 769px) {
-            .mobile-only {
-                display: none;
-            }
-            
-            .bottom-nav {
-                display: none;
-            }
-            
-            body {
-                padding-bottom: 0;
-            }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         .toast {
@@ -335,6 +209,68 @@
                 opacity: 1;
             }
         }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #0f0f1a;
+            border-top: 1px solid #2d2d3d;
+            display: flex;
+            justify-content: space-around;
+            height: 80px;
+            z-index: 50;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: #a098b0;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+        
+        .nav-item.active {
+            color: #ff2d78;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid #1a1a28;
+        }
+
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .transaction-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: auto;
+        }
+
+        .amount-positive {
+            color: #4caf50;
+        }
+
+        .amount-negative {
+            color: #ff4444;
+        }
     </style>
 </head>
 <body>
@@ -349,21 +285,34 @@
         </div>
         
         <div class="card mb-8">
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-on-surface mb-2">اسمك</label>
-                <input type="text" id="auth-name" class="input-field" placeholder="أدخل اسمك">
+            <div id="auth-form">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-on-surface mb-2">اسمك</label>
+                    <input type="text" id="auth-name" class="input-field" placeholder="أدخل اسمك">
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-on-surface mb-2">البريد الإلكتروني</label>
+                    <input type="email" id="auth-email" class="input-field" placeholder="example@email.com">
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-on-surface mb-2">كلمة المرور</label>
+                    <input type="password" id="auth-password" class="input-field" placeholder="أدخل كلمة المرور">
+                </div>
+                
+                <button id="auth-btn" class="btn btn-primary w-full mb-3">تسجيل الدخول / التسجيل</button>
+                <button id="demo-btn" class="btn btn-secondary w-full">جرب النسخة التجريبية</button>
             </div>
             
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-on-surface mb-2">البريد الإلكتروني</label>
-                <input type="email" id="auth-email" class="input-field" placeholder="example@email.com">
+            <div id="auth-loading" style="display: none;" class="text-center">
+                <div class="loading-spinner" style="margin: 20px auto;"></div>
+                <p class="text-on-surface-variant">جاري المعالجة...</p>
             </div>
-            
-            <button id="auth-btn" class="btn btn-primary w-full mb-3">تسجيل الدخول</button>
-            <button id="demo-btn" class="btn btn-secondary w-full">جرب النسخة التجريبية</button>
         </div>
         
-        <p class="text-center text-xs text-on-surface-variant">بيانات آمنة - يتم حفظها محلياً على جهازك</p>
+        <p class="text-center text-xs text-on-surface-variant">بيانات آمنة - يتم حفظها في Firebase</p>
+        <p class="text-center text-xs text-on-surface-variant mt-2" id="firebase-status">⏳ جاري تحميل Firebase...</p>
     </div>
 </div>
 
@@ -379,9 +328,6 @@
                 <span class="font-bold text-lg text-primary hidden sm:inline">Money with Basel</span>
             </div>
             <div class="flex items-center gap-4">
-                <button id="theme-toggle" class="w-10 h-10 rounded-lg bg-surface-light flex items-center justify-center hover:bg-surface-light transition">
-                    <span class="material-symbols-outlined">light_mode</span>
-                </button>
                 <button id="logout-btn" class="w-10 h-10 rounded-lg bg-surface-light flex items-center justify-center hover:bg-surface-light transition">
                     <span class="material-symbols-outlined">logout</span>
                 </button>
@@ -390,7 +336,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="pt-20 pb-24 md:pb-8 max-w-6xl mx-auto px-4">
+    <main class="pt-20 pb-24 max-w-6xl mx-auto px-4">
         
         <!-- Dashboard Section -->
         <section id="dashboard-section" class="section-content">
@@ -415,15 +361,24 @@
                 </div>
             </div>
 
-            <!-- Accounts Overview -->
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-on-surface">حساباتك</h3>
-                    <button id="add-account-btn" class="text-primary text-sm hover:text-primary-dim transition">+ إضافة</button>
+            <!-- Quick Add Transaction -->
+            <div class="card mb-6">
+                <h3 class="text-lg font-bold text-on-surface mb-4">إضافة عملية سريعة</h3>
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div>
+                        <select id="quick-type" class="input-field" style="margin: 0;">
+                            <option value="expense">مصروف</option>
+                            <option value="income">إيراد</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="number" id="quick-amount" class="input-field" placeholder="المبلغ" step="0.01" style="margin: 0;">
+                    </div>
+                    <div>
+                        <button id="quick-add-btn" class="btn btn-primary" style="width: 100%; margin: 0;">إضافة</button>
+                    </div>
                 </div>
-                <div id="accounts-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Accounts will be loaded here -->
-                </div>
+                <input type="text" id="quick-note" class="input-field" placeholder="ملاحظة (اختيارية)">
             </div>
 
             <!-- Recent Transactions -->
@@ -433,350 +388,83 @@
                     <a href="#" class="text-primary text-sm hover:text-primary-dim transition view-all-btn">عرض الكل</a>
                 </div>
                 <div id="recent-transactions">
-                    <!-- Transactions will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Budget Overview -->
-            <div class="card">
-                <h3 class="text-lg font-bold text-on-surface mb-4">ملخص الميزانية</h3>
-                <div id="budget-items">
-                    <!-- Budget items will be loaded here -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Transactions Section -->
-        <section id="transactions-section" class="section-content hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-on-surface">سجل العمليات</h2>
-                <button id="add-transaction-btn" class="btn btn-primary">+ جديد</button>
-            </div>
-
-            <div class="card mb-4">
-                <input type="text" id="search-transactions" class="input-field" placeholder="ابحث عن عملية...">
-            </div>
-
-            <div id="all-transactions" class="card">
-                <!-- All transactions will be loaded here -->
-            </div>
-        </section>
-
-        <!-- Accounts Section -->
-        <section id="accounts-section" class="section-content hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-on-surface">إدارة الحسابات</h2>
-                <button id="new-account-btn" class="btn btn-primary">+ حساب جديد</button>
-            </div>
-
-            <div id="accounts-detail" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Accounts will be loaded here -->
-            </div>
-        </section>
-
-        <!-- Settings Section -->
-        <section id="settings-section" class="section-content hidden">
-            <h2 class="text-2xl font-bold text-on-surface mb-6">الإعدادات</h2>
-
-            <!-- Categories Management -->
-            <div class="card mb-6">
-                <h3 class="text-lg font-bold text-on-surface mb-4">فئات العمليات</h3>
-                <div id="categories-list" class="grid grid-cols-2 gap-3 mb-4">
-                    <!-- Categories will be loaded here -->
-                </div>
-                <button id="add-category-btn" class="btn btn-secondary w-full">+ إضافة فئة</button>
-            </div>
-
-            <!-- Recurring Transactions -->
-            <div class="card mb-6">
-                <h3 class="text-lg font-bold text-on-surface mb-4">الالتزامات الثابتة</h3>
-                <div id="commitments-list">
-                    <!-- Commitments will be loaded here -->
-                </div>
-                <button id="add-commitment-btn" class="btn btn-secondary w-full mt-4">+ التزام ثابت</button>
-            </div>
-
-            <!-- Salary Settings -->
-            <div class="card">
-                <h3 class="text-lg font-bold text-on-surface mb-4">الراتب الشهري</h3>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-sm text-on-surface-variant mb-2">قيمة الراتب</label>
-                        <input type="number" id="salary-amount" class="input-field" placeholder="0.00">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-on-surface-variant mb-2">يوم الدفع (من الشهر)</label>
-                        <input type="number" id="salary-day" min="1" max="31" class="input-field" placeholder="1">
-                    </div>
-                    <button id="save-salary-btn" class="btn btn-primary w-full">حفظ الإعدادات</button>
+                    <p class="text-on-surface-variant text-center py-4">لا توجد عمليات حتى الآن</p>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- FAB Button -->
-    <button id="fab-button" class="btn-fab mobile-only">
-        <span class="material-symbols-outlined">add</span>
-    </button>
-
-    <!-- Bottom Navigation (Mobile) -->
-    <nav class="bottom-nav mobile-only">
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
         <a href="#" data-page="dashboard" class="nav-item active">
             <span class="material-symbols-outlined">home</span>
             <span>الرئيسية</span>
         </a>
-        <a href="#" data-page="transactions" class="nav-item">
-            <span class="material-symbols-outlined">receipt_long</span>
-            <span>العمليات</span>
-        </a>
-        <a href="#" data-page="accounts" class="nav-item">
-            <span class="material-symbols-outlined">account_balance_wallet</span>
-            <span>الحسابات</span>
-        </a>
-        <a href="#" data-page="settings" class="nav-item">
-            <span class="material-symbols-outlined">settings</span>
-            <span>الإعدادات</span>
-        </a>
     </nav>
-
-    <!-- Sidebar Navigation (Desktop) -->
-    <div class="desktop-only fixed left-0 top-0 h-screen w-64 bg-surface pt-20 border-l border-surface-light z-30">
-        <nav class="p-4 space-y-2">
-            <a href="#" data-page="dashboard" class="nav-desktop-item active block px-4 py-3 rounded-lg hover:bg-surface-light transition text-on-surface">
-                <span class="material-symbols-outlined">home</span>
-                <span>الرئيسية</span>
-            </a>
-            <a href="#" data-page="transactions" class="nav-desktop-item block px-4 py-3 rounded-lg hover:bg-surface-light transition text-on-surface">
-                <span class="material-symbols-outlined">receipt_long</span>
-                <span>العمليات</span>
-            </a>
-            <a href="#" data-page="accounts" class="nav-desktop-item block px-4 py-3 rounded-lg hover:bg-surface-light transition text-on-surface">
-                <span class="material-symbols-outlined">account_balance_wallet</span>
-                <span>الحسابات</span>
-            </a>
-            <a href="#" data-page="settings" class="nav-desktop-item block px-4 py-3 rounded-lg hover:bg-surface-light transition text-on-surface">
-                <span class="material-symbols-outlined">settings</span>
-                <span>الإعدادات</span>
-            </a>
-        </nav>
-    </div>
-
-    <!-- Desktop Main Offset -->
-    <div class="desktop-only ml-64"></div>
-
 </div>
 
-<!-- Add Transaction Modal -->
-<div id="transaction-modal" class="modal">
-    <div class="modal-content">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold text-on-surface">إضافة عملية</h3>
-            <button class="close-modal text-on-surface-variant hover:text-on-surface">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
+<!-- Firebase Script -->
+<script type="module">
+    // ============ Firebase Configuration ============
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { 
+        getAuth, 
+        createUserWithEmailAndPassword, 
+        signInWithEmailAndPassword, 
+        signOut,
+        onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        collection, 
+        addDoc, 
+        getDocs, 
+        query, 
+        where,
+        orderBy,
+        limit
+    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">نوع العملية</label>
-                <select id="transaction-type" class="input-field">
-                    <option value="expense">مصروف</option>
-                    <option value="income">إيراد</option>
-                </select>
-            </div>
+    // Firebase Config from your console
+    const firebaseConfig = {
+        apiKey: "AIzaSyDUSHbMd1A98_OpE3JSNXPD-XT0do8FutM",
+        authDomain: "moneywithbasel.firebaseapp.com",
+        projectId: "moneywithbasel",
+        storageBucket: "moneywithbasel.firebasestorage.app",
+        messagingSenderId: "1000601907861",
+        appId: "1:1000601907861:web:6995a21e42d36c1981a19c",
+        measurementId: "G-JBPFJ7ZXX1"
+    };
 
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">الفئة</label>
-                <select id="transaction-category" class="input-field">
-                    <option>اختر فئة...</option>
-                </select>
-            </div>
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">المبلغ</label>
-                <input type="number" id="transaction-amount" class="input-field" placeholder="0.00" step="0.01">
-            </div>
+    console.log("✅ Firebase Initialized Successfully!");
+    document.getElementById('firebase-status').textContent = '✅ Firebase متصل بنجاح';
 
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">الحساب</label>
-                <select id="transaction-account" class="input-field">
-                    <option>اختر حسابك...</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">التاريخ</label>
-                <input type="date" id="transaction-date" class="input-field">
-            </div>
-
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">ملاحظات</label>
-                <input type="text" id="transaction-note" class="input-field" placeholder="ملاحظات إضافية...">
-            </div>
-
-            <div class="flex items-center gap-3 pt-4">
-                <input type="checkbox" id="transaction-recurring" class="w-4 h-4">
-                <label for="transaction-recurring" class="text-sm text-on-surface">التزام ثابت</label>
-            </div>
-
-            <div id="recurring-options" class="hidden space-y-3 p-3 bg-surface-light rounded-lg">
-                <div>
-                    <label class="block text-sm text-on-surface-variant mb-2">تاريخ الانتهاء</label>
-                    <input type="date" id="recurring-end-date" class="input-field">
-                </div>
-                <div>
-                    <label class="block text-sm text-on-surface-variant mb-2">التكرار</label>
-                    <select id="recurring-frequency" class="input-field">
-                        <option value="daily">يومي</option>
-                        <option value="weekly">أسبوعي</option>
-                        <option value="monthly" selected>شهري</option>
-                        <option value="yearly">سنوي</option>
-                    </select>
-                </div>
-            </div>
-
-            <button id="submit-transaction" class="btn btn-primary w-full">إضافة العملية</button>
-        </div>
-    </div>
-</div>
-
-<!-- Add Account Modal -->
-<div id="account-modal" class="modal">
-    <div class="modal-content">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold text-on-surface">حساب جديد</h3>
-            <button class="close-modal text-on-surface-variant">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">اسم الحساب</label>
-                <input type="text" id="account-name" class="input-field" placeholder="مثال: محفظتي، حساب البنك">
-            </div>
-
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">نوع الحساب</label>
-                <select id="account-type" class="input-field">
-                    <option value="cash">نقد</option>
-                    <option value="bank">حساب بنكي</option>
-                    <option value="card">بطاقة ائتمان</option>
-                    <option value="savings">حساب توفير</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">الرصيد الأولي</label>
-                <input type="number" id="account-balance" class="input-field" placeholder="0.00" step="0.01">
-            </div>
-
-            <div>
-                <label class="block text-sm text-on-surface-variant mb-2">العملة</label>
-                <select id="account-currency" class="input-field">
-                    <option value="jod">د.ا - دينار أردني</option>
-                    <option value="usd">$ - دولار أمريكي</option>
-                    <option value="eur">€ - يورو</option>
-                </select>
-            </div>
-
-            <button id="submit-account" class="btn btn-primary w-full">إنشاء الحساب</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // LocalStorage Manager
-    class StorageManager {
-        constructor() {
-            this.prefix = 'money_basel_';
-        }
-
-        set(key, value) {
-            localStorage.setItem(this.prefix + key, JSON.stringify(value));
-        }
-
-        get(key) {
-            const item = localStorage.getItem(this.prefix + key);
-            return item ? JSON.parse(item) : null;
-        }
-
-        remove(key) {
-            localStorage.removeItem(this.prefix + key);
-        }
-    }
-
-    // App State
-    const storage = new StorageManager();
+    // ============ App State ============
     let currentUser = null;
     let appState = {
         user: null,
-        accounts: [],
-        transactions: [],
-        categories: [],
-        commitments: [],
-        salary: { amount: 0, day: 1 }
+        transactions: []
     };
 
-    // Initialize App
-    function init() {
-        loadAppState();
-        setupEventListeners();
-        setupServiceWorker();
-        setCurrentDate();
-        
-        if (currentUser) {
+    // ============ Authentication ============
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
             showAppScreen();
-            renderDashboard();
+            await loadUserData();
         } else {
+            currentUser = null;
             showAuthScreen();
         }
-    }
+    });
 
-    // Load State from Storage
-    function loadAppState() {
-        currentUser = storage.get('currentUser');
-        if (currentUser) {
-            appState.user = storage.get('user_' + currentUser.id);
-            appState.accounts = storage.get('accounts_' + currentUser.id) || [];
-            appState.transactions = storage.get('transactions_' + currentUser.id) || [];
-            appState.categories = storage.get('categories_' + currentUser.id) || getDefaultCategories();
-            appState.commitments = storage.get('commitments_' + currentUser.id) || [];
-            appState.salary = storage.get('salary_' + currentUser.id) || { amount: 0, day: 1 };
-
-            if (!storage.get('categories_' + currentUser.id)) {
-                storage.set('categories_' + currentUser.id, appState.categories);
-            }
-        }
-    }
-
-    // Save State to Storage
-    function saveAppState() {
-        if (currentUser) {
-            storage.set('accounts_' + currentUser.id, appState.accounts);
-            storage.set('transactions_' + currentUser.id, appState.transactions);
-            storage.set('categories_' + currentUser.id, appState.categories);
-            storage.set('commitments_' + currentUser.id, appState.commitments);
-            storage.set('salary_' + currentUser.id, appState.salary);
-        }
-    }
-
-    // Default Categories
-    function getDefaultCategories() {
-        return [
-            { id: '1', name: 'مقاضي', emoji: '🛒', type: 'expense', color: '#ff5252' },
-            { id: '2', name: 'فواتير', emoji: '⚡', type: 'expense', color: '#ffa726' },
-            { id: '3', name: 'مطاعم', emoji: '🍔', type: 'expense', color: '#ffb74d' },
-            { id: '4', name: 'مواصلات', emoji: '🚗', type: 'expense', color: '#ab47bc' },
-            { id: '5', name: 'ترفيه', emoji: '🎬', type: 'expense', color: '#ec407a' },
-            { id: '6', name: 'صحة', emoji: '⚕️', type: 'expense', color: '#29b6f6' },
-            { id: '7', name: 'راتب', emoji: '💼', type: 'income', color: '#66bb6a' },
-            { id: '8', name: 'استثمارات', emoji: '📈', type: 'income', color: '#66bb6a' },
-        ];
-    }
-
-    // UI Functions
     function showAuthScreen() {
         document.getElementById('auth-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
@@ -787,241 +475,8 @@
         document.getElementById('app-screen').classList.remove('hidden');
     }
 
-    function showSection(sectionName) {
-        document.querySelectorAll('.section-content').forEach(section => {
-            section.classList.add('hidden');
-        });
-        document.getElementById(sectionName + '-section').classList.remove('hidden');
-    }
-
-    // Authentication
-    document.getElementById('auth-btn').addEventListener('click', () => {
-        const name = document.getElementById('auth-name').value.trim();
-        const email = document.getElementById('auth-email').value.trim();
-
-        if (!name || !email) {
-            showToast('يرجى ملء جميع الحقول');
-            return;
-        }
-
-        const userId = 'user_' + Date.now();
-        currentUser = { id: userId, name, email };
-        
-        storage.set('currentUser', currentUser);
-        appState.user = currentUser;
-        appState.accounts = [];
-        appState.transactions = [];
-        appState.categories = getDefaultCategories();
-        appState.commitments = [];
-        
-        saveAppState();
-        
-        showAppScreen();
-        updateGreeting();
-        renderDashboard();
-        showToast('أهلاً وسهلاً ' + name);
-    });
-
-    document.getElementById('demo-btn').addEventListener('click', () => {
-        const userId = 'user_demo';
-        currentUser = { id: userId, name: 'مستخدم تجريبي', email: 'demo@basel.app' };
-        
-        appState.user = currentUser;
-        appState.accounts = [
-            { id: '1', name: 'محفظتي', type: 'cash', balance: 350, currency: 'jod' },
-            { id: '2', name: 'حساب البنك', type: 'bank', balance: 2500, currency: 'jod' },
-        ];
-        
-        appState.categories = getDefaultCategories();
-        appState.transactions = [
-            { id: '1', type: 'expense', category: '1', amount: 45.5, account: '1', date: new Date().toISOString().split('T')[0], note: 'شراء من السوبر ماركت' },
-            { id: '2', type: 'expense', category: '3', amount: 30, account: '2', date: new Date().toISOString().split('T')[0], note: 'غداء' },
-            { id: '3', type: 'income', category: '7', amount: 1500, account: '2', date: new Date().toISOString().split('T')[0], note: 'راتب شهري' },
-        ];
-        appState.salary = { amount: 1500, day: 1 };
-        
-        showAppScreen();
-        updateGreeting();
-        renderDashboard();
-        showToast('جاري تحميل النسخة التجريبية...');
-    });
-
-    document.getElementById('logout-btn').addEventListener('click', () => {
-        currentUser = null;
-        storage.remove('currentUser');
-        document.getElementById('auth-name').value = '';
-        document.getElementById('auth-email').value = '';
-        showAuthScreen();
-        showToast('تم تسجيل الخروج بنجاح');
-    });
-
-    // Navigation
-    document.querySelectorAll('[data-page]').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page = e.currentTarget.getAttribute('data-page');
-            
-            document.querySelectorAll('[data-page]').forEach(l => l.classList.remove('active'));
-            e.currentTarget.classList.add('active');
-            
-            showSection(page);
-            
-            if (page === 'dashboard') renderDashboard();
-            else if (page === 'transactions') renderTransactions();
-            else if (page === 'accounts') renderAccounts();
-            else if (page === 'settings') renderSettings();
-        });
-    });
-
-    // FAB and Modal Controls
-    document.getElementById('fab-button').addEventListener('click', () => {
-        document.getElementById('transaction-modal').classList.add('active');
-    });
-
-    document.getElementById('add-transaction-btn').addEventListener('click', () => {
-        document.getElementById('transaction-modal').classList.add('active');
-    });
-
-    document.getElementById('add-account-btn').addEventListener('click', () => {
-        document.getElementById('account-modal').classList.add('active');
-    });
-
-    document.getElementById('new-account-btn').addEventListener('click', () => {
-        document.getElementById('account-modal').classList.add('active');
-    });
-
-    document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.currentTarget.closest('.modal').classList.remove('active');
-        });
-    });
-
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
-    });
-
-    // Transaction Modal
-    document.getElementById('transaction-recurring').addEventListener('change', (e) => {
-        document.getElementById('recurring-options').classList.toggle('hidden', !e.target.checked);
-    });
-
-    document.getElementById('submit-transaction').addEventListener('click', () => {
-        const type = document.getElementById('transaction-type').value;
-        const categoryId = document.getElementById('transaction-category').value;
-        const amount = parseFloat(document.getElementById('transaction-amount').value);
-        const accountId = document.getElementById('transaction-account').value;
-        const date = document.getElementById('transaction-date').value;
-        const note = document.getElementById('transaction-note').value;
-        const isRecurring = document.getElementById('transaction-recurring').checked;
-
-        if (!categoryId || !amount || !accountId || !date) {
-            showToast('يرجى ملء جميع الحقول المطلوبة');
-            return;
-        }
-
-        const transaction = {
-            id: 'txn_' + Date.now(),
-            type,
-            category: categoryId,
-            amount,
-            account: accountId,
-            date,
-            note,
-            isRecurring
-        };
-
-        if (isRecurring) {
-            const endDate = document.getElementById('recurring-end-date').value;
-            const frequency = document.getElementById('recurring-frequency').value;
-            
-            const commitment = {
-                id: 'com_' + Date.now(),
-                type: type === 'expense' ? 'expense' : 'income',
-                category: categoryId,
-                amount,
-                account: accountId,
-                startDate: date,
-                endDate: endDate,
-                frequency,
-                nextRunDate: date
-            };
-            
-            appState.commitments.push(commitment);
-        }
-
-        appState.transactions.push(transaction);
-        
-        // Update account balance
-        const account = appState.accounts.find(a => a.id === accountId);
-        if (account) {
-            if (type === 'expense') {
-                account.balance -= amount;
-            } else {
-                account.balance += amount;
-            }
-        }
-
-        saveAppState();
-        document.getElementById('transaction-modal').classList.remove('active');
-        
-        // Reset form
-        document.getElementById('transaction-modal').querySelector('form')?.reset();
-        document.getElementById('transaction-amount').value = '';
-        document.getElementById('transaction-note').value = '';
-        
-        renderDashboard();
-        showToast('تمت إضافة العملية بنجاح');
-    });
-
-    // Account Modal
-    document.getElementById('submit-account').addEventListener('click', () => {
-        const name = document.getElementById('account-name').value.trim();
-        const type = document.getElementById('account-type').value;
-        const balance = parseFloat(document.getElementById('account-balance').value) || 0;
-        const currency = document.getElementById('account-currency').value;
-
-        if (!name) {
-            showToast('يرجى إدخال اسم الحساب');
-            return;
-        }
-
-        const account = {
-            id: 'acc_' + Date.now(),
-            name,
-            type,
-            balance,
-            currency
-        };
-
-        appState.accounts.push(account);
-        saveAppState();
-
-        document.getElementById('account-modal').classList.remove('active');
-        document.getElementById('account-name').value = '';
-        document.getElementById('account-balance').value = '';
-
-        renderDashboard();
-        showToast('تم إنشاء الحساب بنجاح');
-    });
-
-    // Salary Settings
-    document.getElementById('save-salary-btn').addEventListener('click', () => {
-        const amount = parseFloat(document.getElementById('salary-amount').value) || 0;
-        const day = parseInt(document.getElementById('salary-day').value) || 1;
-
-        appState.salary = { amount, day };
-        saveAppState();
-
-        showToast('تم حفظ إعدادات الراتب');
-    });
-
-    // Render Functions
     function updateGreeting() {
-        const name = currentUser?.name || 'صديقي';
+        const name = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'صديقي';
         const hour = new Date().getHours();
         let greeting = 'أهلاً وسهلاً';
         
@@ -1032,225 +487,189 @@
         document.getElementById('greeting').textContent = greeting + ' ' + name;
     }
 
-    function renderDashboard() {
-        updateGreeting();
-        
-        // Calculate totals
-        const totalIncome = appState.transactions
-            .filter(t => t.type === 'income')
-            .reduce((sum, t) => sum + t.amount, 0);
-        
-        const totalExpenses = appState.transactions
-            .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + t.amount, 0);
-        
-        const netWorth = appState.accounts.reduce((sum, a) => sum + a.balance, 0);
+    // ============ Authentication Handlers ============
+    
+    document.getElementById('auth-btn').addEventListener('click', async () => {
+        const name = document.getElementById('auth-name').value.trim();
+        const email = document.getElementById('auth-email').value.trim();
+        const password = document.getElementById('auth-password').value.trim();
 
-        document.getElementById('net-worth').textContent = formatCurrency(netWorth);
-        document.getElementById('total-income').textContent = formatCurrency(totalIncome);
-        document.getElementById('total-expenses').textContent = formatCurrency(totalExpenses);
-
-        // Render accounts
-        const accountsGrid = document.getElementById('accounts-grid');
-        accountsGrid.innerHTML = appState.accounts.map(account => `
-            <div class="card">
-                <p class="text-on-surface-variant text-sm mb-2">${account.name}</p>
-                <p class="text-2xl font-bold text-primary font-mono">${formatCurrency(account.balance)}</p>
-                <p class="text-xs text-on-surface-variant mt-2">${getAccountTypeLabel(account.type)}</p>
-            </div>
-        `).join('');
-
-        // Render recent transactions
-        const recentTxns = appState.transactions.slice(-5).reverse();
-        const recentTransactionsDiv = document.getElementById('recent-transactions');
-        
-        if (recentTxns.length === 0) {
-            recentTransactionsDiv.innerHTML = '<p class="text-on-surface-variant text-center py-4">لا توجد عمليات حتى الآن</p>';
-        } else {
-            recentTransactionsDiv.innerHTML = recentTxns.map(txn => {
-                const category = appState.categories.find(c => c.id === txn.category);
-                return `
-                    <div class="transaction-item">
-                        <div class="transaction-icon" style="background: ${category?.color}33">
-                            ${category?.emoji || '💰'}
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-on-surface text-sm font-medium">${category?.name || 'عملية'}</p>
-                            <p class="text-on-surface-variant text-xs">${txn.date}</p>
-                        </div>
-                        <p class="transaction-amount ${txn.type === 'income' ? 'amount-positive' : 'amount-negative'}">
-                            ${txn.type === 'income' ? '+' : '-'}${formatCurrency(txn.amount)}
-                        </p>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Update select options
-        updateCategorySelect();
-        updateAccountSelect();
-
-        // Render budget
-        const budgetDiv = document.getElementById('budget-items');
-        budgetDiv.innerHTML = appState.categories.filter(c => c.type === 'expense').map(category => {
-            const categoryTotal = appState.transactions
-                .filter(t => t.category === category.id && t.type === 'expense')
-                .reduce((sum, t) => sum + t.amount, 0);
-            
-            return `
-                <div class="mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-on-surface text-sm">${category.emoji} ${category.name}</span>
-                        <span class="text-on-surface font-mono">${formatCurrency(categoryTotal)}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${Math.min((categoryTotal / (totalExpenses || 1)) * 100, 100)}%"></div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function renderTransactions() {
-        const allTxnsDiv = document.getElementById('all-transactions');
-        const transactions = appState.transactions.slice().reverse();
-
-        if (transactions.length === 0) {
-            allTxnsDiv.innerHTML = '<p class="text-on-surface-variant text-center py-8">لا توجد عمليات</p>';
+        if (!name || !email || !password) {
+            showToast('يرجى ملء جميع الحقول');
             return;
         }
 
-        allTxnsDiv.innerHTML = transactions.map(txn => {
-            const category = appState.categories.find(c => c.id === txn.category);
-            const account = appState.accounts.find(a => a.id === txn.account);
-            return `
+        showLoading(true);
+
+        try {
+            // Try to create new user
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await userCredential.user.reload();
+            showToast('تم التسجيل بنجاح!');
+        } catch (error) {
+            // If user exists, try to sign in
+            if (error.code === 'auth/email-already-in-use') {
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showToast('تم تسجيل الدخول بنجاح!');
+                } catch (loginError) {
+                    showToast('كلمة المرور غير صحيحة');
+                }
+            } else {
+                showToast('خطأ: ' + error.message);
+            }
+        }
+        showLoading(false);
+    });
+
+    document.getElementById('demo-btn').addEventListener('click', async () => {
+        showLoading(true);
+        try {
+            const demoEmail = 'demo@money-basel.com';
+            const demoPassword = 'Demo@123456';
+            
+            try {
+                await signInWithEmailAndPassword(auth, demoEmail, demoPassword);
+            } catch (e) {
+                if (e.code === 'auth/user-not-found') {
+                    await createUserWithEmailAndPassword(auth, demoEmail, demoPassword);
+                    await signInWithEmailAndPassword(auth, demoEmail, demoPassword);
+                }
+            }
+            
+            showToast('مرحباً في النسخة التجريبية!');
+        } catch (error) {
+            showToast('خطأ: ' + error.message);
+        }
+        showLoading(false);
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            currentUser = null;
+            showAuthScreen();
+            showToast('تم تسجيل الخروج');
+            // Clear forms
+            document.getElementById('auth-name').value = '';
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-password').value = '';
+        } catch (error) {
+            showToast('خطأ في تسجيل الخروج');
+        }
+    });
+
+    // ============ Load User Data ============
+    
+    async function loadUserData() {
+        try {
+            updateGreeting();
+            
+            // Load transactions
+            const transactionsRef = collection(db, 'transactions');
+            const q = query(
+                transactionsRef, 
+                where('userId', '==', currentUser.uid),
+                orderBy('date', 'desc'),
+                limit(100)
+            );
+            const snapshot = await getDocs(q);
+            
+            appState.transactions = [];
+            snapshot.forEach((doc) => {
+                appState.transactions.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            
+            renderDashboard();
+        } catch (error) {
+            console.error('Error loading data:', error);
+            if (error.code !== 'failed-precondition') {
+                showToast('خطأ في تحميل البيانات');
+            }
+        }
+    }
+
+    // ============ Add Transaction ============
+    
+    document.getElementById('quick-add-btn').addEventListener('click', async () => {
+        const type = document.getElementById('quick-type').value;
+        const amount = parseFloat(document.getElementById('quick-amount').value);
+        const note = document.getElementById('quick-note').value;
+        const date = new Date().toISOString().split('T')[0];
+
+        if (!amount || amount <= 0) {
+            showToast('أدخل مبلغاً صحيحاً');
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, 'transactions'), {
+                userId: currentUser.uid,
+                type: type,
+                amount: amount,
+                date: date,
+                note: note || 'بدون ملاحظة',
+                createdAt: new Date().toISOString()
+            });
+
+            showToast('✅ تمت إضافة العملية بنجاح!');
+            document.getElementById('quick-amount').value = '';
+            document.getElementById('quick-note').value = '';
+            
+            // Reload data
+            await loadUserData();
+        } catch (error) {
+            showToast('❌ خطأ: ' + error.message);
+        }
+    });
+
+    // ============ Render Dashboard ============
+    
+    function renderDashboard() {
+        // Calculate totals
+        const income = appState.transactions
+            .filter(t => t.type === 'income')
+            .reduce((sum, t) => sum + t.amount, 0);
+        
+        const expenses = appState.transactions
+            .filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        const netWorth = income - expenses;
+
+        document.getElementById('net-worth').textContent = 'د.ا ' + netWorth.toFixed(2);
+        document.getElementById('total-income').textContent = 'د.ا ' + income.toFixed(2);
+        document.getElementById('total-expenses').textContent = 'د.ا ' + expenses.toFixed(2);
+
+        // Show recent transactions
+        const recentTxns = appState.transactions.slice(0, 5);
+        const recentDiv = document.getElementById('recent-transactions');
+        
+        if (recentTxns.length === 0) {
+            recentDiv.innerHTML = '<p class="text-on-surface-variant text-center py-4">لا توجد عمليات حتى الآن</p>';
+        } else {
+            recentDiv.innerHTML = recentTxns.map(txn => `
                 <div class="transaction-item">
-                    <div class="transaction-icon" style="background: ${category?.color}33">
-                        ${category?.emoji || '💰'}
+                    <div class="transaction-icon" style="background: ${txn.type === 'income' ? '#4caf5033' : '#ff444433'};">
+                        ${txn.type === 'income' ? '📈' : '📉'}
                     </div>
-                    <div class="flex-1">
-                        <p class="text-on-surface text-sm font-medium">${category?.name || 'عملية'}</p>
-                        <p class="text-on-surface-variant text-xs">${account?.name} • ${txn.date}</p>
+                    <div style="flex: 1;">
+                        <p style="color: #e8e0f0; font-size: 14px; font-weight: 600;">${txn.note}</p>
+                        <p style="color: #a098b0; font-size: 12px;">${txn.date}</p>
                     </div>
                     <p class="transaction-amount ${txn.type === 'income' ? 'amount-positive' : 'amount-negative'}">
-                        ${txn.type === 'income' ? '+' : '-'}${formatCurrency(txn.amount)}
+                        ${txn.type === 'income' ? '+' : '-'}د.ا ${txn.amount.toFixed(2)}
                     </p>
                 </div>
-            `;
-        }).join('');
-    }
-
-    function renderAccounts() {
-        const accountsDiv = document.getElementById('accounts-detail');
-        accountsDiv.innerHTML = appState.accounts.map(account => `
-            <div class="card">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <p class="text-on-surface-variant text-sm">${getAccountTypeLabel(account.type)}</p>
-                        <h3 class="text-xl font-bold text-on-surface">${account.name}</h3>
-                    </div>
-                    <button class="text-on-surface-variant hover:text-on-surface transition" onclick="deleteAccount('${account.id}')">
-                        <span class="material-symbols-outlined">delete</span>
-                    </button>
-                </div>
-                <p class="text-3xl font-bold text-primary font-mono mb-4">${formatCurrency(account.balance)}</p>
-                <p class="text-xs text-on-surface-variant">${account.currency}</p>
-            </div>
-        `).join('');
-    }
-
-    function renderSettings() {
-        document.getElementById('salary-amount').value = appState.salary.amount;
-        document.getElementById('salary-day').value = appState.salary.day;
-
-        const categoriesDiv = document.getElementById('categories-list');
-        categoriesDiv.innerHTML = appState.categories.map(cat => `
-            <button class="p-3 rounded-lg bg-surface-light hover:bg-surface-light transition text-center" onclick="toggleCategory('${cat.id}')">
-                <div class="text-2xl mb-1">${cat.emoji}</div>
-                <p class="text-xs text-on-surface">${cat.name}</p>
-            </button>
-        `).join('');
-
-        const commitmentsDiv = document.getElementById('commitments-list');
-        if (appState.commitments.length === 0) {
-            commitmentsDiv.innerHTML = '<p class="text-on-surface-variant text-center py-4">لا توجد التزامات ثابتة</p>';
-        } else {
-            commitmentsDiv.innerHTML = appState.commitments.map(com => {
-                const category = appState.categories.find(c => c.id === com.category);
-                return `
-                    <div class="flex items-center justify-between p-3 border-b border-surface-light">
-                        <div>
-                            <p class="text-on-surface">${category?.emoji} ${category?.name}</p>
-                            <p class="text-xs text-on-surface-variant">${formatCurrency(com.amount)} • ${com.frequency}</p>
-                        </div>
-                        <button onclick="deleteCommitment('${com.id}')" class="text-on-surface-variant hover:text-error">
-                            <span class="material-symbols-outlined">close</span>
-                        </button>
-                    </div>
-                `;
-            }).join('');
+            `).join('');
         }
     }
 
-    // Utility Functions
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('ar-JO', {
-            style: 'currency',
-            currency: 'JOD',
-            minimumFractionDigits: 2
-        }).format(amount);
-    }
-
-    function getAccountTypeLabel(type) {
-        const labels = {
-            cash: 'نقد 💵',
-            bank: 'حساب بنكي 🏦',
-            card: 'بطاقة ائتمان 💳',
-            savings: 'حساب توفير 🏪'
-        };
-        return labels[type] || type;
-    }
-
-    function updateCategorySelect() {
-        const select = document.getElementById('transaction-category');
-        select.innerHTML = '<option>اختر فئة...</option>' + appState.categories.map(cat => 
-            `<option value="${cat.id}">${cat.emoji} ${cat.name}</option>`
-        ).join('');
-    }
-
-    function updateAccountSelect() {
-        const select = document.getElementById('transaction-account');
-        select.innerHTML = '<option>اختر حسابك...</option>' + appState.accounts.map(acc => 
-            `<option value="${acc.id}">${acc.name}</option>`
-        ).join('');
-    }
-
-    function setCurrentDate() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('transaction-date').value = today;
-    }
-
-    function deleteAccount(accountId) {
-        if (confirm('هل أنت متأكد من حذف هذا الحساب؟')) {
-            appState.accounts = appState.accounts.filter(a => a.id !== accountId);
-            saveAppState();
-            renderAccounts();
-            renderDashboard();
-            showToast('تم حذف الحساب');
-        }
-    }
-
-    function deleteCommitment(commitmentId) {
-        appState.commitments = appState.commitments.filter(c => c.id !== commitmentId);
-        saveAppState();
-        renderSettings();
-        showToast('تم حذف الالتزام');
-    }
-
-    function toggleCategory(categoryId) {
-        // Could be used for category management
-    }
-
+    // ============ Utility Functions ============
+    
     function showToast(message) {
         const toast = document.createElement('div');
         toast.className = 'toast';
@@ -1260,33 +679,19 @@
         setTimeout(() => {
             toast.style.animation = 'slideIn 0.3s ease reverse';
             setTimeout(() => toast.remove(), 300);
-        }, 2000);
+        }, 3000);
     }
 
-    // Theme Toggle
-    document.getElementById('theme-toggle').addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        const isDark = document.documentElement.classList.contains('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
-
-    // Service Worker
-    function setupServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:application/javascript,console.log("PWA Ready")').catch(() => {
-                console.log('Service Worker registration not available');
-            });
-        }
+    function showLoading(show) {
+        document.getElementById('auth-form').style.display = show ? 'none' : 'block';
+        document.getElementById('auth-loading').style.display = show ? 'block' : 'none';
     }
 
-    // Initialize
-    init();
-    
-    // View All Transactions Link
-    document.querySelector('.view-all-btn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.querySelector('[data-page="transactions"]').click();
-    });
+    // ============ Initialize ============
+    console.log('✅ تطبيق Money with Basel محمّل بنجاح مع Firebase!');
+    console.log('🔥 Firebase Project: moneywithbasel');
+    console.log('🎯 Firestore Database: جاهز');
+    console.log('🔐 Authentication: مفعّل');
 </script>
 
 </body>
