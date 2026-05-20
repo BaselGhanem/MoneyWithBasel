@@ -339,74 +339,87 @@
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item">
-        <span class="material-symbols-outlined">home</span>
-        <span>الرئيسية</span>
-    </a>
-    <a href="transactions.html" class="nav-item">
-        <span class="material-symbols-outlined">receipt_long</span>
-        <span>الحركات</span>
-    </a>
-    <button onclick="document.dispatchEvent(new CustomEvent('openAddModal'))" class="text-primary bg-surface-light p-3 rounded-full -mt-6 border-4 border-background">
-        <span class="material-symbols-outlined">add</span>
-    </button>
-    <a href="accounts.html" class="nav-item">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
-        <span>الحسابات</span>
-    </a>
-    <a href="settings.html" class="nav-item">
-        <span class="material-symbols-outlined">settings</span>
-        <span>الإعدادات</span>
-    </a>
-</nav>
+        <a href="#" class="nav-item" data-section="dashboard">
+            <span class="material-symbols-outlined">home</span>
+            <span>الرئيسية</span>
+        </a>
+        <a href="#" class="nav-item" data-section="transactions">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span>الحركات</span>
+        </a>
+        <button onclick="document.dispatchEvent(new CustomEvent('openAddModal'))" class="text-primary bg-surface-light p-3 rounded-full -mt-6 border-4 border-background">
+            <span class="material-symbols-outlined">add</span>
+        </button>
+        <a href="#" class="nav-item" data-section="accounts">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            <span>الحسابات</span>
+        </a>
+        <a href="#" class="nav-item" data-section="settings">
+            <span class="material-symbols-outlined">settings</span>
+            <span>الإعدادات</span>
+        </a>
+    </nav>
+</div>
 
 <!-- Firebase SDK from CDN -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // إعدادات Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDUSHbMd1A98_OpE3JSNXPD-XT0do8FutM",
-            authDomain: "moneywithbasel.firebaseapp.com",
-            projectId: "moneywithbasel",
-            storageBucket: "moneywithbasel.firebasestorage.app",
-            messagingSenderId: "1000601907861",
-            appId: "1:1000601907861:web:6995a21e42d36c1981a19c"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-    </script>
 
-   <script src="js/db.js" defer></script>
-<script src="js/ui.js"> defer></script>
-<script src="js/charts.js" defer></script>
-<script src="js/automation.js" defer></script>
-<script src="js/app.js"> defer></script>
+<script>
+    // إعدادات Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDUSHbMd1A98_OpE3JSNXPD-XT0do8FutM",
+        authDomain: "moneywithbasel.firebaseapp.com",
+        projectId: "moneywithbasel",
+        storageBucket: "moneywithbasel.firebasestorage.app",
+        messagingSenderId: "1000601907861",
+        appId: "1:1000601907861:web:6995a21e42d36c1981a19c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    <script>
-        // تفعيل الـ Service Worker للـ PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(() => console.log('✅ Service Worker تم تسجيله'))
-                    .catch((err) => console.log('❌ خطأ في Service Worker:', err));
+    // ========== إصلاح زر تسجيل الخروج ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                firebase.auth().signOut()
+                    .then(() => {
+                        console.log('✅ تم تسجيل الخروج بنجاح');
+                    })
+                    .catch((error) => {
+                        console.error('❌ خطأ في تسجيل الخروج:', error);
+                        alert('حدث خطأ أثناء تسجيل الخروج، حاول مرة أخرى.');
+                    });
             });
         }
+    });
 
-        // التعامل مع حالة تسجيل الدخول
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                // استدعاء دالة لتحميل البيانات هنا إذا لزم الأمر
-            } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('app-screen').classList.add('hidden');
-            }
-        });
-    </script>
+    // حالة تسجيل الدخول
+    auth.onAuthStateChanged((user) => {
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        if (user) {
+            authScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            // يمكنك هنا تحميل بيانات المستخدم (المعاملات، الحسابات، إلخ)
+        } else {
+            authScreen.classList.remove('hidden');
+            appScreen.classList.add('hidden');
+        }
+    });
+</script>
+
+<!-- باقي ملفات JS (إن وجدت) -->
+<script src="js/db.js" defer></script>
+<script src="js/ui.js" defer></script>
+<script src="js/charts.js" defer></script>
+<script src="js/automation.js" defer></script>
+<script src="js/app.js" defer></script>
+
 </body>
 </html>
