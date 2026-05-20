@@ -300,7 +300,7 @@
                 type: type,
                 amount: amount,
                 note: note || '',
-                date: firebase.firestore.FieldValue.serverTimestamp()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             showMessage('✅ تمت الإضافة بنجاح');
             quickAmount.value = '';
@@ -449,6 +449,39 @@
             item.classList.add('active');
             // يمكن هنا تطبيق التنقل بين الأقسام مستقبلاً
         });
+    });
+</script>
+    <script>
+    // تأكيد ربط زر الإضافة بعد تحميل جميع الملفات
+    window.addEventListener('load', function() {
+        const quickAddBtn = document.getElementById('quick-add-btn');
+        if (quickAddBtn) {
+            // إزالة أي مستمعين سابقين لتجنب التكرار
+            const newBtn = quickAddBtn.cloneNode(true);
+            quickAddBtn.parentNode.replaceChild(newBtn, quickAddBtn);
+            newBtn.addEventListener('click', async () => {
+                const type = document.getElementById('quick-type').value;
+                const amount = parseFloat(document.getElementById('quick-amount').value);
+                const note = document.getElementById('quick-note').value.trim();
+                if (!currentUser) { showMessage('الرجاء تسجيل الدخول أولاً', true); return; }
+                if (isNaN(amount) || amount <= 0) { showMessage('المبلغ يجب أن يكون رقماً موجباً', true); return; }
+                try {
+                    await db.collection('transactions').add({
+                        userId: currentUser.uid,
+                        type: type,
+                        amount: amount,
+                        note: note || '',
+                        date: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showMessage('✅ تمت الإضافة بنجاح');
+                    document.getElementById('quick-amount').value = '';
+                    document.getElementById('quick-note').value = '';
+                } catch (err) {
+                    console.error(err);
+                    showMessage('فشلت الإضافة: ' + err.message, true);
+                }
+            });
+        }
     });
 </script>
 </body>
