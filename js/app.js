@@ -18,18 +18,18 @@ const app = {
     },
 
     // تسجيل الخدمة الخلفية (لجعل التطبيق يعمل أوفلاين)
-   registerServiceWorker: function() {
+ registerServiceWorker: function() {
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
-            // 🔥 امسح أي كاش قديم فورًا (اختياري)
+            // امسح أي كاش قديم (اختياري)
             if (caches) {
                 const keys = await caches.keys();
                 await Promise.all(keys.map(key => caches.delete(key)));
                 console.log('🗑️ تم مسح الكاش القديم');
             }
             
-            // ثم سجل الـ Service Worker الجديد
-            navigator.serviceWorker.register('/service-worker.js')
+            // ✅ المسار الصحيح للملف
+            navigator.serviceWorker.register('/MoneyWithBasel/service-worker.js')
                 .then(() => console.log('✅ Service Worker registered'))
                 .catch(err => console.error('❌ Service Worker Error:', err));
         });
