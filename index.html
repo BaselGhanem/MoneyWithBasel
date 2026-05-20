@@ -7,10 +7,6 @@
     <meta name="description" content="Money with Basel - لوحة قيادة مالية احترافية للمستخدم العربي">
     <title>Money with Basel</title>
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23ff2d78' width='192' height='192'/><text x='50%' y='50%' font-size='100' fill='white' text-anchor='middle' dominant-baseline='central' font-weight='bold'>₹</text></svg>">
-    
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -49,11 +45,6 @@
         }
     </script>
     
-    <!-- Firebase SDK v9+ (CDK) -->
-    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"></script>
-    
     <style>
         * {
             margin: 0;
@@ -77,26 +68,6 @@
             border: 1px solid #2d2d3d;
             border-radius: 16px;
             padding: 20px;
-        }
-        
-        .btn-fab {
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            background: linear-gradient(135deg, #ff2d78, #ff5fa8);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(255, 45, 120, 0.4);
-            transition: all 0.3s ease;
-            position: fixed;
-            bottom: 100px;
-            right: 24px;
-            z-index: 40;
         }
         
         .btn {
@@ -136,40 +107,13 @@
             font-family: 'Almarai', sans-serif;
             font-size: 14px;
             margin: 8px 0;
+            box-sizing: border-box;
         }
         
         .input-field:focus {
             outline: none;
             border-color: #ff2d78;
             box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.1);
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: #0f0f1a;
-            border: 1px solid #2d2d3d;
-            border-radius: 20px;
-            padding: 24px;
-            max-width: 400px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
         }
         
         .loading-spinner {
@@ -271,6 +215,10 @@
         .amount-negative {
             color: #ff4444;
         }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -286,11 +234,6 @@
         
         <div class="card mb-8">
             <div id="auth-form">
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-on-surface mb-2">اسمك</label>
-                    <input type="text" id="auth-name" class="input-field" placeholder="أدخل اسمك">
-                </div>
-                
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-on-surface mb-2">البريد الإلكتروني</label>
                     <input type="email" id="auth-email" class="input-field" placeholder="example@email.com">
@@ -349,7 +292,7 @@
             <div class="card mb-6">
                 <p class="text-on-surface-variant text-sm mb-2">صافي الثروة</p>
                 <h3 class="text-4xl font-bold text-primary font-mono mb-4" id="net-worth">د.ا 0.00</h3>
-                <div class="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-surface-light">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #2d2d3d;">
                     <div>
                         <p class="text-on-surface-variant text-xs mb-1">الإيرادات</p>
                         <p class="text-xl font-bold text-success" id="total-income">د.ا 0.00</p>
@@ -364,7 +307,7 @@
             <!-- Quick Add Transaction -->
             <div class="card mb-6">
                 <h3 class="text-lg font-bold text-on-surface mb-4">إضافة عملية سريعة</h3>
-                <div class="grid grid-cols-3 gap-3 mb-4">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
                     <div>
                         <select id="quick-type" class="input-field" style="margin: 0;">
                             <option value="expense">مصروف</option>
@@ -383,9 +326,8 @@
 
             <!-- Recent Transactions -->
             <div class="card mb-6">
-                <div class="flex justify-between items-center mb-4">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h3 class="text-lg font-bold text-on-surface">آخر العمليات</h3>
-                    <a href="#" class="text-primary text-sm hover:text-primary-dim transition view-all-btn">عرض الكل</a>
                 </div>
                 <div id="recent-transactions">
                     <p class="text-on-surface-variant text-center py-4">لا توجد عمليات حتى الآن</p>
@@ -404,45 +346,28 @@
     </nav>
 </div>
 
-<!-- Firebase Script -->
-<script type="module">
-    // ============ Firebase Configuration ============
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { 
-        getAuth, 
-        createUserWithEmailAndPassword, 
-        signInWithEmailAndPassword, 
-        signOut,
-        onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-    import { 
-        getFirestore, 
-        collection, 
-        addDoc, 
-        getDocs, 
-        query, 
-        where,
-        orderBy,
-        limit
-    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+<!-- Firebase SDK from CDN -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-    // Firebase Config from your console
+<script>
+    // ============ Firebase Configuration ============
     const firebaseConfig = {
         apiKey: "AIzaSyDUSHbMd1A98_OpE3JSNXPD-XT0do8FutM",
         authDomain: "moneywithbasel.firebaseapp.com",
         projectId: "moneywithbasel",
         storageBucket: "moneywithbasel.firebasestorage.app",
         messagingSenderId: "1000601907861",
-        appId: "1:1000601907861:web:6995a21e42d36c1981a19c",
-        measurementId: "G-JBPFJ7ZXX1"
+        appId: "1:1000601907861:web:6995a21e42d36c1981a19c"
     };
 
     // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    console.log("✅ Firebase Initialized Successfully!");
+    console.log("✅ Firebase Initialized!");
     document.getElementById('firebase-status').textContent = '✅ Firebase متصل بنجاح';
 
     // ============ App State ============
@@ -452,9 +377,8 @@
         transactions: []
     };
 
-    // ============ Authentication ============
-    
-    onAuthStateChanged(auth, async (user) => {
+    // ============ Auth State ============
+    auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
             showAppScreen();
@@ -476,7 +400,7 @@
     }
 
     function updateGreeting() {
-        const name = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'صديقي';
+        const name = currentUser?.email?.split('@')[0] || 'صديقي';
         const hour = new Date().getHours();
         let greeting = 'أهلاً وسهلاً';
         
@@ -487,14 +411,13 @@
         document.getElementById('greeting').textContent = greeting + ' ' + name;
     }
 
-    // ============ Authentication Handlers ============
+    // ============ Auth Buttons ============
     
     document.getElementById('auth-btn').addEventListener('click', async () => {
-        const name = document.getElementById('auth-name').value.trim();
         const email = document.getElementById('auth-email').value.trim();
         const password = document.getElementById('auth-password').value.trim();
 
-        if (!name || !email || !password) {
+        if (!email || !password) {
             showToast('يرجى ملء جميع الحقول');
             return;
         }
@@ -502,21 +425,18 @@
         showLoading(true);
 
         try {
-            // Try to create new user
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await userCredential.user.reload();
-            showToast('تم التسجيل بنجاح!');
+            await auth.createUserWithEmailAndPassword(email, password);
+            showToast('✅ تم التسجيل بنجاح!');
         } catch (error) {
-            // If user exists, try to sign in
             if (error.code === 'auth/email-already-in-use') {
                 try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    showToast('تم تسجيل الدخول بنجاح!');
+                    await auth.signInWithEmailAndPassword(email, password);
+                    showToast('✅ تم تسجيل الدخول بنجاح!');
                 } catch (loginError) {
-                    showToast('كلمة المرور غير صحيحة');
+                    showToast('❌ كلمة المرور غير صحيحة');
                 }
             } else {
-                showToast('خطأ: ' + error.message);
+                showToast('❌ خطأ: ' + error.message);
             }
         }
         showLoading(false);
@@ -529,51 +449,45 @@
             const demoPassword = 'Demo@123456';
             
             try {
-                await signInWithEmailAndPassword(auth, demoEmail, demoPassword);
+                await auth.signInWithEmailAndPassword(demoEmail, demoPassword);
             } catch (e) {
                 if (e.code === 'auth/user-not-found') {
-                    await createUserWithEmailAndPassword(auth, demoEmail, demoPassword);
-                    await signInWithEmailAndPassword(auth, demoEmail, demoPassword);
+                    await auth.createUserWithEmailAndPassword(demoEmail, demoPassword);
+                    await auth.signInWithEmailAndPassword(demoEmail, demoPassword);
                 }
             }
             
-            showToast('مرحباً في النسخة التجريبية!');
+            showToast('🎉 مرحباً في النسخة التجريبية!');
         } catch (error) {
-            showToast('خطأ: ' + error.message);
+            showToast('❌ خطأ: ' + error.message);
         }
         showLoading(false);
     });
 
     document.getElementById('logout-btn').addEventListener('click', async () => {
         try {
-            await signOut(auth);
+            await auth.signOut();
             currentUser = null;
             showAuthScreen();
-            showToast('تم تسجيل الخروج');
-            // Clear forms
-            document.getElementById('auth-name').value = '';
+            showToast('✅ تم تسجيل الخروج');
             document.getElementById('auth-email').value = '';
             document.getElementById('auth-password').value = '';
         } catch (error) {
-            showToast('خطأ في تسجيل الخروج');
+            showToast('❌ خطأ في تسجيل الخروج');
         }
     });
 
-    // ============ Load User Data ============
+    // ============ Load Data ============
     
     async function loadUserData() {
         try {
             updateGreeting();
             
-            // Load transactions
-            const transactionsRef = collection(db, 'transactions');
-            const q = query(
-                transactionsRef, 
-                where('userId', '==', currentUser.uid),
-                orderBy('date', 'desc'),
-                limit(100)
-            );
-            const snapshot = await getDocs(q);
+            const snapshot = await db.collection('transactions')
+                .where('userId', '==', currentUser.uid)
+                .orderBy('date', 'desc')
+                .limit(100)
+                .get();
             
             appState.transactions = [];
             snapshot.forEach((doc) => {
@@ -585,10 +499,7 @@
             
             renderDashboard();
         } catch (error) {
-            console.error('Error loading data:', error);
-            if (error.code !== 'failed-precondition') {
-                showToast('خطأ في تحميل البيانات');
-            }
+            console.error('Error:', error);
         }
     }
 
@@ -601,12 +512,12 @@
         const date = new Date().toISOString().split('T')[0];
 
         if (!amount || amount <= 0) {
-            showToast('أدخل مبلغاً صحيحاً');
+            showToast('❌ أدخل مبلغاً صحيحاً');
             return;
         }
 
         try {
-            await addDoc(collection(db, 'transactions'), {
+            await db.collection('transactions').add({
                 userId: currentUser.uid,
                 type: type,
                 amount: amount,
@@ -615,11 +526,10 @@
                 createdAt: new Date().toISOString()
             });
 
-            showToast('✅ تمت إضافة العملية بنجاح!');
+            showToast('✅ تمت إضافة العملية!');
             document.getElementById('quick-amount').value = '';
             document.getElementById('quick-note').value = '';
             
-            // Reload data
             await loadUserData();
         } catch (error) {
             showToast('❌ خطأ: ' + error.message);
@@ -629,7 +539,6 @@
     // ============ Render Dashboard ============
     
     function renderDashboard() {
-        // Calculate totals
         const income = appState.transactions
             .filter(t => t.type === 'income')
             .reduce((sum, t) => sum + t.amount, 0);
@@ -638,13 +547,10 @@
             .filter(t => t.type === 'expense')
             .reduce((sum, t) => sum + t.amount, 0);
 
-        const netWorth = income - expenses;
-
-        document.getElementById('net-worth').textContent = 'د.ا ' + netWorth.toFixed(2);
+        document.getElementById('net-worth').textContent = 'د.ا ' + (income - expenses).toFixed(2);
         document.getElementById('total-income').textContent = 'د.ا ' + income.toFixed(2);
         document.getElementById('total-expenses').textContent = 'د.ا ' + expenses.toFixed(2);
 
-        // Show recent transactions
         const recentTxns = appState.transactions.slice(0, 5);
         const recentDiv = document.getElementById('recent-transactions');
         
@@ -668,7 +574,7 @@
         }
     }
 
-    // ============ Utility Functions ============
+    // ============ Utilities ============
     
     function showToast(message) {
         const toast = document.createElement('div');
@@ -687,11 +593,7 @@
         document.getElementById('auth-loading').style.display = show ? 'block' : 'none';
     }
 
-    // ============ Initialize ============
-    console.log('✅ تطبيق Money with Basel محمّل بنجاح مع Firebase!');
-    console.log('🔥 Firebase Project: moneywithbasel');
-    console.log('🎯 Firestore Database: جاهز');
-    console.log('🔐 Authentication: مفعّل');
+    console.log('✅ App Ready!');
 </script>
 
 </body>
