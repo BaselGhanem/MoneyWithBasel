@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html class="dark" dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a12">
+    <title>سجل الحركات - Money with Basel</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#0a0a12',
+                        surface: '#0f0f1a',
+                        'surface-light': '#1e1e30',
+                        'surface-variant': '#1a1a28',
+                        primary: '#ff2d78', /* الوردي الزاهي */
+                        secondary: '#00ffcc', /* الأخضر الفيروزي */
+                        tertiary: '#ffe04a', /* الأصفر الدافئ */
+                        error: '#ff4444',
+                        success: '#4caf50',
+                        'on-surface': '#e8e0f0',
+                        'on-surface-variant': '#a098b0',
+                    },
+                    fontFamily: {
+                        sans: ['Almarai', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            font-family: 'Almarai', sans-serif; 
+            background-color: #0a0a12; 
+            color: #e8e0f0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .number-font { font-family: 'JetBrains Mono', monospace; letter-spacing: -0.5px; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        /* إخفاء شريط التمرير مع الحفاظ على وظيفته */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-surface h-screen flex flex-col overflow-hidden">
+
+    <header class="flex items-center justify-between p-4 bg-surface border-b border-surface-variant sticky top-0 z-20">
+        <h1 class="text-xl font-bold">سجل الحركات</h1>
+        <button class="w-10 h-10 rounded-full bg-surface-variant text-on-surface flex items-center justify-center hover:bg-surface-light transition-colors active:scale-95">
+            <span class="material-symbols-outlined">search</span>
+        </button>
+    </header>
+
+    <div class="px-4 py-3 bg-surface border-b border-surface-variant flex gap-2 overflow-x-auto no-scrollbar shrink-0">
+        <button class="px-4 py-1.5 rounded-full bg-primary text-white text-sm font-bold whitespace-nowrap shadow-lg shadow-primary/20">الكل</button>
+        <button class="px-4 py-1.5 rounded-full bg-surface-variant text-on-surface-variant hover:bg-surface-light hover:text-on-surface text-sm font-bold whitespace-nowrap transition-colors">الإيرادات</button>
+        <button class="px-4 py-1.5 rounded-full bg-surface-variant text-on-surface-variant hover:bg-surface-light hover:text-on-surface text-sm font-bold whitespace-nowrap transition-colors">المصاريف</button>
+        <button class="px-3 py-1.5 rounded-full bg-surface-variant text-on-surface-variant hover:bg-surface-light hover:text-on-surface text-sm font-bold whitespace-nowrap flex items-center gap-1 transition-colors mr-auto">
+            <span class="material-symbols-outlined text-[18px]">filter_alt</span>
+            تصفية
+        </button>
+    </div>
+
+    <main class="flex-1 overflow-y-auto p-4 pb-28" id="transactions-container">
+        
+        <div class="mb-6">
+            <h2 class="text-xs text-on-surface-variant mb-3 font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                اليوم
+            </h2>
+            <div class="space-y-3">
+                <div class="bg-surface p-3.5 rounded-2xl flex items-center justify-between border border-surface-variant hover:border-surface-light transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-11 h-11 rounded-full bg-error/10 text-error flex items-center justify-center group-hover:bg-error/20 transition-colors">
+                            <span class="material-symbols-outlined">restaurant</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-on-surface">غداء عمل</p>
+                            <p class="text-xs text-on-surface-variant mt-1 opacity-80">محفظة الكاش • طعام ومطاعم</p>
+                        </div>
+                    </div>
+                    <div class="text-left flex flex-col items-end">
+                        <p class="font-bold text-error number-font">- د.ا 15.50</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xs text-on-surface-variant mb-3 font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">history</span>
+                أمس
+            </h2>
+            <div class="space-y-3">
+                <div class="bg-surface p-3.5 rounded-2xl flex items-center justify-between border border-surface-variant hover:border-surface-light transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-11 h-11 rounded-full bg-success/10 text-success flex items-center justify-center group-hover:bg-success/20 transition-colors">
+                            <span class="material-symbols-outlined">payments</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-on-surface">الراتب الشهري</p>
+                            <p class="text-xs text-on-surface-variant mt-1 opacity-80">البنك العربي • راتب</p>
+                        </div>
+                    </div>
+                    <div class="text-left flex flex-col items-end">
+                        <p class="font-bold text-success number-font">+ د.ا 850.00</p>
+                    </div>
+                </div>
+                
+                <div class="bg-surface p-3.5 rounded-2xl flex items-center justify-between border border-surface-variant hover:border-surface-light transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-11 h-11 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center group-hover:bg-tertiary/20 transition-colors">
+                            <span class="material-symbols-outlined">local_gas_station</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-on-surface">بنزين السيارة</p>
+                            <p class="text-xs text-on-surface-variant mt-1 opacity-80">بطاقة الائتمان • مواصلات</p>
+                        </div>
+                    </div>
+                    <div class="text-left flex flex-col items-end">
+                        <p class="font-bold text-on-surface number-font">- د.ا 30.00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="bg-surface/95 backdrop-blur border-t border-surface-variant fixed bottom-0 w-full flex justify-around items-center px-2 py-2 pb-safe z-30">
+        <a href="dashboard.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-colors active:scale-90 duration-150">
+            <span class="material-symbols-outlined">home</span>
+            <span class="text-[10px] mt-1 font-bold">الرئيسية</span>
+        </a>
+        <a href="transactions.html" class="flex flex-col items-center justify-center text-primary p-2 active:scale-90 duration-150">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+            <span class="text-[10px] mt-1 font-bold">الحركات</span>
+        </a>
+        <button onclick="document.dispatchEvent(new CustomEvent('openAddModal'))" class="flex flex-col items-center justify-center bg-primary text-background w-12 h-12 rounded-full hover:bg-primary-dim transition-all shadow-[0_4px_20px_rgba(255,45,120,0.4)] transform -translate-y-5 active:scale-95 border-4 border-background">
+            <span class="material-symbols-outlined font-bold text-[28px]">add</span>
+        </button>
+        <a href="accounts.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-colors active:scale-90 duration-150">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            <span class="text-[10px] mt-1 font-bold">الحسابات</span>
+        </a>
+        <a href="settings.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-colors active:scale-90 duration-150">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="text-[10px] mt-1 font-bold">الإعدادات</span>
+        </a>
+    </nav>
+
+    </body>
+</html>
