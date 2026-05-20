@@ -339,12 +339,26 @@
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <a href="#" data-page="dashboard" class="nav-item active">
-            <span class="material-symbols-outlined">home</span>
-            <span>الرئيسية</span>
-        </a>
-    </nav>
-</div>
+    <a href="dashboard.html" class="nav-item">
+        <span class="material-symbols-outlined">home</span>
+        <span>الرئيسية</span>
+    </a>
+    <a href="transactions.html" class="nav-item">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span>الحركات</span>
+    </a>
+    <button onclick="document.dispatchEvent(new CustomEvent('openAddModal'))" class="text-primary bg-surface-light p-3 rounded-full -mt-6 border-4 border-background">
+        <span class="material-symbols-outlined">add</span>
+    </button>
+    <a href="accounts.html" class="nav-item">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span>الحسابات</span>
+    </a>
+    <a href="settings.html" class="nav-item">
+        <span class="material-symbols-outlined">settings</span>
+        <span>الإعدادات</span>
+    </a>
+</nav>
 
 <!-- Firebase SDK from CDN -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -594,13 +608,6 @@
     }
 
     console.log('✅ App Ready!');
-    if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(() => console.log('✅ Service Worker تم تسجيله بنجاح'))
-            .catch((err) => console.log('❌ فشل تسجيل Service Worker:', err));
-    });
-}
 </script>
 
 </body>
