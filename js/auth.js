@@ -74,9 +74,11 @@ document.getElementById('demo-btn')?.addEventListener('click', async () => {
     }
 });
 
-document.addEventListener('keydown', e => {
-    if (e.key !== 'Enter') return;
-    const tab = document.querySelector('.auth-tab.active')?.dataset.tab;
-    if (tab === 'login')  document.getElementById('login-btn')?.click();
-    if (tab === 'signup') document.getElementById('signup-btn')?.click();
+['login-email','login-password','signup-name','signup-email','signup-password','signup-confirm'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        const tab = document.querySelector('.auth-tab.active')?.dataset.tab;
+        if (tab === 'login')  document.getElementById('login-btn')?.click();
+        if (tab === 'signup') document.getElementById('signup-btn')?.click();
+    });
 });
