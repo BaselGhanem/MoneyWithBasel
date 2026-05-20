@@ -415,6 +415,97 @@
             appScreen.classList.add('hidden');
         }
     });
+    // تسجيل الدخول أو إنشاء حساب جديد
+const authBtn = document.getElementById('auth-btn');
+const emailInput = document.getElementById('auth-email');
+const passwordInput = document.getElementById('auth-password');
+const authLoading = document.getElementById('auth-loading');
+const authFormDiv = document.getElementById('auth-form');
+
+if (authBtn) {
+    authBtn.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!email || !password) {
+            alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور');
+            return;
+        }
+
+        // إظهار مؤشر التحميل
+        authFormDiv.style.display = 'none';
+        authLoading.style.display = 'block';
+
+        try {
+            // محاولة تسجيل الدخول أولاً
+            const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+            console.log('تم تسجيل الدخول:', userCredential.user.email);
+        } catch (error) {
+            // إذا كان المستخدم غير موجود، نقوم بإنشاء حساب جديد
+            if (error.code === 'auth/user-not-found') {
+                try {
+                    const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                    console.log('تم إنشاء حساب جديد:', userCredential.user.email);
+                } catch (signUpError) {
+                    console.error('خطأ في إنشاء الحساب:', signUpError);
+                    alert('حدث خطأ: ' + signUpError.message);
+                    // إعادة ظهور النموذج
+                    authFormDiv.style.display = 'block';
+                    authLoading.style.display = 'none';
+                    return;
+                }
+            } else {
+                console.error('خطأ في تسجيل الدخول:', error);
+                alert('خطأ: ' + error.message);
+                authFormDiv.style.display = 'block';
+                authLoading.style.display = 'none';
+                return;
+            }
+        }
+        // في حالة النجاح، لا نحتاج لإعادة إظهار النموذج لأن onAuthStateChanged سينقل للشاشة الرئيسية
+        // لكن نعيد تعيين الحالة إذا بقي شيء
+        authFormDiv.style.display = 'block';
+        authLoading.style.display = 'none';
+        // تفريغ الحقول
+        emailInput.value = '';
+        passwordInput.value = '';
+    });
+}
+
+// زر التجريبي (demo) - يتخطى التسجيل ويستخدم حساب تجريبي عام
+const demoBtn = document.getElementById('demo-btn');
+if (demoBtn) {
+    demoBtn.addEventListener('click', async () => {
+        const demoEmail = 'demo@moneywithbasel.com';
+        const demoPassword = 'demodemo';
+
+        authFormDiv.style.display = 'none';
+        authLoading.style.display = 'block';
+
+        try {
+            // محاولة تسجيل الدخول بحساب الديمو
+            await firebase.auth().signInWithEmailAndPassword(demoEmail, demoPassword);
+        } catch (error) {
+            if (error.code === 'auth/user-not-found') {
+                try {
+                    await firebase.auth().createUserWithEmailAndPassword(demoEmail, demoPassword);
+                } catch (createError) {
+                    console.error(createError);
+                    alert('فشل إنشاء حساب تجريبي: ' + createError.message);
+                    authFormDiv.style.display = 'block';
+                    authLoading.style.display = 'none';
+                }
+            } else {
+                alert('خطأ في الدخول التجريبي: ' + error.message);
+                authFormDiv.style.display = 'block';
+                authLoading.style.display = 'none';
+            }
+        } finally {
+            authFormDiv.style.display = 'block';
+            authLoading.style.display = 'none';
+        }
+    });
+}
 </script>
 
 <!-- باقي ملفات JS (إن وجدت) -->
