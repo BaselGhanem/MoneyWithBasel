@@ -1,75 +1,57 @@
-// ============================================================
-// service-worker.js — Money with Basel | PWA Offline Support
-// ============================================================
-
-const CACHE_NAME = 'money-with-basel-v1';
-const ASSETS_TO_CACHE = [
-    '/MoneyWithBasel/',
-    '/MoneyWithBasel/index.html',
-    '/MoneyWithBasel/dashboard.html',
-    '/MoneyWithBasel/transactions.html',
-    '/MoneyWithBasel/accounts.html',
-    '/MoneyWithBasel/settings.html',
-    '/MoneyWithBasel/js/ui.js',
-    '/MoneyWithBasel/js/charts.js',
-    '/MoneyWithBasel/js/automation.js',
-    '/MoneyWithBasel/js/db.js'
-    // تم إزالة الموارد الخارجية (tailwind, fonts) لأنها تسبب CORS
+const CACHE_NAME = 'mwb-v1';
+const BASE = '/MoneyWithBasel';
+const STATIC = [
+    BASE + '/',
+    BASE + '/index.html',
+    BASE + '/dashboard.html',
+    BASE + '/transactions.html',
+    BASE + '/accounts.html',
+    BASE + '/settings.html',
+    BASE + '/manifest.json',
+    BASE + '/css/variables.css',
+    BASE + '/css/base.css',
+    BASE + '/css/layout.css',
+    BASE + '/css/components.css',
+    BASE + '/js/app.js',
+    BASE + '/js/auth.js',
+    BASE + '/js/db.js',
+    BASE + '/js/ui.js',
+    BASE + '/js/automation.js'
 ];
 
-// تثبيت الـ Service Worker
-self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            console.log('📦 تخزين الملفات المحلية');
-            return cache.addAll(ASSETS_TO_CACHE);
-        }).catch(err => {
-            console.error('❌ فشل التخزين:', err);
-        })
+self.addEventListener('install', e => {
+    e.waitUntil(
+        caches.open(CACHE_NAME).then(c => c.addAll(STATIC)).then(() => self.skipWaiting())
     );
 });
 
-// تفعيل وتنظيف الكاش القديم
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
-                        console.log('🧹 حذف الكاش القديم:', cache);
-                        return caches.delete(cache);
-                    }
-                })
-            );
-        })
+self.addEventListener('activate', e => {
+    e.waitUntil(
+        caches.keys()
+            .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+            .then(() => self.clients.claim())
     );
-    self.clients.claim();
 });
 
-// استراتيجية الشبكة أولاً مع الاحتفاظ بالكاش للملفات المحلية
-self.addEventListener('fetch', (event) => {
-    // نتعامل فقط مع طلبات GET
-    if (event.request.method !== 'GET') return;
-    
-    const url = new URL(event.request.url);
-    
-    // إذا كان الطلب لملف محلي (ضمن مجلد MoneyWithBasel)
-    if (url.pathname.startsWith('/MoneyWithBasel/')) {
-        event.respondWith(
-            caches.match(event.request).then((response) => {
-                return response || fetch(event.request).then((fetchResponse) => {
-                    // تخزين نسخة جديدة للاستخدام المستقبلي
-                    return caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, fetchResponse.clone());
-                        return fetchResponse;
-                    });
-                });
-            }).catch(() => {
-                return caches.match('/MoneyWithBasel/index.html');
-            })
-        );
-    } else {
-        // للموارد الخارجية (مثل Tailwind، Fonts) لا نتدخل، نتركها للشبكة
-        event.respondWith(fetch(event.request));
+self.addEventListener('fetch', e => {
+    if (e.request.method !== 'GET') return;
+    const url = new URL(e.request.url);
+
+    // موارد خارجية (Firebase, Tailwind, Fonts) → شبكة فقط
+    if (!url.pathname.startsWith(BASE)) {
+        return;
     }
+
+    // ملفات محلية → Cache first, fallback network
+    e.respondWith(
+        caches.match(e.request).then(cached => {
+            if (cached) return cached;
+            return fetch(e.request).then(res => {
+                if (res.ok) {
+                    caches.open(CACHE_NAME).then(c => c.put(e.request, res.clone()));
+                }
+                return res;
+            });
+        }).catch(() => caches.match(BASE + '/index.html'))
+    );
 });
