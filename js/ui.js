@@ -1,163 +1,65 @@
-// ============================================================
-// js/ui.js — Money with Basel | UI Interactions & Controllers
-// ============================================================
+// ui.js — Money with Basel
+// Global UI helpers used across all pages
 
-const UI = {
-    // التهيئة الأولية عند تحميل الصفحة
-    init() {
-        this.initTheme();
-        this.initModals();
-        this.initNavigation();
-    },
+function initTheme() {
+  const saved = localStorage.getItem('theme') || 'dark';
+  setTheme(saved);
+}
 
-    // 1. إدارة الثيم (الوضع الداكن والفاتح)
-    initTheme() {
-        const toggle = document.getElementById('theme-toggle');
-        
-        // التحقق من الإعدادات المحفوظة مسبقاً أو إعدادات النظام
-        const savedTheme = localStorage.getItem('theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const isDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+function setTheme(theme) {
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+  document.documentElement.classList.toggle('light', theme === 'light');
+  localStorage.setItem('theme', theme);
+}
 
-        this.applyTheme(isDark);
+function showToast(message, type = 'default') {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  const bg = type === 'error' ? '#ff4444' : type === 'success' ? '#39FF14' : '#28283e';
+  const color = (type === 'success') ? '#0a0a12' : '#e8e0f0';
+  toast.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    background:${bg};color:${color};padding:12px 24px;border-radius:9999px;
+    font-family:Almarai,sans-serif;font-size:14px;font-weight:700;z-index:999;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);white-space:nowrap;
+    animation:toastIn 0.3s ease;`;
+  toast.className = 'toast';
+  toast.textContent = message;
+  if (!document.getElementById('toast-style')) {
+    const s = document.createElement('style');
+    s.id = 'toast-style';
+    s.textContent = '@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
+    document.head.appendChild(s);
+  }
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
 
-        if (toggle) {
-            toggle.checked = isDark;
-            toggle.addEventListener('change', (e) => {
-                this.applyTheme(e.target.checked);
-                // حفظ التفضيل في LocalStorage
-                localStorage.setItem('theme', e.target.checked ? 'dark' : 'light');
-            });
-        }
-    },
+function formatCurrency(n, visible = true) {
+  if (!visible) return '••••••';
+  return Number(n).toLocaleString('en-JO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
-    applyTheme(isDark) {
-        const html = document.documentElement;
-        if (isDark) {
-            html.classList.add('dark');
-            html.style.colorScheme = 'dark';
-        } else {
-            html.classList.remove('dark');
-            html.style.colorScheme = 'light';
-        }
-    },
+function formatDate(dateOrTimestamp) {
+  const d = dateOrTimestamp?.toDate ? dateOrTimestamp.toDate() : new Date(dateOrTimestamp);
+  return d.toLocaleDateString('ar-JO', { year: 'numeric', month: 'short', day: 'numeric' });
+}
 
-    // 2. إدارة النوافذ المنبثقة (Modals)
-    initModals() {
-        // الاستماع للأحداث المخصصة لفتح النوافذ (تم استخدامها في أزرار HTML)
-        document.addEventListener('openAddModal', () => this.openModal('add-transaction-modal'));
-        document.addEventListener('openAddAccountModal', () => this.openModal('add-account-modal'));
-        
-        // إغلاق النوافذ المنبثقة عند النقر على الخلفية المظلمة (خارج محتوى النافذة)
-        const modals = document.querySelectorAll('.fixed.inset-0');
-        modals.forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    this.closeModal(modal.id);
-                }
-            });
-        });
+function setLoading(show) {
+  let el = document.getElementById('global-loader');
+  if (!el && show) {
+    el = document.createElement('div');
+    el.id = 'global-loader';
+    el.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,#ff2d78,#39FF14);z-index:9999;animation:loadBar 1s ease infinite;';
+    const s = document.createElement('style');
+    s.textContent = '@keyframes loadBar{0%{transform:scaleX(0);transform-origin:left}50%{transform:scaleX(0.7);transform-origin:left}100%{transform:scaleX(1);transform-origin:left;opacity:0}}';
+    document.head.appendChild(s);
+    document.body.appendChild(el);
+  } else if (el && !show) {
+    el.remove();
+  }
+}
 
-        // إغلاق عبر زر الهروب (Escape) في لوحة المفاتيح
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                modals.forEach(modal => {
-                    if (modal.classList.contains('modal-visible')) {
-                        this.closeModal(modal.id);
-                    }
-                });
-            }
-        });
-    },
-
-    openModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.replace('modal-hidden', 'modal-visible');
-            // منع التمرير في الخلفية عند فتح النافذة
-            document.body.style.overflow = 'hidden';
-        } else {
-            console.warn(`Modal with ID "${modalId}" not found.`);
-        }
-    },
-
-    closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.replace('modal-visible', 'modal-hidden');
-            // إعادة تفعيل التمرير في الخلفية
-            document.body.style.overflow = '';
-        }
-    },
-
-    // 3. إدارة شريط التنقل السفلي (Bottom Navigation)
-    initNavigation() {
-        const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-        const navLinks = document.querySelectorAll('nav a');
-        
-        navLinks.forEach(link => {
-            const linkPath = link.getAttribute('href');
-            if (linkPath === currentPath) {
-                // تفعيل الأيقونة واللون للصفحة الحالية
-                link.classList.remove('text-on-surface-variant');
-                link.classList.add('text-primary');
-                const icon = link.querySelector('.material-symbols-outlined');
-                if (icon) {
-                    icon.style.fontVariationSettings = "'FILL' 1"; // جعل الأيقونة ممتلئة
-                }
-            }
-        });
-    },
-
-    // 4. دوال مساعدة (Utilities)
-
-    // تنسيق الأرقام كعملة نقدية
-    formatCurrency(amount, currencyCode = 'JOD') {
-        const formatter = new Intl.NumberFormat('ar-JO', {
-            style: 'currency',
-            currency: currencyCode,
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        return formatter.format(amount);
-    },
-
-    // إظهار إشعارات للمستخدم (Toasts)
-    showToast(message, type = 'success') {
-        // مسح أي Toast سابق لتجنب التكدس
-        const existingToast = document.getElementById('app-toast');
-        if (existingToast) existingToast.remove();
-
-        const toast = document.createElement('div');
-        toast.id = 'app-toast';
-        
-        // اختيار الألوان بناءً على نوع الإشعار
-        const bgColor = type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-error' : 'bg-primary');
-        
-        toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full text-white font-bold text-sm z-[100] transition-all duration-300 translate-y-[-150%] opacity-0 shadow-lg flex items-center gap-2 ${bgColor}`;
-        
-        // إضافة أيقونة بناءً على النوع
-        const iconName = type === 'success' ? 'check_circle' : (type === 'error' ? 'error' : 'info');
-        toast.innerHTML = `<span class="material-symbols-outlined text-[20px]">${iconName}</span> ${message}`;
-        
-        document.body.appendChild(toast);
-
-        // تحريك النافذة للظهور (Animation in)
-        requestAnimationFrame(() => {
-            toast.classList.remove('translate-y-[-150%]', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-        });
-
-        // إخفاء النافذة بعد 3 ثوانٍ (Animation out)
-        setTimeout(() => {
-            toast.classList.remove('translate-y-0', 'opacity-100');
-            toast.classList.add('translate-y-[-150%]', 'opacity-0');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-};
-
-// تشغيل التهيئة عند اكتمال تحميل هيكل الصفحة (DOM)
-document.addEventListener('DOMContentLoaded', () => {
-    UI.init();
-});
+// Override app.js showToast to use this one
+window.showToast = showToast;
+window.UI = { initTheme, setTheme, showToast, formatCurrency, formatDate, setLoading };

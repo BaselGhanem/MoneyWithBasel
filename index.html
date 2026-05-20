@@ -1,488 +1,405 @@
 <!DOCTYPE html>
-<html class="dark" dir="rtl" lang="ar">
+<html lang="ar" dir="rtl" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money with Basel - تسجيل الدخول</title>
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0a12">
-    <meta name="description" content="Money with Basel - لوحة قيادة مالية احترافية للمستخدم العربي">
-    <title>Money with Basel – لوحة القيادة المالية</title>
-    
-    <!-- Favicon inline SVG -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23ff2d78'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E💰%3C/text%3E%3C/svg%3E">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS (dev only) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        background: '#0a0a12',
-                        surface: '#0f0f1a',
-                        'surface-light': '#1e1e30',
-                        'surface-variant': '#1a1a28',
-                        primary: '#ff2d78',
-                        'primary-dim': '#ff80aa',
-                        'primary-container': '#b3004e',
-                        secondary: '#00ffcc',
-                        'secondary-container': '#004d3d',
-                        tertiary: '#ffe04a',
-                        'on-background': '#e8e0f0',
-                        'on-surface': '#e8e0f0',
-                        'on-surface-variant': '#a098b0',
-                        error: '#ff4444',
-                        success: '#4caf50',
-                        warning: '#ffa726',
-                    },
-                    fontFamily: {
-                        sans: ['Almarai', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                }
-            }
-        }
-    </script>
-    
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Almarai', sans-serif; background-color: #0a0a12; color: #e8e0f0; min-height: 100vh; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .card { background-color: #1e1e30; border: 1px solid #2d2d3d; border-radius: 16px; padding: 20px; }
-        .btn { padding: 12px 24px; border: none; border-radius: 12px; font-family: 'Almarai', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background: linear-gradient(135deg, #ff2d78, #ff5fa8); color: white; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 45, 120, 0.3); }
-        .btn-secondary { background: #1e1e30; color: #e8e0f0; border: 1px solid #2d2d3d; }
-        .input-field { width: 100%; background: #1e1e30; border: 1px solid #2d2d3d; border-radius: 12px; padding: 12px 16px; color: #e8e0f0; font-family: 'Almarai', sans-serif; font-size: 14px; margin: 8px 0; box-sizing: border-box; }
-        .input-field:focus { outline: none; border-color: #ff2d78; box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.1); }
-        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255, 45, 120, 0.3); border-top-color: #ff2d78; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        body {
+            font-family: 'Almarai', sans-serif;
+            background-color: #0a0a12;
+            color: #e8e0f0;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-logo {
+            font-size: 56px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ff2d78;
+            margin-bottom: 6px;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: #a098b0;
+        }
+
+        .auth-card {
+            background-color: #1E1E1E;
+            border: 1px solid #2D2D2D;
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: #28283e;
+            border-radius: 9999px;
+            padding: 4px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px 0;
+            text-align: center;
+            cursor: pointer;
+            color: #a098b0;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .auth-tab.active {
+            background-color: #ff2d78;
+            color: #fff;
+        }
+
+        .auth-tab-content { display: none; }
+        .auth-tab-content.active { display: block; }
+
+        .input-group { margin-bottom: 16px; }
+
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #a098b0;
+            margin-bottom: 6px;
+            text-align: right;
+        }
+
+        .input-field {
+            width: 100%;
+            height: 48px;
+            background: #28283e;
+            border: 1px solid #302840;
+            border-radius: 12px;
+            padding: 0 16px;
+            font-family: 'Almarai', sans-serif;
+            font-size: 16px;
+            color: #e8e0f0;
+            text-align: right;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .input-field:focus {
+            border-color: #ff2d78;
+        }
+
+        .btn-primary {
+            width: 100%;
+            height: 52px;
+            background: #39FF14;
+            color: #0a0a12;
+            border: none;
+            border-radius: 9999px;
+            font-family: 'Almarai', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:active { opacity: 0.8; }
+
+        .btn-secondary {
+            width: 100%;
+            height: 48px;
+            background: transparent;
+            color: #a098b0;
+            border: 1px solid #302840;
+            border-radius: 9999px;
+            font-family: 'Almarai', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: #ff2d78;
+            color: #ff2d78;
+        }
+
+        .error-message {
+            background-color: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: #ff4444;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: none;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .error-message.active { display: block; }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            color: #a098b0;
+            font-size: 14px;
+        }
+
+        .loading.active { display: flex; }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #302840;
+            border-top-color: #ff2d78;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
         @keyframes spin { to { transform: rotate(360deg); } }
-        .toast { position: fixed; bottom: 100px; right: 24px; background: #1e1e30; border: 1px solid #2d2d3d; border-radius: 12px; padding: 16px 20px; z-index: 60; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #0f0f1a; border-top: 1px solid #2d2d3d; display: flex; justify-content: space-around; height: 80px; z-index: 50; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #a098b0; text-decoration: none; font-size: 12px; transition: all 0.2s ease; flex: 1; }
-        .nav-item.active { color: #ff2d78; }
-        .transaction-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #1a1a28; }
-        .transaction-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .transaction-amount { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 14px; margin-right: auto; }
-        .amount-positive { color: #4caf50; }
-        .amount-negative { color: #ff4444; }
-        .hidden { display: none !important; }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #5a5068;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+            color: #5a5068;
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #302840;
+        }
     </style>
 </head>
 <body>
+    <div class="auth-box">
+        <div class="auth-header">
+            <span class="auth-logo">💰</span>
+            <h1 class="auth-title">Money with Basel</h1>
+            <p class="auth-subtitle">لوحة قيادة مالية احترافية</p>
+        </div>
 
-<!-- شاشة تسجيل الدخول -->
-<div id="auth-screen" class="w-full min-h-screen bg-background flex items-center justify-center p-4">
-    <div class="w-full max-w-md">
-        <div class="text-center mb-12">
-            <div class="text-6xl mb-4">💰</div>
-            <h1 class="text-3xl font-bold text-primary mb-2">Money with Basel</h1>
-            <p class="text-on-surface-variant">لوحة قيادة مالية احترافية</p>
-        </div>
-        <div class="card mb-8">
-            <div id="auth-form">
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-on-surface mb-2">البريد الإلكتروني</label>
-                    <input type="email" id="auth-email" class="input-field" placeholder="example@email.com">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-on-surface mb-2">كلمة المرور</label>
-                    <input type="password" id="auth-password" class="input-field" placeholder="أدخل كلمة المرور">
-                </div>
-                <button id="auth-btn" class="btn btn-primary w-full mb-3">تسجيل الدخول / التسجيل</button>
-                <button id="demo-btn" class="btn btn-secondary w-full">جرب النسخة التجريبية</button>
+        <div class="auth-card">
+            <div id="error-message" class="error-message"></div>
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">تسجيل الدخول</div>
+                <div class="auth-tab" data-tab="signup">حساب جديد</div>
             </div>
-            <div id="auth-loading" style="display: none;" class="text-center">
-                <div class="loading-spinner" style="margin: 20px auto;"></div>
-                <p class="text-on-surface-variant">جاري المعالجة...</p>
+
+            <!-- Login -->
+            <div class="auth-tab-content active" id="login-tab">
+                <div class="input-group">
+                    <label class="input-label">البريد الإلكتروني</label>
+                    <input type="email" class="input-field" id="login-email" placeholder="example@email.com">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">كلمة المرور</label>
+                    <input type="password" class="input-field" id="login-password" placeholder="••••••••">
+                </div>
+                <button class="btn-primary" id="login-btn">دخول</button>
             </div>
+
+            <!-- Signup -->
+            <div class="auth-tab-content" id="signup-tab">
+                <div class="input-group">
+                    <label class="input-label">الاسم الكامل</label>
+                    <input type="text" class="input-field" id="signup-name" placeholder="باسل محمد">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">البريد الإلكتروني</label>
+                    <input type="email" class="input-field" id="signup-email" placeholder="example@email.com">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">كلمة المرور</label>
+                    <input type="password" class="input-field" id="signup-password" placeholder="6 أحرف على الأقل">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">تأكيد كلمة المرور</label>
+                    <input type="password" class="input-field" id="signup-confirm" placeholder="••••••••">
+                </div>
+                <button class="btn-primary" id="signup-btn">إنشاء الحساب</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <span>جاري المعالجة...</span>
+            </div>
+
+            <div class="divider">أو</div>
+            <button class="btn-secondary" id="demo-btn">🎮 جرب النسخة التجريبية</button>
         </div>
-        <p class="text-center text-xs text-on-surface-variant">بيانات آمنة - يتم حفظها في Firebase</p>
-        <p class="text-center text-xs text-on-surface-variant mt-2" id="firebase-status">✅ Firebase جاهز</p>
+
+        <div class="auth-footer">
+            <p id="firebase-status">⏳ جاري الاتصال...</p>
+        </div>
     </div>
-</div>
 
-<!-- شاشة التطبيق الرئيسية -->
-<div id="app-screen" class="hidden">
-    <header class="fixed top-0 w-full bg-background border-b border-surface-light z-40">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center text-primary text-lg font-bold">💰</div>
-                <span class="font-bold text-lg text-primary hidden sm:inline">Money with Basel</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <button id="logout-btn" class="w-10 h-10 rounded-lg bg-surface-light flex items-center justify-center hover:bg-surface-light transition">
-                    <span class="material-symbols-outlined">logout</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="pt-20 pb-24 max-w-6xl mx-auto px-4">
-        <section id="dashboard-section">
-            <div class="mb-8">
-                <h2 class="text-2xl font-bold text-on-surface mb-2" id="greeting">أهلاً!</h2>
-                <p class="text-on-surface-variant">نظرة عامة على محفظتك المالية</p>
-            </div>
-
-            <div class="card mb-6">
-                <p class="text-on-surface-variant text-sm mb-2">صافي الثروة</p>
-                <h3 class="text-4xl font-bold text-primary font-mono mb-4" id="net-worth">0.00 د.ا</h3>
-                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-surface-light">
-                    <div><p class="text-on-surface-variant text-xs mb-1">الإيرادات</p><p class="text-xl font-bold text-success" id="total-income">0.00 د.ا</p></div>
-                    <div><p class="text-on-surface-variant text-xs mb-1">المصاريف</p><p class="text-xl font-bold text-error" id="total-expenses">0.00 د.ا</p></div>
-                </div>
-            </div>
-
-            <!-- إضافة سريعة -->
-            <div class="card mb-6">
-                <h3 class="text-lg font-bold text-on-surface mb-4">إضافة عملية سريعة</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <select id="quick-type" class="input-field" style="margin:0">
-                        <option value="expense">مصروف</option>
-                        <option value="income">إيراد</option>
-                    </select>
-                    <input type="number" id="quick-amount" class="input-field" placeholder="المبلغ" step="0.01" style="margin:0">
-                    <input type="text" id="quick-note" class="input-field" placeholder="ملاحظة (اختياري)" style="margin:0">
-                    <button id="quick-add-btn" class="btn btn-primary" style="margin:0">إضافة</button>
-                </div>
-            </div>
-
-            <!-- آخر العمليات -->
-            <div class="card">
-                <div class="flex justify-between items-center mb-4"><h3 class="text-lg font-bold text-on-surface">آخر العمليات</h3></div>
-                <div id="recent-transactions"><p class="text-on-surface-variant text-center py-4">لا توجد عمليات حتى الآن</p></div>
-            </div>
-        </section>
-    </main>
-
-    <nav class="bottom-nav">
-        <a href="#" class="nav-item active" data-section="dashboard"><span class="material-symbols-outlined">home</span><span>الرئيسية</span></a>
-        <a href="#" class="nav-item" data-section="transactions"><span class="material-symbols-outlined">receipt_long</span><span>الحركات</span></a>
-        <button onclick="document.dispatchEvent(new CustomEvent('openAddModal'))" class="text-primary bg-surface-light p-3 rounded-full -mt-6 border-4 border-background"><span class="material-symbols-outlined">add</span></button>
-        <a href="#" class="nav-item" data-section="accounts"><span class="material-symbols-outlined">account_balance_wallet</span><span>الحسابات</span></a>
-        <a href="#" class="nav-item" data-section="settings"><span class="material-symbols-outlined">settings</span><span>الإعدادات</span></a>
-    </nav>
-</div>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-<script>
-    // ------------------- تهيئة Firebase -------------------
-    const firebaseConfig = {
-        apiKey: "AIzaSyDUSHbMd1A98_OpE3JSNXPD-XT0do8FutM",
-        authDomain: "moneywithbasel.firebaseapp.com",
-        projectId: "moneywithbasel",
-        storageBucket: "moneywithbasel.firebasestorage.app",
-        messagingSenderId: "1000601907861",
-        appId: "1:1000601907861:web:6995a21e42d36c1981a19c"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // ------------------- عناصر DOM -------------------
-    const authScreen = document.getElementById('auth-screen');
-    const appScreen = document.getElementById('app-screen');
-    const authBtn = document.getElementById('auth-btn');
-    const demoBtn = document.getElementById('demo-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const quickAddBtn = document.getElementById('quick-add-btn');
-    const quickType = document.getElementById('quick-type');
-    const quickAmount = document.getElementById('quick-amount');
-    const quickNote = document.getElementById('quick-note');
-    const netWorthEl = document.getElementById('net-worth');
-    const totalIncomeEl = document.getElementById('total-income');
-    const totalExpensesEl = document.getElementById('total-expenses');
-    const recentContainer = document.getElementById('recent-transactions');
-    const greetingEl = document.getElementById('greeting');
-
-    // ------------------- المتغيرات العامة -------------------
-    let currentUser = null;
-    let transactionsUnsubscribe = null;  // لإلغاء الاستماع عند الخروج
-
-    // ------------------- دوال مساعدة -------------------
-    function formatMoney(amount) {
-        return amount.toFixed(2) + ' د.ا';
-    }
-
-    // عرض الإشعارات البسيطة
-    function showMessage(msg, isError = false) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.style.backgroundColor = isError ? '#b00020' : '#1e1e30';
-        toast.style.borderRight = isError ? '3px solid #ff4444' : '3px solid #4caf50';
-        toast.innerText = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-
-    // تحديث لوحة المعلومات (الإجماليات)
-    async function updateDashboard(userId) {
-        try {
-            const snapshot = await db.collection('transactions').where('userId', '==', userId).get();
-            let totalIncome = 0, totalExpense = 0;
-            snapshot.forEach(doc => {
-                const t = doc.data();
-                if (t.type === 'income') totalIncome += t.amount;
-                else totalExpense += t.amount;
+    <!-- Firebase v9 compat (نفس الإصدار المستخدم في باقي الملفات) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // ── Tab switching ──────────────────────────────────
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.auth-tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+                document.getElementById('error-message').classList.remove('active');
             });
-            const netWorth = totalIncome - totalExpense;
-            netWorthEl.innerText = formatMoney(netWorth);
-            totalIncomeEl.innerText = formatMoney(totalIncome);
-            totalExpensesEl.innerText = formatMoney(totalExpense);
-        } catch (err) {
-            console.error('خطأ في تحديث البيانات:', err);
-        }
-    }
-
-    // عرض آخر 5 معاملات
-    function renderRecentTransactions(transactions) {
-        if (!transactions || transactions.length === 0) {
-            recentContainer.innerHTML = '<p class="text-on-surface-variant text-center py-4">لا توجد عمليات حتى الآن</p>';
-            return;
-        }
-        const sorted = [...transactions].sort((a,b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-        const recent = sorted.slice(0,5);
-        let html = '';
-        recent.forEach(t => {
-            const isIncome = t.type === 'income';
-            const sign = isIncome ? '+' : '-';
-            const amountClass = isIncome ? 'amount-positive' : 'amount-negative';
-            const icon = isIncome ? '💰' : '💸';
-            const bgIcon = isIncome ? '#2e7d32' : '#b71c1c';
-            html += `
-                <div class="transaction-item">
-                    <div class="transaction-icon" style="background:${bgIcon}20; color:${bgIcon}">${icon}</div>
-                    <div style="flex:1">
-                        <div class="font-bold">${t.note || (isIncome ? 'إيراد' : 'مصروف')}</div>
-                        <div class="text-xs text-on-surface-variant">${new Date(t.createdAt?.toMillis?.() || Date.now()).toLocaleDateString('ar-EG')}</div>
-                    </div>
-                    <div class="transaction-amount ${amountClass}">${sign} ${t.amount.toFixed(2)} د.ا</div>
-                </div>
-            `;
         });
-        recentContainer.innerHTML = html;
-    }
 
-    // الاستماع للمعاملات في الوقت الحقيقي
-    function subscribeToTransactions(userId) {
-        if (transactionsUnsubscribe) transactionsUnsubscribe();
-        transactionsUnsubscribe = db.collection('transactions')
-            .where('userId', '==', userId)
-            .orderBy('createdAt', 'desc')
-            .onSnapshot((snapshot) => {
-                const transactions = [];
-                snapshot.forEach(doc => transactions.push({ id: doc.id, ...doc.data() }));
-                renderRecentTransactions(transactions);
-                updateDashboard(userId);
-            }, (error) => {
-                console.error('خطأ في الاستماع:', error);
-                showMessage('خطأ في تحميل المعاملات', true);
-            });
-    }
-
-    // إضافة معاملة جديدة
-    async function addTransaction(type, amount, note) {
-        if (!currentUser) { showMessage('الرجاء تسجيل الدخول أولاً', true); return false; }
-        if (isNaN(amount) || amount <= 0) { showMessage('المبلغ يجب أن يكون رقماً موجباً', true); return false; }
-        try {
-            await db.collection('transactions').add({
-                userId: currentUser.uid,
-                type: type,
-                amount: amount,
-                note: note || '',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            showMessage('✅ تمت الإضافة بنجاح');
-            quickAmount.value = '';
-            quickNote.value = '';
-            return true;
-        } catch (err) {
-            console.error(err);
-            showMessage('فشلت الإضافة: ' + err.message, true);
-            return false;
+        // ── Helpers ────────────────────────────────────────
+        function showError(msg) {
+            const el = document.getElementById('error-message');
+            el.textContent = msg;
+            el.classList.add('active');
         }
-    }
 
-    // ------------------- أحداث تسجيل الدخول -------------------
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUser = user;
-            authScreen.classList.add('hidden');
-            appScreen.classList.remove('hidden');
-            greetingEl.innerText = `أهلاً, ${user.email?.split('@')[0] || 'مستخدم'}!`;
-            // تحميل البيانات
-            subscribeToTransactions(user.uid);
-        } else {
-            if (transactionsUnsubscribe) transactionsUnsubscribe();
-            currentUser = null;
-            authScreen.classList.remove('hidden');
-            appScreen.classList.add('hidden');
-            // تفريغ الواجهة
-            netWorthEl.innerText = '0.00 د.ا';
-            totalIncomeEl.innerText = '0.00 د.ا';
-            totalExpensesEl.innerText = '0.00 د.ا';
-            recentContainer.innerHTML = '<p class="text-on-surface-variant text-center py-4">لا توجد عمليات حتى الآن</p>';
+        function setLoading(show) {
+            document.getElementById('loading').classList.toggle('active', show);
+            ['login-btn','signup-btn','demo-btn'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = show;
+            });
         }
-    });
 
-    // زر تسجيل الدخول / إنشاء حساب
-    if (authBtn) {
-        authBtn.addEventListener('click', async () => {
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value.trim();
-            const authFormDiv = document.getElementById('auth-form');
-            const authLoadingDiv = document.getElementById('auth-loading');
-            if (!email || !password) {
-                showMessage('الرجاء إدخال البريد وكلمة المرور', true);
-                return;
-            }
-            authFormDiv.style.display = 'none';
-            authLoadingDiv.style.display = 'block';
+        // ── Auth state → redirect ──────────────────────────
+        auth.onAuthStateChanged(user => {
+            if (user) window.location.href = 'dashboard.html';
+            else document.getElementById('firebase-status').textContent = '✅ جاهز للدخول';
+        });
+
+        // ── Login ──────────────────────────────────────────
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email    = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            if (!email || !password) { showError('أدخل البريد وكلمة المرور'); return; }
+            setLoading(true);
             try {
                 await auth.signInWithEmailAndPassword(email, password);
-                showMessage('تم تسجيل الدخول بنجاح');
-            } catch (error) {
-                if (error.code === 'auth/user-not-found') {
+            } catch (e) {
+                const msgs = {
+                    'auth/user-not-found':  'البريد غير مسجل',
+                    'auth/wrong-password':  'كلمة المرور خاطئة',
+                    'auth/invalid-email':   'بريد إلكتروني غير صحيح',
+                    'auth/too-many-requests':'محاولات كثيرة، انتظر قليلاً'
+                };
+                showError('❌ ' + (msgs[e.code] || e.message));
+                setLoading(false);
+            }
+        });
+
+        // ── Signup ─────────────────────────────────────────
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            const name     = document.getElementById('signup-name').value.trim();
+            const email    = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirm  = document.getElementById('signup-confirm').value;
+            if (!name || !email || !password || !confirm) { showError('ملأ جميع الحقول'); return; }
+            if (password !== confirm) { showError('كلمات المرور غير متطابقة'); return; }
+            if (password.length < 6)  { showError('كلمة المرور يجب أن تكون 6 أحرف على الأقل'); return; }
+            setLoading(true);
+            try {
+                const { user } = await auth.createUserWithEmailAndPassword(email, password);
+                await user.updateProfile({ displayName: name });
+            } catch (e) {
+                const msgs = {
+                    'auth/email-already-in-use': 'البريد مستخدم بالفعل',
+                    'auth/weak-password':        'كلمة المرور ضعيفة جداً'
+                };
+                showError('❌ ' + (msgs[e.code] || e.message));
+                setLoading(false);
+            }
+        });
+
+        // ── Demo ───────────────────────────────────────────
+        document.getElementById('demo-btn').addEventListener('click', async () => {
+            setLoading(true);
+            const demoEmail = 'demo@money-basel.com';
+            const demoPass  = 'Demo@123456';
+            try {
+                await auth.signInWithEmailAndPassword(demoEmail, demoPass);
+            } catch (e) {
+                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
                     try {
-                        await auth.createUserWithEmailAndPassword(email, password);
-                        showMessage('تم إنشاء الحساب وتسجيل الدخول');
-                    } catch (signUpErr) {
-                        showMessage('خطأ في إنشاء الحساب: ' + signUpErr.message, true);
-                        authFormDiv.style.display = 'block';
-                        authLoadingDiv.style.display = 'none';
-                        return;
+                        await auth.createUserWithEmailAndPassword(demoEmail, demoPass);
+                        await auth.currentUser.updateProfile({ displayName: 'باسل (تجريبي)' });
+                    } catch (e2) {
+                        showError('❌ ' + e2.message);
+                        setLoading(false);
                     }
                 } else {
-                    showMessage('خطأ: ' + error.message, true);
-                    authFormDiv.style.display = 'block';
-                    authLoadingDiv.style.display = 'none';
-                    return;
+                    showError('❌ ' + e.message);
+                    setLoading(false);
                 }
             }
-            authFormDiv.style.display = 'block';
-            authLoadingDiv.style.display = 'none';
-            document.getElementById('auth-email').value = '';
-            document.getElementById('auth-password').value = '';
         });
-    }
 
-    // زر تجريبي (حساب demo@moneywithbasel.com / demodemo)
-    if (demoBtn) {
-        demoBtn.addEventListener('click', async () => {
-            const demoEmail = 'demo@moneywithbasel.com';
-            const demoPassword = 'demodemo';
-            const authFormDiv = document.getElementById('auth-form');
-            const authLoadingDiv = document.getElementById('auth-loading');
-            authFormDiv.style.display = 'none';
-            authLoadingDiv.style.display = 'block';
-            try {
-                await auth.signInWithEmailAndPassword(demoEmail, demoPassword);
-                showMessage('مرحباً في النسخة التجريبية');
-            } catch (err) {
-                if (err.code === 'auth/user-not-found') {
-                    try {
-                        await auth.createUserWithEmailAndPassword(demoEmail, demoPassword);
-                        showMessage('تم إنشاء حساب تجريبي تلقائياً');
-                    } catch (createErr) {
-                        showMessage('فشل إنشاء الحساب التجريبي', true);
-                        authFormDiv.style.display = 'block';
-                        authLoadingDiv.style.display = 'none';
-                    }
-                } else {
-                    showMessage('خطأ: ' + err.message, true);
-                    authFormDiv.style.display = 'block';
-                    authLoadingDiv.style.display = 'none';
-                }
-            } finally {
-                authFormDiv.style.display = 'block';
-                authLoadingDiv.style.display = 'none';
-            }
+        // ── Enter key support ──────────────────────────────
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Enter') return;
+            const activeTab = document.querySelector('.auth-tab.active')?.dataset.tab;
+            if (activeTab === 'login')  document.getElementById('login-btn').click();
+            if (activeTab === 'signup') document.getElementById('signup-btn').click();
         });
-    }
 
-    // زر تسجيل الخروج
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            try {
-                await auth.signOut();
-                showMessage('تم تسجيل الخروج');
-            } catch (err) {
-                showMessage('خطأ أثناء الخروج', true);
-            }
-        });
-    }
-
-    // زر الإضافة السريعة
-    if (quickAddBtn) {
-        quickAddBtn.addEventListener('click', async () => {
-            const type = quickType.value;
-            const amount = parseFloat(quickAmount.value);
-            const note = quickNote.value.trim();
-            await addTransaction(type, amount, note);
-        });
-    }
-
-    // خدمة الـ Service Worker (PWA) – المسار الصحيح
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/MoneyWithBasel/service-worker.js')
-                .then(reg => console.log('✅ Service Worker مسجل', reg.scope))
-                .catch(err => console.error('❌ فشل التسجيل:', err));
-        });
-    }
-
-    // إضافة القليل من التفاعل للقائمة السفلية (مجرد تأثير بصري)
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            item.classList.add('active');
-            // يمكن هنا تطبيق التنقل بين الأقسام مستقبلاً
-        });
-    });
-</script>
-    <script>
-    // تأكيد ربط زر الإضافة بعد تحميل جميع الملفات
-    window.addEventListener('load', function() {
-        const quickAddBtn = document.getElementById('quick-add-btn');
-        if (quickAddBtn) {
-            // إزالة أي مستمعين سابقين لتجنب التكرار
-            const newBtn = quickAddBtn.cloneNode(true);
-            quickAddBtn.parentNode.replaceChild(newBtn, quickAddBtn);
-            newBtn.addEventListener('click', async () => {
-                const type = document.getElementById('quick-type').value;
-                const amount = parseFloat(document.getElementById('quick-amount').value);
-                const note = document.getElementById('quick-note').value.trim();
-                if (!currentUser) { showMessage('الرجاء تسجيل الدخول أولاً', true); return; }
-                if (isNaN(amount) || amount <= 0) { showMessage('المبلغ يجب أن يكون رقماً موجباً', true); return; }
-                try {
-                    await db.collection('transactions').add({
-                        userId: currentUser.uid,
-                        type: type,
-                        amount: amount,
-                        note: note || '',
-                        date: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    showMessage('✅ تمت الإضافة بنجاح');
-                    document.getElementById('quick-amount').value = '';
-                    document.getElementById('quick-note').value = '';
-                } catch (err) {
-                    console.error(err);
-                    showMessage('فشلت الإضافة: ' + err.message, true);
-                }
-            });
+        // ── Service Worker ─────────────────────────────────
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js').catch(() => {});
         }
-    });
-</script>
+    </script>
 </body>
 </html>

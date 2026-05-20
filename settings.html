@@ -1,332 +1,387 @@
 <!DOCTYPE html>
 <html class="dark" dir="rtl" lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a12">
-    <title>الإعدادات - Money with Basel</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        background: '#0a0a12',
-                        surface: '#0f0f1a',
-                        'surface-light': '#1e1e30',
-                        'surface-variant': '#1a1a28',
-                        primary: '#ff2d78',
-                        secondary: '#00ffcc',
-                        tertiary: '#ffe04a',
-                        error: '#ff4444',
-                        success: '#4caf50',
-                        'on-surface': '#e8e0f0',
-                        'on-surface-variant': '#a098b0',
-                    },
-                    fontFamily: {
-                        sans: ['Almarai', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Almarai', sans-serif; background-color: #0a0a12; color: #e8e0f0; -webkit-tap-highlight-color: transparent; }
-        .number-font { font-family: 'JetBrains Mono', monospace; letter-spacing: -0.5px; }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
-        .toggle-checkbox:checked { right: 0; border-color: #00ffcc; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #00ffcc; }
-        .modal-hidden { display: none; opacity: 0; pointer-events: none; }
-        .modal-visible { display: flex; opacity: 1; pointer-events: auto; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>الإعدادات - Money with Basel</title>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-container-low":"#111118","on-surface-variant":"#a098b0","on-surface":"#e8e0f0",error:"#ff4444",background:"#0a0a12","surface-container-high":"#1e1e30",tertiary:"#ffe04a","surface-bright":"#1a1a2e",outline:"#5a5068","primary-fixed":"#ffe0ec","error-container":"#3d0f0f","surface-container":"#141422","outline-variant":"#302840","on-primary-container":"#ffe0ec","surface-container-lowest":"#0a0a12","surface-tint":"#ff2d78",secondary:"#00ffcc","surface-dim":"#0f0f1a","primary-container":"#b3004e","on-background":"#e8e0f0","on-primary":"#1a0010","surface-container-highest":"#28283e","primary-fixed-dim":"#ff80aa","surface-variant":"#1e1e30",primary:"#ff2d78",surface:"#0f0f1a"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"container-padding":"24px",unit:"8px","section-margin":"40px",gutter:"16px","card-gap":"20px"},fontFamily:{"label-caps":["Almarai","sans-serif"],"headline-md":["Almarai","sans-serif"],"body-lg":["Almarai","sans-serif"],"number-sm":["Almarai","sans-serif"],"display-lg":["Almarai","sans-serif"],"body-md":["Almarai","sans-serif"],"number-lg":["Almarai","sans-serif"],"headline-lg":["Almarai","sans-serif"]},fontSize:{"label-caps":["12px",{lineHeight:"16px",fontWeight:"700"}],"headline-md":["24px",{lineHeight:"32px",fontWeight:"600"}],"body-lg":["18px",{lineHeight:"28px",fontWeight:"400"}],"number-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-lg":["48px",{lineHeight:"56px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],"number-lg":["24px",{lineHeight:"32px",fontWeight:"500"}],"headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.01em",fontWeight:"600"}]}}}};
+</script>
+<style>
+body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+.fill-icon{font-variation-settings:'FILL' 1;}
+.card-surface{background-color:#1E1E1E;border:1px solid #2D2D2D;border-radius:16px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:flex-end;justify-content:center;}
+.modal-overlay.active{display:flex;}
+.modal-sheet{background:#1E1E1E;border-radius:24px 24px 0 0;width:100%;max-width:640px;padding:24px;max-height:90vh;overflow-y:auto;}
+.toggle-track{background:#2D2D2D;width:48px;height:26px;border-radius:9999px;position:relative;cursor:pointer;transition:background 0.2s;}
+.toggle-track.on{background:#39FF14;}
+.toggle-thumb{position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:9999px;transition:transform 0.2s;}
+.toggle-track.on .toggle-thumb{transform:translateX(-22px);}
+.setting-row{display:flex;flex-direction:row-reverse;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #2D2D2D;}
+.setting-row:last-child{border-bottom:none;}
+</style>
 </head>
-<body class="bg-background text-on-surface h-screen flex flex-col overflow-hidden relative">
+<body class="bg-background text-on-background antialiased pb-[90px] md:pb-0">
 
-    <header class="flex items-center justify-between p-4 bg-surface border-b border-surface-variant sticky top-0 z-20">
-        <h1 class="text-xl font-bold">الإعدادات والملف الشخصي</h1>
-        <button id="logout-btn" class="w-10 h-10 rounded-full bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-colors active:scale-95" title="تسجيل الخروج">
-            <span class="material-symbols-outlined">logout</span>
-        </button>
-    </header>
-
-    <main class="flex-1 overflow-y-auto p-4 pb-32 space-y-6">
-
-        <section class="bg-surface rounded-3xl p-5 border border-surface-variant flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-16 h-16 rounded-full bg-primary-dim border-2 border-primary flex items-center justify-center text-2xl font-bold text-white relative overflow-hidden">
-                    <img id="user-avatar" src="https://ui-avatars.com/api/?name=Basel&background=ff2d78&color=fff" alt="User Avatar" class="w-full h-full object-cover">
-                </div>
-                <div>
-                    <h2 class="text-lg font-bold text-white" id="user-name-display">باسل</h2>
-                    <p class="text-sm text-on-surface-variant mt-0.5" id="user-email-display">basel@example.com</p>
-                </div>
-            </div>
-            <button onclick="document.getElementById('edit-profile-modal').classList.replace('modal-hidden', 'modal-visible')" class="w-10 h-10 rounded-full bg-surface-variant text-on-surface flex items-center justify-center hover:bg-surface-light transition-colors active:scale-95">
-                <span class="material-symbols-outlined">edit</span>
-            </button>
-        </section>
-
-        <section>
-            <h3 class="text-sm font-bold text-on-surface-variant mb-3 px-1">الخيارات العامة</h3>
-            <div class="bg-surface rounded-3xl border border-surface-variant overflow-hidden">
-                <div class="p-4 border-b border-surface-variant flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-secondary">dark_mode</span>
-                        <span class="font-bold">الوضع الداكن</span>
-                    </div>
-                    <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                        <input type="checkbox" name="toggle" id="theme-toggle" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-surface appearance-none cursor-pointer transition-transform duration-200 ease-in-out z-10"/>
-                        <label for="theme-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-light cursor-pointer transition-colors duration-200 ease-in-out"></label>
-                    </div>
-                </div>
-                <div class="p-4 flex items-center justify-between cursor-pointer hover:bg-surface-light transition-colors">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-tertiary">payments</span>
-                        <span class="font-bold">العملة الافتراضية</span>
-                    </div>
-                    <div class="flex items-center gap-1 text-on-surface-variant">
-                        <span class="font-bold number-font" id="currency-display">JOD (د.ا)</span>
-                        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <div class="flex items-center justify-between mb-3 px-1">
-                <h3 class="text-sm font-bold text-on-surface-variant">إدارة الفئات (الموازنة)</h3>
-                <button onclick="document.getElementById('add-category-modal').classList.replace('modal-hidden', 'modal-visible')" class="text-xs bg-primary/20 text-primary px-3 py-1.5 rounded-full font-bold hover:bg-primary/30 transition-colors flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px]">add</span> إضافة فئة
-                </button>
-            </div>
-            <div class="bg-surface rounded-3xl border border-surface-variant overflow-hidden p-2">
-                <div class="flex bg-surface-variant rounded-xl p-1 mb-3">
-                    <button class="flex-1 py-1.5 text-sm font-bold bg-surface text-white rounded-lg shadow">المصاريف</button>
-                    <button class="flex-1 py-1.5 text-sm font-bold text-on-surface-variant hover:text-white rounded-lg transition-colors">الإيرادات</button>
-                </div>
-                <div class="space-y-2 max-h-48 overflow-y-auto no-scrollbar px-1" id="categories-list">
-                    <div class="flex items-center justify-between p-2 rounded-xl hover:bg-surface-light transition-colors group">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-error/10 text-error flex items-center justify-center">
-                                <span class="material-symbols-outlined text-[20px]">restaurant</span>
-                            </div>
-                            <span class="font-bold text-sm">طعام ومطاعم</span>
-                        </div>
-                        <button class="text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity hover:text-primary">
-                            <span class="material-symbols-outlined text-[20px]">edit</span>
-                        </button>
-                    </div>
-                    <div class="flex items-center justify-between p-2 rounded-xl hover:bg-surface-light transition-colors group">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center">
-                                <span class="material-symbols-outlined text-[20px]">local_gas_station</span>
-                            </div>
-                            <span class="font-bold text-sm">مواصلات وبنزين</span>
-                        </div>
-                        <button class="text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity hover:text-primary">
-                            <span class="material-symbols-outlined text-[20px]">edit</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <div class="flex items-center justify-between mb-3 px-1">
-                <h3 class="text-sm font-bold text-on-surface-variant flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[18px]">autorenew</span> الالتزامات والأتمتة
-                </h3>
-                <button onclick="document.getElementById('add-commitment-modal').classList.replace('modal-hidden', 'modal-visible')" class="text-xs bg-secondary/20 text-secondary px-3 py-1.5 rounded-full font-bold hover:bg-secondary/30 transition-colors flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px]">add</span> جديد
-                </button>
-            </div>
-            <div class="bg-surface rounded-3xl border border-surface-variant overflow-hidden">
-                <div class="p-4 border-b border-surface-variant flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-success/10 text-success flex items-center justify-center">
-                            <span class="material-symbols-outlined">payments</span>
-                        </div>
-                        <div>
-                            <p class="font-bold text-sm">الراتب الشهري</p>
-                            <p class="text-xs text-on-surface-variant">يتكرر يوم 25 من كل شهر</p>
-                        </div>
-                    </div>
-                    <div class="text-left">
-                        <p class="font-bold text-success number-font text-sm">+ 850.00</p>
-                    </div>
-                </div>
-                <div class="p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-error/10 text-error flex items-center justify-center">
-                            <span class="material-symbols-outlined">wifi</span>
-                        </div>
-                        <div>
-                            <p class="font-bold text-sm">فاتورة الإنترنت</p>
-                            <p class="text-xs text-on-surface-variant">يتكرر يوم 1 من كل شهر</p>
-                        </div>
-                    </div>
-                    <div class="text-left">
-                        <p class="font-bold text-error number-font text-sm">- 25.00</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h3 class="text-sm font-bold text-on-surface-variant mb-3 px-1">البيانات</h3>
-            <div class="bg-surface rounded-3xl border border-surface-variant overflow-hidden">
-                <div class="p-4 border-b border-surface-variant flex items-center justify-between cursor-pointer hover:bg-surface-light transition-colors">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-success">download</span>
-                        <span class="font-bold text-sm">تصدير البيانات (CSV/JSON)</span>
-                    </div>
-                </div>
-                <div class="p-4 border-b border-surface-variant flex items-center justify-between cursor-pointer hover:bg-surface-light transition-colors">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-tertiary">cloud_sync</span>
-                        <span class="font-bold text-sm">مزامنة سحابية</span>
-                    </div>
-                </div>
-                <div class="p-4 flex items-center justify-between cursor-pointer hover:bg-error/10 transition-colors text-error">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined">delete_forever</span>
-                        <span class="font-bold text-sm">مسح كافة البيانات</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <nav class="bg-surface/95 backdrop-blur border-t border-surface-variant fixed bottom-0 w-full flex justify-around items-center px-2 py-2 pb-safe z-30">
-        <a href="dashboard.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-colors active:scale-90 duration-150">
-            <span class="material-symbols-outlined">home</span>
-            <span class="text-[10px] mt-1 font-bold">الرئيسية</span>
-        </a>
-        <a href="transactions.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-colors active:scale-90 duration-150">
-            <span class="material-symbols-outlined">receipt_long</span>
-            <span class="text-[10px] mt-1 font-bold">الحركات</span>
-        </a>
-        <button onclick="document.dispatchEvent(new CustomEvent('openAddModal'))" class="flex flex-col items-center justify-center bg-primary text-background w-12 h-12 rounded-full hover:bg-primary-dim transition-all shadow-[0_4px_20px_rgba(255,45,120,0.4)] transform -translate-y-5 active:scale-95 border-4 border-background">
-            <span class="material-symbols-outlined font-bold text-[28px]">add</span>
-        </button>
-        <a href="accounts.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-colors active:scale-90 duration-150">
-            <span class="material-symbols-outlined">account_balance_wallet</span>
-            <span class="text-[10px] mt-1 font-bold">الحسابات</span>
-        </a>
-        <a href="settings.html" class="flex flex-col items-center justify-center text-primary p-2 active:scale-90 duration-150">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
-            <span class="text-[10px] mt-1 font-bold">الإعدادات</span>
-        </a>
-    </nav>
-
-    <div id="edit-profile-modal" class="modal-hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-end sm:items-center justify-center transition-all duration-300">
-        <div class="bg-surface w-full sm:w-[400px] rounded-t-3xl sm:rounded-3xl p-6 border-t border-surface-variant sm:border animate-[slideUp_0.3s_ease-out]">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold">تعديل الملف الشخصي</h3>
-                <button onclick="this.closest('.fixed').classList.replace('modal-visible', 'modal-hidden')" class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center hover:text-primary">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
-                </button>
-            </div>
-            <form class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-2">الاسم</label>
-                    <input type="text" class="w-full bg-background border border-surface-variant rounded-xl p-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" value="باسل">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-2">البريد الإلكتروني</label>
-                    <input type="email" class="w-full bg-background border border-surface-variant rounded-xl p-3 text-white focus:border-primary outline-none" value="basel@example.com" disabled>
-                    <p class="text-[10px] text-error mt-1">لا يمكن تغيير البريد الإلكتروني حالياً.</p>
-                </div>
-                <button type="button" class="w-full py-3.5 mt-4 rounded-xl bg-primary text-white font-bold hover:bg-primary-dim transition-colors active:scale-95 shadow-lg shadow-primary/30">
-                    حفظ التغييرات
-                </button>
-            </form>
-        </div>
+<header class="sticky top-0 w-full bg-background border-b border-outline-variant/30 z-50">
+  <div class="flex flex-row-reverse justify-between items-center px-container-padding h-16 max-w-[1200px] mx-auto">
+    <h1 class="font-headline-md text-headline-md font-bold text-primary">الإعدادات</h1>
+    <div id="hdr-avatar" class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant flex items-center justify-center">
+      <span class="material-symbols-outlined text-on-surface-variant">person</span>
     </div>
+  </div>
+</header>
 
-    <div id="add-category-modal" class="modal-hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-end sm:items-center justify-center transition-all duration-300">
-        <div class="bg-surface w-full sm:w-[400px] rounded-t-3xl sm:rounded-3xl p-6 border-t border-surface-variant sm:border">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold">إضافة فئة جديدة</h3>
-                <button onclick="this.closest('.fixed').classList.replace('modal-visible', 'modal-hidden')" class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
-                </button>
-            </div>
-            <form class="space-y-4">
-                <div class="flex gap-2 p-1 bg-surface-variant rounded-xl mb-4">
-                    <label class="flex-1 text-center cursor-pointer">
-                        <input type="radio" name="cat_type" value="expense" class="peer hidden" checked>
-                        <div class="py-2 text-sm font-bold rounded-lg peer-checked:bg-error peer-checked:text-white transition-all text-on-surface-variant">مصروف</div>
-                    </label>
-                    <label class="flex-1 text-center cursor-pointer">
-                        <input type="radio" name="cat_type" value="income" class="peer hidden">
-                        <div class="py-2 text-sm font-bold rounded-lg peer-checked:bg-success peer-checked:text-white transition-all text-on-surface-variant">إيراد</div>
-                    </label>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-2">اسم الفئة</label>
-                    <input type="text" placeholder="مثال: تسوق، فواتير..." class="w-full bg-background border border-surface-variant rounded-xl p-3 text-white focus:border-primary outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-2">الأيقونة</label>
-                    <div class="grid grid-cols-6 gap-2 h-32 overflow-y-auto no-scrollbar p-1">
-                        <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center cursor-pointer hover:bg-primary/20 border border-primary"><span class="material-symbols-outlined text-[20px]">shopping_cart</span></div>
-                        <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center cursor-pointer hover:bg-primary/20"><span class="material-symbols-outlined text-[20px]">bolt</span></div>
-                        <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center cursor-pointer hover:bg-primary/20"><span class="material-symbols-outlined text-[20px]">directions_car</span></div>
-                        <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center cursor-pointer hover:bg-primary/20"><span class="material-symbols-outlined text-[20px]">flight</span></div>
-                        <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center cursor-pointer hover:bg-primary/20"><span class="material-symbols-outlined text-[20px]">health_and_safety</span></div>
-                        <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center cursor-pointer hover:bg-primary/20"><span class="material-symbols-outlined text-[20px]">school</span></div>
-                    </div>
-                </div>
-                <button type="button" class="w-full py-3.5 mt-2 rounded-xl bg-primary text-white font-bold hover:bg-primary-dim transition-colors active:scale-95 shadow-lg shadow-primary/30">حفظ الفئة</button>
-            </form>
-        </div>
+<main class="max-w-[1200px] mx-auto px-container-padding pt-6 flex flex-col gap-6">
+
+  <!-- Profile card -->
+  <div class="card-surface p-container-padding flex flex-row-reverse items-center gap-4">
+    <div id="profile-avatar" class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border-2 border-primary-container">
+      <span class="material-symbols-outlined text-on-surface-variant text-[32px]">person</span>
     </div>
-
-    <div id="add-commitment-modal" class="modal-hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-end sm:items-center justify-center transition-all duration-300">
-        <div class="bg-surface w-full sm:w-[400px] rounded-t-3xl sm:rounded-3xl p-6 border-t border-surface-variant sm:border">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold">إضافة التزام ثابت</h3>
-                <button onclick="this.closest('.fixed').classList.replace('modal-visible', 'modal-hidden')" class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
-                </button>
-            </div>
-            <form class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-2">اسم الالتزام (مثال: راتب، قسط سيارة)</label>
-                    <input type="text" class="w-full bg-background border border-surface-variant rounded-xl p-3 text-white focus:border-secondary outline-none">
-                </div>
-                <div class="flex gap-4">
-                    <div class="flex-1">
-                        <label class="block text-xs font-bold text-on-surface-variant mb-2">المبلغ</label>
-                        <input type="number" class="w-full bg-background border border-surface-variant rounded-xl p-3 text-white focus:border-secondary outline-none number-font" placeholder="0.00">
-                    </div>
-                    <div class="w-1/3">
-                        <label class="block text-xs font-bold text-on-surface-variant mb-2">يوم التكرار</label>
-                        <input type="number" min="1" max="31" class="w-full bg-background border border-surface-variant rounded-xl p-3 text-white focus:border-secondary outline-none number-font text-center" placeholder="25">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-2">الحساب المرتبط</label>
-                    <select class="w-full bg-background border border-surface-variant rounded-xl p-3 text-white focus:border-secondary outline-none appearance-none">
-                        <option value="bank">البنك العربي</option>
-                        <option value="cash">محفظة الكاش</option>
-                    </select>
-                </div>
-                <button type="button" class="w-full py-3.5 mt-2 rounded-xl bg-secondary text-surface font-bold hover:bg-secondary/90 transition-colors active:scale-95 shadow-lg shadow-secondary/30">حفظ الالتزام</button>
-            </form>
-        </div>
+    <div class="flex flex-col items-end flex-grow">
+      <span id="profile-name" class="font-headline-md text-headline-md font-bold text-on-surface">—</span>
+      <span id="profile-email" class="font-body-md text-body-md text-on-surface-variant">—</span>
     </div>
+    <button onclick="signOut()" class="px-3 py-2 rounded-full border border-error/50 text-error font-label-caps text-label-caps hover:bg-error/10 transition-colors text-sm">
+      تسجيل الخروج
+    </button>
+  </div>
 
+  <!-- Appearance -->
+  <div class="card-surface overflow-hidden">
+    <div class="px-container-padding py-3 border-b border-outline-variant">
+      <h2 class="font-label-caps text-label-caps text-on-surface-variant">المظهر</h2>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">الوضع الداكن</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">مناسب للأماكن المعتمة</span>
+      </div>
+      <div id="dark-toggle" class="toggle-track on" onclick="toggleTheme()"><div class="toggle-thumb"></div></div>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="card-surface overflow-hidden">
+    <div class="px-container-padding py-3 border-b border-outline-variant flex justify-between items-center flex-row-reverse">
+      <h2 class="font-label-caps text-label-caps text-on-surface-variant">الفئات</h2>
+      <button onclick="openCatModal()" class="flex items-center gap-1 text-primary-fixed font-label-caps text-label-caps hover:opacity-80">
+        <span class="material-symbols-outlined text-[16px]">add</span> إضافة
+      </button>
+    </div>
+    <div id="categories-list" class="flex flex-col"></div>
+  </div>
+
+  <!-- Commitments -->
+  <div class="card-surface overflow-hidden">
+    <div class="px-container-padding py-3 border-b border-outline-variant flex justify-between items-center flex-row-reverse">
+      <h2 class="font-label-caps text-label-caps text-on-surface-variant">الالتزامات الثابتة والراتب</h2>
+      <button onclick="openCommitModal()" class="flex items-center gap-1 text-primary-fixed font-label-caps text-label-caps hover:opacity-80">
+        <span class="material-symbols-outlined text-[16px]">add</span> إضافة
+      </button>
+    </div>
+    <div id="commitments-list" class="flex flex-col"></div>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="card-surface overflow-hidden border-error/30">
+    <div class="px-container-padding py-3 border-b border-outline-variant">
+      <h2 class="font-label-caps text-label-caps text-error">منطقة الخطر</h2>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">تسجيل الخروج</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">من كل الأجهزة</span>
+      </div>
+      <button onclick="signOut()" class="px-4 py-2 rounded-full bg-error/10 text-error font-label-caps text-label-caps hover:bg-error/20 transition-colors">خروج</button>
+    </div>
+  </div>
+
+  <p class="text-center font-label-caps text-label-caps text-on-surface-variant pb-4">Money with Basel v1.0</p>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="md:hidden bg-surface-container-low fixed bottom-0 w-full rounded-t-xl border-t border-outline-variant shadow-[0_-4px_30px_rgba(0,0,0,0.4)] left-0 z-50 flex flex-row-reverse justify-around items-center px-4 py-3">
+  <a href="dashboard.html"    class="p-2 rounded-full text-on-surface-variant"><span class="material-symbols-outlined">home</span></a>
+  <a href="transactions.html" class="p-2 rounded-full text-on-surface-variant"><span class="material-symbols-outlined">receipt_long</span></a>
+  <a href="dashboard.html"    class="text-background bg-primary-container p-3 rounded-full shadow-lg transform -translate-y-4 ring-4 ring-background"><span class="material-symbols-outlined">add</span></a>
+  <a href="accounts.html"     class="p-2 rounded-full text-on-surface-variant"><span class="material-symbols-outlined">account_balance_wallet</span></a>
+  <a href="settings.html"     class="p-2 rounded-full bg-primary-container text-on-primary-container scale-110"><span class="material-symbols-outlined fill-icon">settings</span></a>
+</nav>
+
+<!-- CATEGORY MODAL -->
+<div id="cat-modal" class="modal-overlay" onclick="if(event.target===this)closeCatModal()">
+  <div class="modal-sheet">
+    <div class="flex justify-between items-center mb-6 flex-row-reverse">
+      <h2 id="cat-modal-title" class="font-headline-md text-headline-md text-on-surface">فئة جديدة</h2>
+      <button onclick="closeCatModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <!-- Emoji -->
+    <div class="flex items-center gap-3 mb-4 flex-row-reverse">
+      <button id="emoji-btn" onclick="document.getElementById('emoji-input').focus()" class="w-14 h-14 bg-surface-container-highest rounded-2xl text-3xl flex items-center justify-center border border-outline-variant hover:border-primary-fixed transition-colors">📦</button>
+      <input id="emoji-input" type="text" placeholder="أو اكتب إيموجي" maxlength="2"
+        class="flex-1 h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container text-right"
+        oninput="document.getElementById('emoji-btn').textContent=this.value||'📦'"/>
+    </div>
+    <input id="cat-name" type="text" placeholder="اسم الفئة" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container mb-4 text-right"/>
+    <div class="flex rounded-full bg-surface-container-highest p-1 mb-4 gap-1">
+      <button id="cat-expense-btn" onclick="setCatType('expense')" class="flex-1 py-2 rounded-full font-label-caps text-label-caps bg-error text-white transition-colors">مصروف</button>
+      <button id="cat-income-btn"  onclick="setCatType('income')"  class="flex-1 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant transition-colors">دخل</button>
+    </div>
+    <div id="cat-edit-actions" class="hidden mb-3">
+      <button onclick="deleteCategory()" class="w-full h-12 bg-error/20 text-error font-label-caps text-label-caps rounded-full hover:bg-error/30 transition-colors">حذف الفئة</button>
+    </div>
+    <button onclick="submitCategory()" class="w-full h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">حفظ</button>
+  </div>
+</div>
+
+<!-- COMMITMENT MODAL -->
+<div id="commit-modal" class="modal-overlay" onclick="if(event.target===this)closeCommitModal()">
+  <div class="modal-sheet">
+    <div class="flex justify-between items-center mb-6 flex-row-reverse">
+      <h2 id="commit-modal-title" class="font-headline-md text-headline-md text-on-surface">التزام ثابت جديد</h2>
+      <button onclick="closeCommitModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="flex rounded-full bg-surface-container-highest p-1 mb-4 gap-1">
+      <button id="commit-expense-btn" onclick="setCommitType('expense')" class="flex-1 py-2 rounded-full font-label-caps text-label-caps bg-error text-white transition-colors">مصروف ثابت</button>
+      <button id="commit-income-btn"  onclick="setCommitType('income')"  class="flex-1 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant transition-colors">راتب / دخل</button>
+    </div>
+    <input id="commit-name" type="text" placeholder="الاسم (مثال: قسط السيارة، الراتب)" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container mb-4 text-right"/>
+    <div class="relative mb-4">
+      <input id="commit-amount" type="number" placeholder="المبلغ" inputmode="decimal" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container text-right"/>
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-body-md">JOD</span>
+    </div>
+    <select id="commit-account" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right appearance-none"></select>
+    <div class="flex gap-3 mb-4">
+      <div class="flex-1 flex flex-col gap-1">
+        <label class="font-label-caps text-label-caps text-on-surface-variant text-right">يوم الخصم/الإيداع</label>
+        <input id="commit-day" type="number" min="1" max="31" value="1" class="h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 text-center font-body-md text-on-surface focus:outline-none focus:border-primary-container"/>
+      </div>
+      <div class="flex-1 flex flex-col gap-1">
+        <label class="font-label-caps text-label-caps text-on-surface-variant text-right">تاريخ البدء</label>
+        <input id="commit-start" type="date" class="h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-3 font-body-md text-on-surface focus:outline-none focus:border-primary-container"/>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1 mb-4">
+      <label class="font-label-caps text-label-caps text-on-surface-variant text-right">تاريخ الانتهاء (اختياري)</label>
+      <input id="commit-end" type="date" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container"/>
+    </div>
+    <div id="commit-edit-actions" class="hidden mb-3">
+      <button onclick="deleteCommitment()" class="w-full h-12 bg-error/20 text-error font-label-caps text-label-caps rounded-full hover:bg-error/30 transition-colors">إيقاف الالتزام</button>
+    </div>
+    <button onclick="submitCommitment()" class="w-full h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">حفظ</button>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/db.js"></script>
+<script>
+let state={categories:[],accounts:[],commitments:[],editCat:null,editCommit:null,catType:'expense',commitType:'expense'};
+
+auth.onAuthStateChanged(async u=>{
+  if(!u){window.location.href='index.html';return;}
+  app.user=u;
+  renderProfile(u);
+  initTheme();
+  await loadAll();
+});
+
+async function loadAll(){
+  const [cats,accs,commits]=await Promise.all([
+    DB.getCategories(app.user.uid),
+    DB.getAccounts(app.user.uid),
+    DB.getCommitments(app.user.uid)
+  ]);
+  state.categories=cats; state.accounts=accs; state.commitments=commits;
+  renderCategories(); renderCommitments(); populateAccountSelect();
+}
+
+function renderProfile(u){
+  document.getElementById('profile-name').textContent=u.displayName||'المستخدم';
+  document.getElementById('profile-email').textContent=u.email;
+  if(u.photoURL){
+    const av=`<img src="${u.photoURL}" class="w-full h-full object-cover" alt=""/>`;
+    document.getElementById('profile-avatar').innerHTML=av;
+    document.getElementById('hdr-avatar').innerHTML=av;
+  }
+}
+
+function initTheme(){
+  const saved=localStorage.getItem('theme')||'dark';
+  document.documentElement.classList.toggle('dark',saved==='dark');
+  document.getElementById('dark-toggle').classList.toggle('on',saved==='dark');
+}
+function toggleTheme(){
+  const isDark=document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme',isDark?'dark':'light');
+  document.getElementById('dark-toggle').classList.toggle('on',isDark);
+}
+
+function renderCategories(){
+  const list=document.getElementById('categories-list');
+  if(!state.categories.length){list.innerHTML='<div class="px-4 py-6 text-center text-on-surface-variant font-body-md text-body-md">لا توجد فئات. أضف فئة جديدة.</div>';return;}
+  const grouped={expense:state.categories.filter(c=>c.type==='expense'),income:state.categories.filter(c=>c.type==='income')};
+  list.innerHTML=`
+    ${grouped.expense.length?`<div class="px-4 pt-3 pb-1"><span class="font-label-caps text-label-caps text-error">مصروفات</span></div>${grouped.expense.map(c=>catRow(c)).join('')}`:''}
+    ${grouped.income.length?`<div class="px-4 pt-3 pb-1"><span class="font-label-caps text-label-caps text-[#39FF14]">دخل</span></div>${grouped.income.map(c=>catRow(c)).join('')}`:''}`;
+}
+
+function catRow(c){
+  return `<div class="setting-row cursor-pointer hover:bg-surface-container/50 transition-colors" onclick='openEditCat(${JSON.stringify(c)})'>
+    <div class="flex items-center gap-3 flex-row-reverse">
+      <span class="text-2xl">${c.emoji}</span>
+      <span class="font-body-md text-body-md text-on-surface">${c.name}</span>
+    </div>
+    <span class="material-symbols-outlined text-on-surface-variant text-[18px]">edit</span>
+  </div>`;
+}
+
+function renderCommitments(){
+  const list=document.getElementById('commitments-list');
+  const active=state.commitments.filter(c=>c.isActive);
+  if(!active.length){list.innerHTML='<div class="px-4 py-6 text-center text-on-surface-variant font-body-md text-body-md">لا توجد التزامات ثابتة.</div>';return;}
+  list.innerHTML=active.map(c=>{
+    const next=c.nextRunDate?.toDate?c.nextRunDate.toDate():new Date(c.nextRunDate);
+    const daysLeft=Math.ceil((next-new Date())/86400000);
+    const typeColor=c.type==='income'?'text-[#39FF14]':'text-error';
+    return `<div class="setting-row cursor-pointer hover:bg-surface-container/50 transition-colors" onclick='openEditCommit(${JSON.stringify({...c,nextRunDate:null,startDate:null,endDate:null,createdAt:null,lastRunDate:null})})'>
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">${c.name}</span>
+        <span class="font-number-sm text-number-sm text-on-surface-variant">بعد ${daysLeft} يوم · يوم ${c.dayOfMonth} شهرياً</span>
+      </div>
+      <div class="flex flex-col items-start">
+        <span class="font-body-md text-body-md font-bold ${typeColor}">${fmt(c.amount)} JOD</span>
+        <span class="material-symbols-outlined text-on-surface-variant text-[18px]">edit</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmt(n){return Number(n).toLocaleString('en-JO',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function populateAccountSelect(){
+  document.getElementById('commit-account').innerHTML=
+    '<option value="">اختر الحساب...</option>'+
+    state.accounts.map(a=>`<option value="${a.id}">${a.icon||'💰'} ${a.name}</option>`).join('');
+}
+
+// CATEGORY MODAL
+function openCatModal(){
+  state.editCat=null;
+  document.getElementById('cat-modal-title').textContent='فئة جديدة';
+  document.getElementById('cat-name').value='';
+  document.getElementById('emoji-input').value='';
+  document.getElementById('emoji-btn').textContent='📦';
+  document.getElementById('cat-edit-actions').classList.add('hidden');
+  setCatType('expense');
+  document.getElementById('cat-modal').classList.add('active');
+}
+function openEditCat(cat){
+  state.editCat=cat;
+  document.getElementById('cat-modal-title').textContent='تعديل الفئة';
+  document.getElementById('cat-name').value=cat.name;
+  document.getElementById('emoji-btn').textContent=cat.emoji||'📦';
+  document.getElementById('emoji-input').value=cat.emoji||'';
+  document.getElementById('cat-edit-actions').classList.remove('hidden');
+  setCatType(cat.type);
+  document.getElementById('cat-modal').classList.add('active');
+}
+function closeCatModal(){document.getElementById('cat-modal').classList.remove('active');}
+function setCatType(t){
+  state.catType=t;
+  document.getElementById('cat-expense-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='expense'?'bg-error text-white':'text-on-surface-variant');
+  document.getElementById('cat-income-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='income'?'bg-[#39FF14] text-background':'text-on-surface-variant');
+}
+async function submitCategory(){
+  const name=document.getElementById('cat-name').value.trim();
+  const emoji=document.getElementById('emoji-input').value||document.getElementById('emoji-btn').textContent||'📦';
+  if(!name){showToast('أدخل اسم الفئة','error');return;}
+  try{
+    if(state.editCat){
+      await DB.updateCategory(state.editCat.id,{name,emoji,type:state.catType});
+      showToast('تم التعديل ✅');
+    }else{
+      await DB.addCategory(app.user.uid,{name,emoji,type:state.catType});
+      showToast('تم الإضافة ✅');
+    }
+    closeCatModal(); await loadAll();
+  }catch(e){showToast('خطأ','error');}
+}
+async function deleteCategory(){
+  if(!confirm('حذف هذه الفئة؟'))return;
+  await DB.deleteCategory(state.editCat.id);
+  showToast('تم الحذف'); closeCatModal(); await loadAll();
+}
+
+// COMMITMENT MODAL
+function openCommitModal(){
+  state.editCommit=null;
+  document.getElementById('commit-modal-title').textContent='التزام ثابت جديد';
+  document.getElementById('commit-name').value='';
+  document.getElementById('commit-amount').value='';
+  document.getElementById('commit-day').value='1';
+  document.getElementById('commit-start').value=new Date().toISOString().split('T')[0];
+  document.getElementById('commit-end').value='';
+  document.getElementById('commit-edit-actions').classList.add('hidden');
+  setCommitType('expense');
+  document.getElementById('commit-modal').classList.add('active');
+}
+function openEditCommit(c){
+  state.editCommit=c;
+  document.getElementById('commit-modal-title').textContent='تعديل الالتزام';
+  document.getElementById('commit-name').value=c.name;
+  document.getElementById('commit-amount').value=c.amount;
+  document.getElementById('commit-day').value=c.dayOfMonth||1;
+  document.getElementById('commit-account').value=c.accountId||'';
+  document.getElementById('commit-edit-actions').classList.remove('hidden');
+  setCommitType(c.type||'expense');
+  document.getElementById('commit-modal').classList.add('active');
+}
+function closeCommitModal(){document.getElementById('commit-modal').classList.remove('active');}
+function setCommitType(t){
+  state.commitType=t;
+  document.getElementById('commit-expense-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='expense'?'bg-error text-white':'text-on-surface-variant');
+  document.getElementById('commit-income-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='income'?'bg-[#39FF14] text-background':'text-on-surface-variant');
+}
+async function submitCommitment(){
+  const name=document.getElementById('commit-name').value.trim();
+  const amount=parseFloat(document.getElementById('commit-amount').value);
+  const accountId=document.getElementById('commit-account').value;
+  const dayOfMonth=parseInt(document.getElementById('commit-day').value)||1;
+  const startDate=document.getElementById('commit-start').value;
+  const endDate=document.getElementById('commit-end').value||null;
+  if(!name){showToast('أدخل اسماً','error');return;}
+  if(!amount||amount<=0){showToast('أدخل مبلغاً','error');return;}
+  if(!accountId){showToast('اختر الحساب','error');return;}
+  try{
+    if(state.editCommit){
+      await DB.updateCommitment(state.editCommit.id,{name,amount,type:state.commitType,accountId,dayOfMonth});
+      showToast('تم التعديل ✅');
+    }else{
+      await DB.addCommitment(app.user.uid,{name,amount,type:state.commitType,accountId,dayOfMonth,startDate,endDate});
+      showToast('تم الإضافة ✅');
+    }
+    closeCommitModal(); await loadAll();
+  }catch(e){console.error(e);showToast('خطأ','error');}
+}
+async function deleteCommitment(){
+  if(!confirm('إيقاف هذا الالتزام؟'))return;
+  await DB.deleteCommitment(state.editCommit.id);
+  showToast('تم الإيقاف'); closeCommitModal(); await loadAll();
+}
+
+function signOut(){
+  if(!confirm('تسجيل الخروج؟'))return;
+  auth.signOut().then(()=>window.location.href='index.html');
+}
+</script>
 </body>
 </html>
