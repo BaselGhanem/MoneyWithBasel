@@ -13,24 +13,23 @@ const ASSETS_TO_CACHE = [
     '/MoneyWithBasel/js/ui.js',
     '/MoneyWithBasel/js/charts.js',
     '/MoneyWithBasel/js/automation.js',
-    '/MoneyWithBasel/js/db.js',
-    // باقي الروابط الخارجية تبقى كما هي
-    'https://cdn.tailwindcss.com',
-    'https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap',
-    'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap'
+    '/MoneyWithBasel/js/db.js'
+    // تم إزالة الموارد الخارجية (tailwind, fonts) لأنها تسبب CORS
 ];
 
-// 1. تثبيت الـ Service Worker وحفظ الموارد في الكاش
+// تثبيت الـ Service Worker
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('📦 فتح الكاش وتخزين الملفات الأساسية');
+            console.log('📦 تخزين الملفات المحلية');
             return cache.addAll(ASSETS_TO_CACHE);
+        }).catch(err => {
+            console.error('❌ فشل التخزين:', err);
         })
     );
 });
 
-// 2. تفعيل الخدمة وتنظيف الكاش القديم
+// تفعيل وتنظيف الكاش القديم
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -44,19 +43,33 @@ self.addEventListener('activate', (event) => {
             );
         })
     );
+    self.clients.claim();
 });
 
-// 3. اعتراض طلبات الشبكة وتقديمها من الكاش
+// استراتيجية الشبكة أولاً مع الاحتفاظ بالكاش للملفات المحلية
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            // إرجاع الملف من الكاش إذا وجد، وإلا حاول جلبه من الشبكة
-            return response || fetch(event.request).catch(() => {
-                // في حال فشل الاتصال وعدم وجود الملف في الكاش (صفحة الـ Offline)
-                if (event.request.headers.get('accept').includes('text/html')) {
-                    return caches.match('/index.html');
-                }
-            });
-        })
-    );
+    // نتعامل فقط مع طلبات GET
+    if (event.request.method !== 'GET') return;
+    
+    const url = new URL(event.request.url);
+    
+    // إذا كان الطلب لملف محلي (ضمن مجلد MoneyWithBasel)
+    if (url.pathname.startsWith('/MoneyWithBasel/')) {
+        event.respondWith(
+            caches.match(event.request).then((response) => {
+                return response || fetch(event.request).then((fetchResponse) => {
+                    // تخزين نسخة جديدة للاستخدام المستقبلي
+                    return caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, fetchResponse.clone());
+                        return fetchResponse;
+                    });
+                });
+            }).catch(() => {
+                return caches.match('/MoneyWithBasel/index.html');
+            })
+        );
+    } else {
+        // للموارد الخارجية (مثل Tailwind، Fonts) لا نتدخل، نتركها للشبكة
+        event.respondWith(fetch(event.request));
+    }
 });
