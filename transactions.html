@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html class="dark" dir="rtl" lang="ar">
+<html dir="rtl" lang="ar">
 <head>
+<script src="js/ui.js"></script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>الحركات - Money with Basel</title>
@@ -94,11 +95,21 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 
 <!-- BOTTOM NAV -->
 <nav class="bg-surface-container-low fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-[72px] md:h-screen z-50 md:border-l md:border-outline-variant flex md:flex-col justify-around items-center px-4 py-3 md:py-8 shadow-[0_-4px_30px_rgba(0,0,0,0.4)] md:shadow-none">
-  <a href="dashboard.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full"><span class="material-symbols-outlined">home</span></a>
-  <a href="transactions.html" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-2 scale-110"><span class="material-symbols-outlined fill-icon">receipt_long</span></a>
-  <button onclick="openAddModal()" class="flex flex-col items-center justify-center text-background bg-primary-container p-3 rounded-full shadow-lg md:hover:scale-105 transition-all transform md:translate-y-0 -translate-y-4 ring-4 ring-background"><span class="material-symbols-outlined font-bold">add</span></button>
-  <a href="accounts.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full"><span class="material-symbols-outlined">account_balance_wallet</span></a>
-  <a href="settings.html" class="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded-full"><span class="material-symbols-outlined">settings</span></a>
+  <a href="dashboard.html" class="nav-link">
+    <span class="material-symbols-outlined">home</span>
+  </a>
+  <a href="transactions.html" class="nav-link active">
+    <span class="material-symbols-outlined">receipt_long</span>
+  </a>
+  <button onclick="openAddModal()" class="nav-main-btn">
+    <span class="material-symbols-outlined">add</span>
+  </button>
+  <a href="accounts.html" class="nav-link">
+    <span class="material-symbols-outlined">account_balance_wallet</span>
+  </a>
+  <a href="settings.html" class="nav-link">
+    <span class="material-symbols-outlined">settings</span>
+  </a>
 </nav>
 
 <!-- ADD MODAL -->
@@ -136,6 +147,51 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 </div>
 
 <!-- EDIT MODAL -->
+<div id="view-modal" class="modal-overlay" onclick="if(event.target===this)closeViewModal()">
+  <div class="modal-sheet">
+    <div class="flex justify-between items-center mb-6 flex-row-reverse">
+      <h2 class="font-headline-md text-headline-md text-on-surface">تفاصيل الحركة</h2>
+      <button onclick="closeViewModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="grid grid-cols-1 gap-4">
+      <div class="p-4 bg-surface-container-highest rounded-2xl">
+        <div class="flex justify-between items-center mb-3 flex-row-reverse">
+          <span class="font-body-md text-body-md text-on-surface-variant">المبلغ</span>
+          <span id="view-amount" class="font-body-md text-body-md font-bold text-on-surface"></span>
+        </div>
+        <div class="flex justify-between items-center mb-3 flex-row-reverse">
+          <span class="font-body-md text-body-md text-on-surface-variant">الحساب</span>
+          <span id="view-account" class="font-body-md text-body-md text-on-surface"></span>
+        </div>
+        <div class="flex justify-between items-center mb-3 flex-row-reverse">
+          <span class="font-body-md text-body-md text-on-surface-variant">الفئة</span>
+          <span id="view-category" class="font-body-md text-body-md text-on-surface"></span>
+        </div>
+        <div class="flex justify-between items-center mb-3 flex-row-reverse">
+          <span class="font-body-md text-body-md text-on-surface-variant">التاريخ</span>
+          <span id="view-date" class="font-body-md text-body-md text-on-surface"></span>
+        </div>
+        <div class="flex justify-between items-center mb-3 flex-row-reverse">
+          <span class="font-body-md text-body-md text-on-surface-variant">النوع</span>
+          <span id="view-type" class="font-body-md text-body-md text-on-surface"></span>
+        </div>
+        <div class="flex justify-between items-center flex-row-reverse">
+          <span class="font-body-md text-body-md text-on-surface-variant">الحالة</span>
+          <span id="view-recurring" class="font-body-md text-body-md text-on-surface"></span>
+        </div>
+      </div>
+      <div class="p-4 bg-surface-container-highest rounded-2xl">
+        <span class="font-body-md text-body-md text-on-surface-variant">الملاحظة</span>
+        <p id="view-note" class="mt-2 font-body-md text-body-md text-on-surface"></p>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="openEditModal(state.viewTx)" class="flex-1 h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">تعديل</button>
+        <button onclick="closeViewModal()" class="flex-1 h-14 bg-surface-container-highest text-on-surface font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="edit-modal" class="modal-overlay" onclick="if(event.target===this)closeEditModal()">
   <div class="modal-sheet">
     <div class="flex justify-between items-center mb-6 flex-row-reverse">
@@ -208,11 +264,12 @@ function filterTransactions(){
 function renderSummary(tx){
   const inc=tx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const exp=tx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  document.getElementById('sum-income').textContent=fmt(inc)+' JOD';
-  document.getElementById('sum-expense').textContent=fmt(exp)+' JOD';
+  const currency = UI.getCurrency();
+  document.getElementById('sum-income').textContent = fmt(inc) + ' ' + currency;
+  document.getElementById('sum-expense').textContent = fmt(exp) + ' ' + currency;
   const net=inc-exp;
   const el=document.getElementById('sum-net');
-  el.textContent=(net>=0?'+':'')+fmt(net)+' JOD';
+  el.textContent=(net>=0?'+':'')+fmt(net) + ' ' + currency;
   el.className='font-body-md text-body-md font-bold '+(net>=0?'text-[#39FF14]':'text-error');
 }
 
@@ -244,7 +301,7 @@ function txCard(t){
   const sign=t.type==='income'?'+':'-';
   const color=t.type==='income'?'text-[#39FF14]':'text-on-surface';
   const badge=t.isRecurring?'<span class="font-label-caps text-label-caps px-2 py-0.5 rounded-full bg-tertiary/20 text-tertiary ml-1">ثابت</span>':'';
-  return `<div class="flex flex-row-reverse items-center justify-between py-3 px-4 border-b border-surface-container-high last:border-0 hover:bg-surface-container/50 transition-colors cursor-pointer" onclick='openEditModal(${JSON.stringify({...t,date:t.date?.toDate?t.date.toDate().toISOString():t.date})})'>
+  return `<div class="flex flex-row-reverse items-center justify-between py-3 px-4 border-b border-surface-container-high last:border-0 hover:bg-surface-container/50 transition-colors cursor-pointer" onclick='openViewModal(${JSON.stringify({...t,date:t.date?.toDate?t.date.toDate().toISOString():t.date})})'>
     <div class="flex flex-row-reverse items-center gap-3">
       <div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-xl border border-outline-variant/30">
         ${cat?.emoji||(t.type==='income'?'💵':'💸')}
@@ -256,12 +313,13 @@ function txCard(t){
         <span class="font-body-md text-number-sm text-on-surface-variant">${acc?.name||''}</span>
       </div>
     </div>
-    <span class="font-body-md text-body-md font-medium ${color}">${sign}${fmt(t.amount)} JOD</span>
+    <span class="font-body-md text-body-md font-medium ${color}">${sign}${fmt(t.amount)} ${UI.getCurrency()}</span>
   </div>`;
 }
 
 function fmt(n){return Number(n).toLocaleString('en-JO',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function getCatName(id){return state.categories.find(c=>c.id===id)?.name||'';}
+function getAccountName(id){return state.accounts.find(a=>a.id===id)?.name||'';}
 
 // ADD MODAL
 function openAddModal(type='expense'){
@@ -320,7 +378,21 @@ async function submitTransaction(){
 }
 
 // EDIT MODAL
+function openViewModal(tx){
+  state.viewTx=tx;
+  const date = tx.date?.seconds ? new Date(tx.date.seconds*1000) : new Date(tx.date);
+  document.getElementById('view-amount').textContent = `${tx.type==='income'?'+':'-'}${fmt(tx.amount)} ${UI.getCurrency()}`;
+  document.getElementById('view-account').textContent = getAccountName(tx.accountId);
+  document.getElementById('view-category').textContent = getCatName(tx.categoryId);
+  document.getElementById('view-date').textContent = date.toLocaleDateString('ar-JO', {year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('view-type').textContent = tx.type==='income' ? 'دخل' : 'مصروف';
+  document.getElementById('view-recurring').textContent = tx.isRecurring ? 'ثابت' : 'عادي';
+  document.getElementById('view-note').textContent = tx.note || 'لا توجد ملاحظة';
+  document.getElementById('view-modal').classList.add('active');
+}
+function closeViewModal(){document.getElementById('view-modal').classList.remove('active');}
 function openEditModal(tx){
+  closeViewModal();
   state.editTx=tx;
   state.editCatId=tx.categoryId||null;
   document.getElementById('edit-amount').value=tx.amount;

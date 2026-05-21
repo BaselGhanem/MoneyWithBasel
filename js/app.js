@@ -16,13 +16,6 @@ const app = {
     data: { transactions: [], accounts: [], categories: [], commitments: [] }
 };
 
-function initTheme() {
-    const saved = localStorage.getItem('theme') || 'dark';
-    document.documentElement.classList.toggle('dark',  saved === 'dark');
-    document.documentElement.classList.toggle('light', saved === 'light');
-}
-initTheme();
-
 function showToast(message, type = 'default') {
     document.querySelector('.toast')?.remove();
     const toast = document.createElement('div');
