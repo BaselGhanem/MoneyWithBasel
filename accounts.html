@@ -17,7 +17,8 @@
 body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
 .fill-icon{font-variation-settings:'FILL' 1;}
-.card-surface{background-color:#1E1E1E;border:1px solid #2D2D2D;border-radius:16px;}
+.card-surface { background: rgba(30, 30, 46, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.card-surface:hover { border-color: rgba(255, 45, 120, 0.3); transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:flex-end;justify-content:center;}
 .modal-overlay.active{display:flex;}
 .modal-sheet{background:#1E1E1E;border-radius:24px 24px 0 0;width:100%;max-width:640px;padding:24px;max-height:90vh;overflow-y:auto;}
@@ -71,26 +72,30 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 
 <!-- BOTTOM NAV -->
 <!-- استخدم هذا الـ Nav فقط -->
-<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0 shadow-[0_-4px_30px_rgba(0,0,0,0.4)] md:shadow-none">
-    <a href="dashboard.html" class="nav-link">
+<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
+    <a href="dashboard.html" class="nav-link" data-tooltip="الرئيسية">
         <span class="material-symbols-outlined">home</span>
         <span class="text-[10px] md:hidden font-bold">الرئيسية</span>
     </a>
-    <a href="transactions.html" class="nav-link">
+    <a href="transactions.html" class="nav-link" data-tooltip="الحركات">
         <span class="material-symbols-outlined">receipt_long</span>
         <span class="text-[10px] md:hidden font-bold">الحركات</span>
     </a>
-    <button onclick="openAddModal()" class="nav-main-btn">
+    <button onclick="openAddModal()" class="nav-main-btn" data-tooltip="إضافة حركة">
         <span class="material-symbols-outlined">add</span>
     </button>
-    <a href="accounts.html" class="nav-link active">
+    <a href="accounts.html" class="nav-link active" data-tooltip="الحسابات">
         <span class="material-symbols-outlined">account_balance_wallet</span>
         <span class="text-[10px] md:hidden font-bold">الحسابات</span>
     </a>
-    <a href="settings.html" class="nav-link">
+    <a href="settings.html" class="nav-link" data-tooltip="الإعدادات">
         <span class="material-symbols-outlined">settings</span>
         <span class="text-[10px] md:hidden font-bold">الإعدادات</span>
     </a>
+    <button onclick="UI.signOut()" class="nav-link text-error" data-tooltip="خروج">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-[10px] md:hidden font-bold">خروج</span>
+    </button>
 </nav>
 
 <!-- ملاحظة: أضف هذا الـ Padding للـ body في الـ CSS ليظهر المحتوى بجانب الـ Nav في اللابتوب -->
@@ -176,7 +181,7 @@ function renderAccounts(){
   empty.classList.add('hidden');
   const typeLabel={cash:'كاش',bank:'بنك',savings:'توفير',credit:'بطاقة'};
   grid.innerHTML=state.accounts.map(a=>`
-    <div class="card-surface p-6 flex flex-col gap-4 hover:border-primary-fixed/50 transition-colors cursor-pointer group" onclick='openEditModal(${JSON.stringify(a)})'>
+    <div class="card-surface p-6 flex flex-col gap-4 hover:border-primary-fixed/50 transition-colors cursor-pointer group" onclick="window.location.href='account-details.html?id=${a.id}'">
       <div class="flex justify-between items-start flex-row-reverse">
         <div class="flex items-center gap-3 flex-row-reverse">
           <span class="text-3xl">${a.icon||'💰'}</span>

@@ -55,9 +55,10 @@ tailwind.config = {
   .number-font { font-family:'Almarai',sans-serif; }
   .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
   .fill-icon { font-variation-settings:'FILL' 1; }
-  .card-surface { background-color:#1E1E1E; border:1px solid #2D2D2D; border-radius:16px; }
+  .card-surface { background: rgba(30, 30, 46, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .card-surface:hover { border-color: rgba(255, 45, 120, 0.3); background: rgba(30, 30, 46, 0.6); transform: translateY(-4px) scale(1.01); box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5), 0 0 20px rgba(255, 45, 120, 0.05); }
   .bento-grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:20px; }
-  .pill-button { background-color:#39FF14; color:#0A0A0A; border-radius:9999px; }
+  .pill-button { background: var(--color-secondary-gradient); color:#0A0A0A; border-radius:9999px; box-shadow: 0 4px 15px rgba(57, 255, 20, 0.3); }
   .progress-bg { background-color:#2D2D2D; }
   .scrollbar-hide::-webkit-scrollbar { display:none; }
   .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
@@ -72,9 +73,19 @@ tailwind.config = {
   input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
   .skeleton { background:linear-gradient(90deg,#1E1E1E 25%,#2D2D2D 50%,#1E1E1E 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
   @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  
+  /* Premium Scroll Snapping & Interaction */
+  .snap-x-mandatory { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+  .snap-item { scroll-snap-align: start; }
+  #accounts-row { cursor: grab; user-select: none; }
+  #accounts-row:active { cursor: grabbing; }
+
+  .mesh-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(at 0% 0%, rgba(255, 45, 120, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(57, 255, 20, 0.03) 0px, transparent 50%), #020205; }
 </style>
 </head>
-<body class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
+<body class="bg-[#020205] text-[#e8e0f0] antialiased pb-[90px] md:pb-0 md:pr-20">
+  <div class="mesh-gradient"></div>
+  
   <!-- TOP BAR -->
 <header class="sticky top-0 w-full bg-background border-b border-outline-variant/30 z-50">
   <div class="flex flex-row-reverse justify-between items-center px-container-padding h-16 max-w-[1200px] mx-auto">
@@ -103,7 +114,7 @@ tailwind.config = {
   <div class="bento-grid">
 
     <!-- Net Worth Hero -->
-    <div class="col-span-12 md:col-span-8 card-surface p-container-padding flex flex-col justify-between min-h-[280px] relative overflow-hidden group">
+    <div class="col-span-12 md:col-span-8 card-surface p-container-padding flex flex-col justify-between min-h-[280px] relative overflow-hidden group animate-card" style="animation-delay: 0.1s">
       <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-container/5 to-transparent pointer-events-none"></div>
       <div class="flex justify-between items-start w-full relative z-10 flex-row-reverse">
         <div class="flex flex-col items-end">
@@ -128,7 +139,7 @@ tailwind.config = {
     </div>
 
     <!-- Month Summary Cards -->
-    <div class="col-span-12 md:col-span-4 flex flex-col gap-card-gap">
+    <div class="col-span-12 md:col-span-4 flex flex-col gap-card-gap animate-card" style="animation-delay: 0.2s">
       <div class="card-surface p-6 flex flex-col gap-2 relative overflow-hidden group">
         <div class="absolute inset-0 bg-gradient-to-br from-[#39FF14]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <div class="flex justify-between items-start">
@@ -150,21 +161,21 @@ tailwind.config = {
     </div>
 
     <!-- Accounts Row -->
-    <div class="col-span-12">
+    <div class="col-span-12 animate-card" style="animation-delay: 0.3s">
       <div class="flex justify-between items-center flex-row-reverse mb-4">
         <h2 class="font-headline-md text-headline-md text-on-surface">حساباتك</h2>
         <a href="accounts.html" class="font-body-md text-body-md text-primary-fixed hover:opacity-80 transition-opacity">إدارة الحسابات</a>
       </div>
-      <div id="accounts-row" class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+      <div id="accounts-row" class="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x-mandatory">
         <!-- Skeleton -->
-        <div class="skeleton w-48 h-24 shrink-0 rounded-2xl"></div>
-        <div class="skeleton w-48 h-24 shrink-0 rounded-2xl"></div>
-        <div class="skeleton w-48 h-24 shrink-0 rounded-2xl"></div>
+        <div class="skeleton w-48 h-24 shrink-0 rounded-2xl snap-item"></div>
+        <div class="skeleton w-48 h-24 shrink-0 rounded-2xl snap-item"></div>
+        <div class="skeleton w-48 h-24 shrink-0 rounded-2xl snap-item"></div>
       </div>
     </div>
 
     <!-- Donut Chart + Budget Progress -->
-    <div class="col-span-12 md:col-span-5 card-surface p-container-padding flex flex-col gap-4">
+    <div class="col-span-12 md:col-span-5 card-surface p-container-padding flex flex-col gap-4 animate-card" style="animation-delay: 0.4s">
       <h2 class="font-headline-md text-headline-md text-on-surface text-right">توزيع المصروفات</h2>
       <div class="flex items-center justify-center gap-6">
         <div class="relative w-44 h-44 shrink-0">
@@ -179,7 +190,7 @@ tailwind.config = {
     </div>
 
     <!-- Budget Progress Bars -->
-    <div class="col-span-12 md:col-span-7 card-surface p-container-padding flex flex-col gap-4">
+    <div class="col-span-12 md:col-span-7 card-surface p-container-padding flex flex-col gap-4 animate-card" style="animation-delay: 0.5s">
       <div class="flex justify-between items-center flex-row-reverse">
         <h2 class="font-headline-md text-headline-md text-on-surface">الميزانية الشهرية</h2>
         <span id="budget-month" class="font-body-md text-body-md text-on-surface-variant"></span>
@@ -308,31 +319,30 @@ tailwind.config = {
 </div>
 
 <!-- ── BOTTOM NAV (Mobile) ───────────────────────────────────── -->
-<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen flex md:flex-col justify-around items-center gap-2 px-2 py-2 pb-safe md:pb-0 z-50">
-    
-    <a href="dashboard.html" class="nav-link active">
+<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
+    <a href="dashboard.html" class="nav-link active" data-tooltip="الرئيسية">
         <span class="material-symbols-outlined">home</span>
         <span class="text-[10px] md:hidden font-bold">الرئيسية</span>
     </a>
-    
-    <a href="transactions.html" class="nav-link">
+    <a href="transactions.html" class="nav-link" data-tooltip="الحركات">
         <span class="material-symbols-outlined">receipt_long</span>
         <span class="text-[10px] md:hidden font-bold">الحركات</span>
     </a>
-
-    <button onclick="document.dispatchEvent(new CustomEvent('openAddModal'))" class="nav-main-btn">
+    <button onclick="openAddModal()" class="nav-main-btn" data-tooltip="إضافة حركة">
         <span class="material-symbols-outlined">add</span>
     </button>
-
-    <a href="accounts.html" class="nav-link">
+    <a href="accounts.html" class="nav-link" data-tooltip="الحسابات">
         <span class="material-symbols-outlined">account_balance_wallet</span>
         <span class="text-[10px] md:hidden font-bold">الحسابات</span>
     </a>
-
-    <a href="settings.html" class="nav-link">
+    <a href="settings.html" class="nav-link" data-tooltip="الإعدادات">
         <span class="material-symbols-outlined">settings</span>
         <span class="text-[10px] md:hidden font-bold">الإعدادات</span>
     </a>
+    <button onclick="UI.signOut()" class="nav-link text-error" data-tooltip="خروج">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-[10px] md:hidden font-bold">خروج</span>
+    </button>
 </nav>
 
 <!-- ── ADD TRANSACTION MODAL ─────────────────────────────────── -->
@@ -428,6 +438,10 @@ auth.onAuthStateChanged(async user => {
   app.user = user;
   await DB.createUserProfile(user);
   await loadDashboard(user);
+
+  // Check for openAdd query param
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('openAdd') === 'true') openAddModal();
 });
 
 // ── Load All Data ─────────────────────────────────────────
@@ -459,6 +473,38 @@ async function loadDashboard(user) {
 
   // Run automation
   await runPendingCommitments(user.uid, commitments);
+
+  // Setup Desktop Scroll Interaction
+  setupAccountsRowScroll();
+}
+
+function setupAccountsRowScroll() {
+  const row = document.getElementById('accounts-row');
+  if (!row) return;
+  
+  // Convert vertical mouse wheel to horizontal scroll for desktop mice
+  row.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      // In RTL, we scroll by negative delta to move forward in the horizontal list
+      row.scrollBy({ left: -e.deltaY, behavior: 'auto' });
+    }
+  }, { passive: false });
+
+  // Drag-to-scroll (Grab) interaction for desktop users
+  let isDown = false; let startX; let scrollL;
+  row.addEventListener('mousedown', (e) => {
+    isDown = true; startX = e.pageX - row.offsetLeft; scrollL = row.scrollLeft;
+  });
+  row.addEventListener('mouseleave', () => isDown = false);
+  row.addEventListener('mouseup', () => isDown = false);
+  row.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - row.offsetLeft;
+    const walk = (x - startX) * 2; 
+    row.scrollLeft = scrollL - walk;
+  });
 }
 
 // ── Render Helpers ────────────────────────────────────────
@@ -467,9 +513,12 @@ function renderGreeting(user) {
   const h    = new Date().getHours();
   const greet = h < 12 ? 'صباح الخير' : h < 17 ? 'مساء الخير' : 'مساء النور';
   document.getElementById('greeting').textContent = `${greet}، ${name} 👋`;
-  const avatar = document.getElementById('hdr-avatar');
-  if (user.photoURL) {
-    avatar.innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover" alt=""/>`;
+  
+  const photo = UI.getAvatar(user.uid, user.photoURL);
+  if (photo) {
+    document.querySelectorAll('#hdr-avatar').forEach(el => {
+      el.innerHTML = `<img src="${photo}" class="w-full h-full object-cover" alt=""/>`;
+    });
   }
 }
 
@@ -502,7 +551,7 @@ function renderAccounts(accounts) {
     return;
   }
   container.innerHTML = accounts.map(a => `
-    <div class="card-surface p-4 shrink-0 w-52 flex flex-col gap-2 hover:bg-surface-container-high transition-colors cursor-pointer" onclick="window.location.href='accounts.html'">
+    <div class="card-surface p-4 shrink-0 w-52 flex flex-col gap-2 hover:bg-surface-container-high transition-colors cursor-pointer snap-item" onclick="window.location.href='accounts.html'">
       <div class="flex justify-between items-center flex-row-reverse">
         <span class="text-2xl">${a.icon || '💰'}</span>
         <span class="font-label-caps text-label-caps text-on-surface-variant">${a.type === 'bank' ? 'بنك' : a.type === 'savings' ? 'توفير' : a.type === 'credit' ? 'بطاقة' : 'كاش'}</span>

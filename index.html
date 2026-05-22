@@ -16,7 +16,7 @@
     <style>
         body {
             font-family: 'Almarai', sans-serif;
-            background-color: #0a0a12;
+            background-color: #020205;
             color: #e8e0f0;
             min-height: 100dvh;
             display: flex;
@@ -43,8 +43,10 @@
 
         .auth-title {
             font-size: 28px;
-            font-weight: 800;
-            color: #ff2d78;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff2d78 0%, #ff80aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 6px;
         }
 
@@ -54,17 +56,19 @@
         }
 
         .auth-card {
-            background-color: #1E1E1E;
-            border: 1px solid #2D2D2D;
-            border-radius: 20px;
+            background: rgba(30, 30, 46, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 32px;
             padding: 28px;
+            animation: cardEntry 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
         }
 
         .auth-tabs {
             display: flex;
             gap: 8px;
             margin-bottom: 24px;
-            background: #28283e;
+            background: rgba(40, 40, 62, 0.5);
             border-radius: 9999px;
             padding: 4px;
         }
@@ -82,8 +86,9 @@
         }
 
         .auth-tab.active {
-            background-color: #ff2d78;
+            background: var(--color-primary-gradient);
             color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 45, 120, 0.3);
         }
 
         .auth-tab-content { display: none; }
@@ -103,7 +108,7 @@
         .input-field {
             width: 100%;
             height: 48px;
-            background: #28283e;
+            background: rgba(20, 20, 35, 0.5);
             border: 1px solid #302840;
             border-radius: 12px;
             padding: 0 16px;
@@ -123,7 +128,7 @@
         .btn-primary {
             width: 100%;
             height: 52px;
-            background: #39FF14;
+            background: var(--color-secondary-gradient);
             color: #0a0a12;
             border: none;
             border-radius: 9999px;
@@ -132,10 +137,10 @@
             font-weight: 800;
             cursor: pointer;
             margin-top: 8px;
-            transition: opacity 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:hover { opacity: 0.9; transform: scale(1.02); box-shadow: 0 8px 25px rgba(57, 255, 20, 0.4); }
         .btn-primary:active { opacity: 0.8; }
 
         .btn-secondary {
@@ -399,7 +404,7 @@
 
         // ── Service Worker ─────────────────────────────────
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('/MoneyWithBasel/service-worker.js').catch(() => {});
+          navigator.serviceWorker.register('./service-worker.js').catch(() => {});
         }
     </script>
 </body>

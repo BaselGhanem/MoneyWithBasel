@@ -17,7 +17,8 @@
 body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
 .fill-icon{font-variation-settings:'FILL' 1;}
-.card-surface{background-color:#1E1E1E;border:1px solid #2D2D2D;border-radius:16px;}
+.card-surface { background: rgba(30, 30, 46, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.card-surface:hover { border-color: rgba(255, 45, 120, 0.3); background: rgba(30, 30, 46, 0.6); transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5); }
 .scrollbar-hide::-webkit-scrollbar{display:none;}
 .scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none;}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:flex-end;justify-content:center;}
@@ -28,9 +29,17 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .toggle-thumb{position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:9999px;transition:transform 0.2s;}
 .toggle-track.on .toggle-thumb{transform:translateX(-22px);}
 .chip-active{background:rgba(179,0,78,0.2);border-color:#b3004e;color:#ffe0ec;}
+
+.skeleton { background: linear-gradient(90deg, rgba(30, 30, 46, 0.4) 25%, rgba(60, 60, 80, 0.4) 50%, rgba(30, 30, 46, 0.4) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+@keyframes cardEntry { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.animate-card { animation: cardEntry 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+.mesh-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(at 0% 0%, rgba(255, 45, 120, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(57, 255, 20, 0.03) 0px, transparent 50%), #020205; }
 </style>
 </head>
-<body class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
+<body class="bg-[#020205] text-[#e8e0f0] antialiased pb-[90px] md:pb-0 md:pr-20">
+  <div class="mesh-gradient"></div>
 
 <!-- TOP BAR -->
 <header class="sticky top-0 w-full bg-background border-b border-outline-variant/30 z-50">
@@ -44,7 +53,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
   </div>
 </header>
 
-<main class="max-w-[1200px] mx-auto px-container-padding pt-6 flex flex-col gap-4">
+<main class="max-w-[1200px] mx-auto px-container-padding pt-6 flex flex-col gap-6">
 
   <!-- Search + Filters -->
   <div class="relative w-full">
@@ -54,22 +63,22 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
   </div>
 
   <!-- Filter Chips -->
-  <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1 flex-row-reverse">
-    <button onclick="setFilter('all')"     id="f-all"     class="chip chip-active whitespace-nowrap px-4 py-2 rounded-full border border-outline-variant font-label-caps text-label-caps transition-colors">الكل</button>
-    <button onclick="setFilter('expense')" id="f-expense" class="chip whitespace-nowrap px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps transition-colors hover:bg-surface-variant">مصروفات</button>
-    <button onclick="setFilter('income')"  id="f-income"  class="chip whitespace-nowrap px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps transition-colors hover:bg-surface-variant">دخل</button>
-    <button onclick="setFilter('recurring')" id="f-recurring" class="chip whitespace-nowrap px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps transition-colors hover:bg-surface-variant">ثابتة</button>
+  <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1 flex-row-reverse animate-card">
+    <button onclick="setFilter('all')"     id="f-all"     class="chip chip-active whitespace-nowrap px-5 py-2.5 rounded-full border border-outline-variant font-label-caps text-label-caps transition-all">الكل</button>
+    <button onclick="setFilter('expense')" id="f-expense" class="chip whitespace-nowrap px-5 py-2.5 rounded-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps transition-all hover:bg-white/5">مصروفات</button>
+    <button onclick="setFilter('income')"  id="f-income"  class="chip whitespace-nowrap px-5 py-2.5 rounded-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps transition-all hover:bg-white/5">دخل</button>
+    <button onclick="setFilter('recurring')" id="f-recurring" class="chip whitespace-nowrap px-5 py-2.5 rounded-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps transition-all hover:bg-white/5">ثابتة</button>
   </div>
 
   <!-- Month picker -->
-  <div class="flex items-center justify-between flex-row-reverse card-surface px-4 py-3">
+  <div class="flex items-center justify-between flex-row-reverse card-surface px-4 py-3 animate-card" style="animation-delay: 0.1s">
     <button onclick="prevMonth()" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">chevron_right</span></button>
     <span id="month-label" class="font-body-lg text-body-lg font-bold text-on-surface"></span>
     <button onclick="nextMonth()" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined">chevron_left</span></button>
   </div>
 
   <!-- Summary bar -->
-  <div class="grid grid-cols-3 gap-3">
+  <div class="grid grid-cols-3 gap-3 animate-card" style="animation-delay: 0.2s">
     <div class="card-surface p-3 flex flex-col items-center gap-1">
       <span class="font-label-caps text-label-caps text-on-surface-variant">دخل</span>
       <span id="sum-income" class="font-body-md text-body-md font-bold text-[#39FF14]">—</span>
@@ -85,31 +94,39 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
   </div>
 
   <!-- Transactions list -->
-  <div id="tx-list" class="flex flex-col gap-2"></div>
+  <div id="tx-list" class="flex flex-col gap-4"></div>
   <div id="tx-empty" class="hidden text-center py-16 flex flex-col items-center gap-3">
     <span class="text-5xl">💸</span>
     <p class="font-body-lg text-body-lg text-on-surface-variant">لا توجد حركات</p>
-    <button onclick="openAddModal()" class="px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps">إضافة أول حركة</button>
+    <button onclick="openAddModal()" class="px-6 py-2.5 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:opacity-90">إضافة أول حركة</button>
   </div>
 </main>
 
-<!-- BOTTOM NAV -->
-<nav class="bg-surface-container-low fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-[72px] md:h-screen z-50 md:border-l md:border-outline-variant flex md:flex-col justify-around items-center px-4 py-3 md:py-8 shadow-[0_-4px_30px_rgba(0,0,0,0.4)] md:shadow-none">
-  <a href="dashboard.html" class="nav-link">
-    <span class="material-symbols-outlined">home</span>
-  </a>
-  <a href="transactions.html" class="nav-link active">
-    <span class="material-symbols-outlined">receipt_long</span>
-  </a>
-  <button onclick="openAddModal()" class="nav-main-btn">
-    <span class="material-symbols-outlined">add</span>
-  </button>
-  <a href="accounts.html" class="nav-link">
-    <span class="material-symbols-outlined">account_balance_wallet</span>
-  </a>
-  <a href="settings.html" class="nav-link">
-    <span class="material-symbols-outlined">settings</span>
-  </a>
+<!-- ── BOTTOM NAV (Mobile) ───────────────────────────────────── -->
+<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
+    <a href="dashboard.html" class="nav-link" data-tooltip="الرئيسية">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[10px] md:hidden font-bold">الرئيسية</span>
+    </a>
+    <a href="transactions.html" class="nav-link active" data-tooltip="الحركات">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="text-[10px] md:hidden font-bold">الحركات</span>
+    </a>
+    <button onclick="openAddModal()" class="nav-main-btn" data-tooltip="إضافة حركة">
+        <span class="material-symbols-outlined">add</span>
+    </button>
+    <a href="accounts.html" class="nav-link" data-tooltip="الحسابات">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span class="text-[10px] md:hidden font-bold">الحسابات</span>
+    </a>
+    <a href="settings.html" class="nav-link" data-tooltip="الإعدادات">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="text-[10px] md:hidden font-bold">الإعدادات</span>
+    </a>
+    <button onclick="UI.signOut()" class="nav-link text-error" data-tooltip="خروج">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-[10px] md:hidden font-bold">خروج</span>
+    </button>
 </nav>
 
 <!-- ADD MODAL -->
@@ -226,11 +243,36 @@ auth.onAuthStateChanged(async u=>{
 });
 
 async function loadMonth(){
+  renderSkeleton();
   updateMonthLabel();
   const s=new Date(state.curYear,state.curMonth,1);
   const e=new Date(state.curYear,state.curMonth+1,0,23,59,59);
   state.allTx=await DB.getTransactions(app.user.uid,{startDate:s,endDate:e});
   filterTransactions();
+}
+
+function renderSkeleton() {
+  const list = document.getElementById('tx-list');
+  document.getElementById('tx-empty').classList.add('hidden');
+  list.innerHTML = Array(2).fill(0).map(() => `
+    <div class="flex flex-col gap-2">
+      <div class="skeleton w-40 h-4 mb-2 opacity-30"></div>
+      <div class="card-surface overflow-hidden">
+        ${Array(3).fill(0).map(() => `
+          <div class="flex flex-row-reverse items-center justify-between py-4 px-4 border-b border-white/5 last:border-0">
+            <div class="flex flex-row-reverse items-center gap-3">
+              <div class="w-11 h-11 rounded-full skeleton opacity-50"></div>
+              <div class="flex flex-col items-end gap-2">
+                <div class="skeleton w-32 h-4 opacity-40"></div>
+                <div class="skeleton w-20 h-3 opacity-30"></div>
+              </div>
+            </div>
+            <div class="skeleton w-24 h-5 opacity-40"></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
 }
 
 function updateMonthLabel(){
@@ -286,8 +328,8 @@ function renderList(tx){
     if(!groups[key])groups[key]=[];
     groups[key].push(t);
   });
-  list.innerHTML=Object.entries(groups).map(([date,txs])=>`
-    <div class="flex flex-col gap-1">
+  list.innerHTML=Object.entries(groups).map(([date,txs], idx)=>`
+    <div class="flex flex-col gap-2 animate-card" style="animation-delay: ${idx * 0.1}s">
       <span class="font-label-caps text-label-caps text-on-surface-variant px-1 pt-2">${date}</span>
       <div class="card-surface overflow-hidden">
         ${txs.map(t=>txCard(t)).join('')}

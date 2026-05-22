@@ -1,6 +1,15 @@
 // ui.js — Money with Basel
 // Global UI helpers used across all pages
 
+// Suppress Tailwind CDN production warning
+(function() {
+  const originalWarn = console.warn;
+  console.warn = function(...args) {
+    if (args && args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+    originalWarn.apply(console, args);
+  };
+})();
+
 const DEFAULT_CURRENCY = 'JOD';
 const CURRENCY_LABELS = { JOD: 'JOD', USD: 'USD', EUR: 'EUR' };
 
@@ -78,9 +87,16 @@ function setLoading(show) {
   }
 }
 
+function getAvatar(uid, fallback) {
+  return localStorage.getItem(`user_avatar_${uid}`) || fallback;
+}
+
+function signOut() {
+  if (!confirm('هل تريد تسجيل الخروج؟')) return;
+  auth.signOut().then(() => window.location.href = 'index.html');
+}
+
 // Override app.js showToast to use this one
 window.showToast = showToast;
-window.UI = { initTheme, setTheme, getCurrency, setCurrency, updateCurrencyUnits, showToast, formatCurrency, formatDate, setLoading };
-initTheme();
-
+window.UI = { initTheme, setTheme, getCurrency, setCurrency, updateCurrencyUnits, showToast, formatCurrency, formatDate, setLoading, getAvatar, signOut };
 initTheme();

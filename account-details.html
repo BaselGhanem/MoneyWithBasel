@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<script src="js/ui.js"></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>تفاصيل الحساب - Money with Basel</title>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="css/variables.css">
+<style>
+body{font-family:'Almarai',sans-serif;min-height:100dvh;background:#020205;}
+.card-surface { background: rgba(30, 30, 46, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.mesh-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(at 0% 0%, rgba(255, 45, 120, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(57, 255, 20, 0.03) 0px, transparent 50%), #020205; }
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.active{display:flex;}
+.modal-sheet{background:#1E1E1E;border-radius:32px 32px 0 0;width:100%;max-width:640px;padding:28px;max-height:90vh;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);}
+.skeleton { background: linear-gradient(90deg, rgba(30, 30, 46, 0.4) 25%, rgba(60, 60, 80, 0.4) 50%, rgba(30, 30, 46, 0.4) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+</style>
+</head>
+<body class="text-[#e8e0f0] antialiased pb-[90px] md:pb-0 md:pr-20">
+  <div class="mesh-gradient"></div>
+
+<header class="sticky top-0 w-full bg-background/80 backdrop-blur-md border-b border-white/5 z-50">
+  <div class="flex flex-row-reverse justify-between items-center px-6 h-16 max-w-[1200px] mx-auto">
+    <div class="flex items-center gap-3 flex-row-reverse">
+        <a href="accounts.html" class="p-2 hover:bg-white/5 rounded-full transition-colors">
+            <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+        <h1 id="header-title" class="font-headline-md text-headline-md font-bold text-primary">تفاصيل الحساب</h1>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1200px] mx-auto px-6 pt-6 flex flex-col gap-6">
+  <!-- Account Hero -->
+  <div id="account-hero" class="card-surface p-8 animate-card relative overflow-hidden">
+    <div class="skeleton h-32 w-full opacity-20"></div>
+  </div>
+
+  <h2 class="font-headline-md text-headline-md text-on-surface text-right mt-4">سجل الحركات</h2>
+  
+  <!-- Transactions list -->
+  <div id="tx-list" class="flex flex-col gap-4"></div>
+</main>
+
+<!-- NAV -->
+<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
+    <a href="dashboard.html" class="nav-link" data-tooltip="الرئيسية"><span class="material-symbols-outlined">home</span></a>
+    <a href="transactions.html" class="nav-link" data-tooltip="الحركات"><span class="material-symbols-outlined">receipt_long</span></a>
+    <a href="dashboard.html?openAdd=true" class="nav-main-btn"><span class="material-symbols-outlined">add</span></a>
+    <a href="accounts.html" class="nav-link active" data-tooltip="الحسابات"><span class="material-symbols-outlined">account_balance_wallet</span></a>
+    <a href="settings.html" class="nav-link" data-tooltip="الإعدادات"><span class="material-symbols-outlined">settings</span></a>
+    <button onclick="UI.signOut()" class="nav-link text-error" data-tooltip="خروج"><span class="material-symbols-outlined">logout</span></button>
+</nav>
+
+<!-- VIEW/EDIT MODALS (Reusing Transaction Logic) -->
+<div id="view-modal" class="modal-overlay" onclick="if(event.target===this)closeViewModal()">
+  <div class="modal-sheet">
+    <div class="flex justify-between items-center mb-6 flex-row-reverse">
+      <h2 class="font-headline-md text-headline-md text-on-surface">تفاصيل الحركة</h2>
+      <button onclick="closeViewModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div id="view-content" class="space-y-4"></div>
+    <div class="flex gap-3 mt-8">
+        <button onclick="openEditModal(state.viewTx)" class="flex-1 h-14 bg-[#39FF14] text-background font-bold rounded-full hover:opacity-90 transition-opacity">تعديل</button>
+        <button onclick="closeViewModal()" class="flex-1 h-14 bg-white/5 text-on-surface font-bold rounded-full hover:bg-white/10 transition-colors">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-modal" class="modal-overlay" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal-sheet">
+    <div class="flex justify-between items-center mb-6 flex-row-reverse">
+      <h2 class="font-headline-md text-headline-md text-on-surface">تعديل الحركة</h2>
+      <button onclick="closeEditModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="space-y-4">
+        <input id="edit-amount" type="number" step="0.01" class="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-display-lg font-bold text-center text-on-surface"/>
+        <input id="edit-note" type="text" class="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-right" placeholder="الملاحظة"/>
+        <input id="edit-date" type="date" class="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-right"/>
+        <div id="edit-categories" class="flex gap-2 overflow-x-auto pb-2 flex-row-reverse"></div>
+        <div class="flex gap-3 pt-4">
+            <button onclick="deleteTransaction()" class="flex-1 h-14 bg-error/20 text-error font-bold rounded-full hover:bg-error/30 transition-colors">حذف</button>
+            <button onclick="submitEdit()" class="flex-1 h-14 bg-[#39FF14] text-background font-bold rounded-full hover:opacity-90">حفظ التغييرات</button>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/db.js"></script>
+<script>
+let state = { account: null, txs: [], viewTx: null, editTx: null, editCatId: null, categories: [] };
+
+auth.onAuthStateChanged(async u => {
+    if (!u) { window.location.href = 'index.html'; return; }
+    app.user = u;
+    const urlParams = new URLSearchParams(window.location.search);
+    const accId = urlParams.get('id');
+    if (!accId) { window.location.href = 'accounts.html'; return; }
+
+    const [accs, cats] = await Promise.all([DB.getAccounts(u.uid), DB.getCategories(u.uid)]);
+    state.account = accs.find(a => a.id === accId);
+    state.categories = cats;
+
+    if (!state.account) { window.location.href = 'accounts.html'; return; }
+    
+    renderAccountHero();
+    loadTransactions(accId);
+});
+
+function renderAccountHero() {
+    const a = state.account;
+    document.getElementById('header-title').textContent = a.name;
+    document.getElementById('account-hero').innerHTML = `
+        <div class="flex justify-between items-start flex-row-reverse relative z-10">
+            <div class="flex items-center gap-4 flex-row-reverse">
+                <span class="text-6xl">${a.icon || '💰'}</span>
+                <div class="flex flex-col items-end">
+                    <h2 class="text-3xl font-bold">${a.name}</h2>
+                    <span class="text-on-surface-variant font-medium">${a.type === 'bank' ? 'حساب بنكي' : 'كاش'}</span>
+                </div>
+            </div>
+            <div class="flex flex-col items-start">
+                <span class="text-on-surface-variant text-sm font-bold uppercase tracking-widest">الرصيد الحالي</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-4xl font-black text-primary-fixed">${UI.formatCurrency(a.balance)}</span>
+                    <span class="text-on-surface-variant font-bold">${UI.getCurrency()}</span>
+                </div>
+            </div>
+        </div>
+        <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
+    `;
+}
+
+async function loadTransactions(accId) {
+    const list = document.getElementById('tx-list');
+    list.innerHTML = `<div class="skeleton h-20 w-full opacity-20 mb-4"></div>`.repeat(5);
+    
+    state.txs = await DB.getTransactions(app.user.uid, { accountId: accId });
+    renderList();
+}
+
+function renderList() {
+    const list = document.getElementById('tx-list');
+    if (!state.txs.length) {
+        list.innerHTML = `<div class="card-surface p-12 text-center text-on-surface-variant">لا توجد حركات مسجلة لهذا الحساب</div>`;
+        return;
+    }
+
+    const groups = {};
+    state.txs.forEach(t => {
+        const d = t.date?.toDate ? t.date.toDate() : new Date(t.date);
+        const key = d.toLocaleDateString('ar-JO', { month: 'long', year: 'numeric' });
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(t);
+    });
+
+    list.innerHTML = Object.entries(groups).map(([month, txs]) => `
+        <div class="flex flex-col gap-3">
+            <span class="px-2 text-sm font-bold text-on-surface-variant text-right">${month}</span>
+            <div class="card-surface overflow-hidden">
+                ${txs.map(t => txRow(t)).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function txRow(t) {
+    const cat = state.categories.find(c => c.id === t.categoryId);
+    const color = t.type === 'income' ? 'text-[#39FF14]' : 'text-on-surface';
+    const date = (t.date?.toDate ? t.date.toDate() : new Date(t.date)).toLocaleDateString('ar-JO', { day: 'numeric', month: 'short' });
+    
+    return `
+        <div class="flex flex-row-reverse items-center justify-between p-4 border-b border-white/5 last:border-0 hover:bg-white/5 cursor-pointer transition-colors" onclick='openViewModal(${JSON.stringify({...t, date: (t.date?.toDate ? t.date.toDate().toISOString() : t.date)})})'>
+            <div class="flex flex-row-reverse items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl border border-white/5">
+                    ${cat?.emoji || '📄'}
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="font-bold">${t.note || cat?.name || 'بدون ملاحظة'}</span>
+                    <span class="text-xs text-on-surface-variant">${date}</span>
+                </div>
+            </div>
+            <span class="font-black ${color}">${t.type === 'income' ? '+' : '-'}${UI.formatCurrency(t.amount)}</span>
+        </div>
+    `;
+}
+
+function openViewModal(tx) {
+    state.viewTx = tx;
+    const cat = state.categories.find(c => c.id === tx.categoryId);
+    const date = new Date(tx.date).toLocaleDateString('ar-JO', { dateStyle: 'full' });
+    
+    document.getElementById('view-content').innerHTML = `
+        <div class="flex flex-col items-center text-center p-6 bg-white/5 rounded-3xl gap-2">
+            <span class="text-6xl mb-2">${cat?.emoji || '📄'}</span>
+            <span class="text-on-surface-variant font-bold">${cat?.name || 'فئة غير محددة'}</span>
+            <span class="text-4xl font-black ${tx.type === 'income' ? 'text-[#39FF14]' : 'text-on-surface'}">
+                ${tx.type === 'income' ? '+' : '-'}${UI.formatCurrency(tx.amount)} ${UI.getCurrency()}
+            </span>
+        </div>
+        <div class="grid grid-cols-1 gap-3 text-right">
+            <div class="p-4 rounded-2xl border border-white/5 flex flex-row-reverse justify-between">
+                <span class="text-on-surface-variant">التاريخ</span>
+                <span class="font-bold">${date}</span>
+            </div>
+            <div class="p-4 rounded-2xl border border-white/5 flex flex-row-reverse justify-between">
+                <span class="text-on-surface-variant">النوع</span>
+                <span class="font-bold">${tx.type === 'income' ? 'دخل' : 'مصروف'}</span>
+            </div>
+            <div class="p-4 rounded-2xl border border-white/5">
+                <span class="text-on-surface-variant block mb-1">الملاحظة</span>
+                <span class="font-bold">${tx.note || '—'}</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('view-modal').classList.add('active');
+}
+
+function closeViewModal() { document.getElementById('view-modal').classList.remove('active'); }
+
+function openEditModal(tx) {
+    state.editTx = tx;
+    state.editCatId = tx.categoryId;
+    document.getElementById('edit-amount').value = tx.amount;
+    document.getElementById('edit-note').value = tx.note || '';
+    document.getElementById('edit-date').value = new Date(tx.date).toISOString().split('T')[0];
+    
+    const cats = state.categories.filter(c => c.type === tx.type);
+    document.getElementById('edit-categories').innerHTML = cats.map(c => `
+        <button onclick="state.editCatId='${c.id}'; renderEditCats()" class="edit-cat-chip shrink-0 px-4 py-2 rounded-full border transition-all ${state.editCatId === c.id ? 'bg-primary border-primary text-white' : 'border-white/10 text-on-surface-variant'}" data-id="${c.id}">
+            ${c.emoji} ${c.name}
+        </button>
+    `).join('');
+
+    closeViewModal();
+    document.getElementById('edit-modal').classList.add('active');
+}
+
+function renderEditCats() {
+    document.querySelectorAll('.edit-cat-chip').forEach(btn => {
+        const active = btn.dataset.id === state.editCatId;
+        btn.className = `edit-cat-chip shrink-0 px-4 py-2 rounded-full border transition-all ${active ? 'bg-primary border-primary text-white' : 'border-white/10 text-on-surface-variant'}`;
+    });
+}
+
+function closeEditModal() { document.getElementById('edit-modal').classList.remove('active'); }
+
+async function submitEdit() {
+    const amount = parseFloat(document.getElementById('edit-amount').value);
+    const note = document.getElementById('edit-note').value;
+    const date = document.getElementById('edit-date').value;
+
+    if(!amount || amount <= 0) return UI.showToast('المبلغ غير صحيح', 'error');
+
+    try {
+        await DB.updateTransaction(state.editTx.id, state.editTx, {
+            ...state.editTx,
+            amount, note, date,
+            categoryId: state.editCatId
+        });
+        UI.showToast('تم التعديل ✅');
+        window.location.reload();
+    } catch(e) { UI.showToast('حدث خطأ', 'error'); }
+}
+
+async function deleteTransaction() {
+    if(!confirm('هل تريد حذف هذه الحركة؟')) return;
+    try {
+        await DB.deleteTransaction(state.editTx.id, state.editTx);
+        UI.showToast('تم الحذف ✅');
+        window.location.reload();
+    } catch(e) { UI.showToast('حدث خطأ', 'error'); }
+}
+</script>
+</body>
+</html>

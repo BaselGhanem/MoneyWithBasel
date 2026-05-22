@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script src="js/ui.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -45,14 +44,15 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 
   <!-- Profile card -->
   <div class="card-surface p-container-padding flex flex-row-reverse items-center gap-4">
-    <div id="profile-avatar" class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border-2 border-primary-container">
+    <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+    <div id="profile-avatar" onclick="document.getElementById('avatar-upload').click()" class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border-2 border-primary-container cursor-pointer hover:opacity-80 transition-opacity group relative">
       <span class="material-symbols-outlined text-on-surface-variant text-[32px]">person</span>
     </div>
     <div class="flex flex-col items-end flex-grow">
       <span id="profile-name" class="font-headline-md text-headline-md font-bold text-on-surface">—</span>
       <span id="profile-email" class="font-body-md text-body-md text-on-surface-variant">—</span>
     </div>
-    <button onclick="signOut()" class="px-3 py-2 rounded-full border border-error/50 text-error font-label-caps text-label-caps hover:bg-error/10 transition-colors text-sm">
+    <button onclick="UI.signOut()" class="px-3 py-2 rounded-full border border-error/50 text-error font-label-caps text-label-caps hover:bg-error/10 transition-colors text-sm">
       تسجيل الخروج
     </button>
   </div>
@@ -118,17 +118,46 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
     <div id="commitments-list" class="flex flex-col"></div>
   </div>
 
+  <!-- Data Management -->
+  <div class="card-surface overflow-hidden">
+    <div class="px-container-padding py-3 border-b border-outline-variant">
+      <h2 class="font-label-caps text-label-caps text-on-surface-variant">إدارة البيانات</h2>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">نسخة احتياطية</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">تحميل كافة البيانات في ملف JSON</span>
+      </div>
+      <button onclick="exportData()" class="px-4 py-2 rounded-full bg-surface-container-highest text-on-surface font-label-caps text-label-caps hover:bg-surface-bright transition-colors">تحميل</button>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">استيراد بيانات</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">رفع ملف نسخة احتياطية سابقة</span>
+      </div>
+      <input type="file" id="import-file" accept=".json" class="hidden" onchange="handleImport(event)">
+      <button onclick="document.getElementById('import-file').click()" class="px-4 py-2 rounded-full bg-surface-container-highest text-on-surface font-label-caps text-label-caps hover:bg-surface-bright transition-colors">استيراد</button>
+    </div>
+  </div>
+
   <!-- Danger Zone -->
-  <div class="card-surface overflow-hidden border-error/30">
+  <div class="card-surface overflow-hidden border border-error/20">
     <div class="px-container-padding py-3 border-b border-outline-variant">
       <h2 class="font-label-caps text-label-caps text-error">منطقة الخطر</h2>
     </div>
     <div class="setting-row">
       <div class="flex flex-col items-end">
-        <span class="font-body-md text-body-md text-on-surface">تسجيل الخروج</span>
-        <span class="font-body-md text-number-sm text-on-surface-variant">من كل الأجهزة</span>
+        <span class="font-body-md text-body-md text-on-surface">تصفير الحساب</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">حذف جميع الحركات والحسابات والبدء من جديد</span>
       </div>
-      <button onclick="signOut()" class="px-4 py-2 rounded-full bg-error/10 text-error font-label-caps text-label-caps hover:bg-error/20 transition-colors">خروج</button>
+      <button onclick="resetData()" class="px-4 py-2 rounded-full bg-error/10 text-error font-label-caps text-label-caps hover:bg-error/20 transition-colors">تصفير</button>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface text-error font-bold">حذف الحساب نهائياً</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">سيتم حذف البريد الإلكتروني وكافة البيانات</span>
+      </div>
+      <button onclick="deleteAccountPermanently()" class="px-4 py-2 rounded-full border border-error text-error font-label-caps text-label-caps hover:bg-error/10 transition-colors">حذف نهائي</button>
     </div>
   </div>
 
@@ -136,26 +165,30 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 </main>
 
 <!-- BOTTOM NAV -->
-<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0 shadow-[0_-4px_30px_rgba(0,0,0,0.4)] md:shadow-none">
-    <a href="dashboard.html" class="nav-link">
+<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
+    <a href="dashboard.html" class="nav-link" data-tooltip="الرئيسية">
         <span class="material-symbols-outlined">home</span>
         <span class="text-[10px] md:hidden font-bold">الرئيسية</span>
     </a>
-    <a href="transactions.html" class="nav-link">
+    <a href="transactions.html" class="nav-link" data-tooltip="الحركات">
         <span class="material-symbols-outlined">receipt_long</span>
         <span class="text-[10px] md:hidden font-bold">الحركات</span>
     </a>
-    <button onclick="window.location.href='dashboard.html'" class="nav-main-btn">
+    <button onclick="window.location.href='dashboard.html?openAdd=true'" class="nav-main-btn" data-tooltip="إضافة حركة">
         <span class="material-symbols-outlined">add</span>
     </button>
-    <a href="accounts.html" class="nav-link">
+    <a href="accounts.html" class="nav-link" data-tooltip="الحسابات">
         <span class="material-symbols-outlined">account_balance_wallet</span>
         <span class="text-[10px] md:hidden font-bold">الحسابات</span>
     </a>
-    <a href="settings.html" class="nav-link active">
+    <a href="settings.html" class="nav-link active" data-tooltip="الإعدادات">
         <span class="material-symbols-outlined">settings</span>
         <span class="text-[10px] md:hidden font-bold">الإعدادات</span>
     </a>
+    <button onclick="UI.signOut()" class="nav-link text-error" data-tooltip="خروج">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-[10px] md:hidden font-bold">خروج</span>
+    </button>
 </nav>
 <style>
   @media (min-width: 768px) {
@@ -256,11 +289,35 @@ async function loadAll(){
 function renderProfile(u){
   document.getElementById('profile-name').textContent=u.displayName||'المستخدم';
   document.getElementById('profile-email').textContent=u.email;
-  if(u.photoURL){
-    const av=`<img src="${u.photoURL}" class="w-full h-full object-cover" alt=""/>`;
-    document.getElementById('profile-avatar').innerHTML=av;
-    document.getElementById('hdr-avatar').innerHTML=av;
+  const photo = UI.getAvatar(u.uid, u.photoURL);
+  if(photo){
+    const img=`<img src="${photo}" class="w-full h-full object-cover" alt=""/>`;
+    document.getElementById('profile-avatar').innerHTML=img;
+    document.getElementById('hdr-avatar').innerHTML=img;
   }
+}
+
+function handleAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Basic size check (e.g., 2MB) to prevent localStorage bloat
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('الصورة كبيرة جداً، يرجى اختيار صورة أصغر من 2 ميجابايت', 'error');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64String = e.target.result;
+    localStorage.setItem(`user_avatar_${app.user.uid}`, base64String);
+    
+    const img = `<img src="${base64String}" class="w-full h-full object-cover" alt=""/>`;
+    document.getElementById('profile-avatar').innerHTML = img;
+    document.getElementById('hdr-avatar').innerHTML = img;
+    showToast('تم تحديث الصورة الشخصية بنجاح ✅');
+  };
+  reader.readAsDataURL(file);
 }
 
 function initTheme(){
@@ -458,11 +515,6 @@ async function deleteCommitment(){
   showToast('تم الإيقاف'); closeCommitModal(); await loadAll();
 }
 
-function signOut(){
-  if(!confirm('تسجيل الخروج؟'))return;
-  auth.signOut().then(()=>window.location.href='index.html');
-}
 </script>
-  <script src="js/auth-guard.js" defer></script>
 </body>
 </html>

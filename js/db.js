@@ -328,11 +328,91 @@ async function getNetWorth(uid) {
     return accounts.reduce((s, a) => s + (a.balance || 0), 0);
 }
 
+// ── DATA MANAGEMENT (Export / Import / Reset) ───────────────
+
+async function exportFullData(uid) {
+    const [accounts, categories, transactions, commitments] = await Promise.all([
+        getAccounts(uid),
+        getCategories(uid),
+        getTransactions(uid),
+        getCommitments(uid)
+    ]);
+
+    // Convert Firestore Timestamps to ISO strings for JSON compatibility
+    const processDocs = (docs) => docs.map(doc => {
+        const cleaned = { ...doc };
+        for (let key in cleaned) {
+            if (cleaned[key] && typeof cleaned[key].toDate === 'function') {
+                cleaned[key] = cleaned[key].toDate().toISOString();
+            }
+        }
+        return cleaned;
+    });
+
+    return {
+        exportDate: new Date().toISOString(),
+        accounts: processDocs(accounts),
+        categories: processDocs(categories),
+        transactions: processDocs(transactions),
+        commitments: processDocs(commitments)
+    };
+}
+
+async function clearAllUserData(uid, keepProfile = true) {
+    const collections = ['accounts', 'categories', 'transactions', 'commitments'];
+    if (!keepProfile) collections.push('users');
+
+    const batch = db.batch();
+    
+    for (const col of collections) {
+        const snap = await db.collection(col).where(col === 'users' ? 'uid' : 'userId', '==', uid).get();
+        snap.docs.forEach(doc => batch.delete(doc.ref));
+    }
+
+    await batch.commit();
+    
+    if (keepProfile) {
+        await seedDefaultCategories(uid);
+    }
+}
+
+async function importData(uid, data) {
+    // 1. Clear current data first to avoid duplicates/conflicts
+    await clearAllUserData(uid, true);
+
+    const batch = db.batch();
+
+    const collections = ['accounts', 'categories', 'transactions', 'commitments'];
+    
+    collections.forEach(colName => {
+        if (data[colName] && Array.isArray(data[colName])) {
+            data[colName].forEach(item => {
+                const { id, ...docData } = item;
+                // Ensure userId is current user and strings are converted back to Timestamps
+                docData.userId = uid;
+                for (let key in docData) {
+                    if (key.toLowerCase().includes('date') && typeof docData[key] === 'string') {
+                        docData[key] = firebase.firestore.Timestamp.fromDate(new Date(docData[key]));
+                    }
+                }
+                
+                // We use the original ID to preserve relationships
+                const ref = db.collection(colName).doc(id);
+                batch.set(ref, docData);
+            });
+        }
+    });
+
+    await batch.commit();
+}
+
 // ── EXPORT ───────────────────────────────────────────────────
 
 window.DB = {
     // Users
-    createUserProfile, getUserProfile, updateUserPreferences,
+    createUserProfile, getUserProfile, updateUserPreferences, clearAllUserData,
+    // Data Portability
+    exportFullData, importData,
     // Accounts
     getAccounts, addAccount, updateAccount, deleteAccount,
     updateAccountBalance, transferBetweenAccounts,

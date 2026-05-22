@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mwb-v1';
+const CACHE_NAME = 'mwb-v2';
 const STATIC = [
   '/', '/index.html', '/dashboard.html', '/transactions.html',
   '/accounts.html', '/settings.html',
