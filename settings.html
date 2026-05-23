@@ -227,35 +227,44 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 
 <!-- COMMITMENT MODAL -->
 <div id="commit-modal" class="modal-overlay" onclick="if(event.target===this)closeCommitModal()">
-  <div class="modal-sheet">
-    <div class="flex justify-between items-center mb-6 flex-row-reverse">
-      <h2 id="commit-modal-title" class="font-headline-md text-headline-md text-on-surface">التزام ثابت جديد</h2>
-      <button onclick="closeCommitModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+  <div class="modal-sheet max-w-lg border border-white/10 backdrop-blur-2xl bg-[#121218]/95 shadow-2xl">
+    <div class="flex justify-between items-center mb-8 flex-row-reverse border-b border-white/5 pb-4">
+      <h2 id="commit-modal-title" class="text-2xl font-black text-on-surface">إعداد الالتزام</h2>
+      <button onclick="closeCommitModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-on-surface-variant hover:bg-white/10 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
-    <div class="flex rounded-full bg-surface-container-highest p-1 mb-4 gap-1">
-      <button id="commit-expense-btn" onclick="setCommitType('expense')" class="flex-1 py-2 rounded-full font-label-caps text-label-caps bg-error text-white transition-colors">مصروف ثابت</button>
-      <button id="commit-income-btn"  onclick="setCommitType('income')"  class="flex-1 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant transition-colors">راتب / دخل</button>
+    <div class="flex rounded-2xl bg-white/5 p-1.5 mb-8 gap-1.5">
+      <button id="commit-expense-btn" onclick="setCommitType('expense')" class="flex-1 py-3 rounded-xl font-bold transition-all bg-error text-white">مصروف ثابت</button>
+      <button id="commit-income-btn"  onclick="setCommitType('income')"  class="flex-1 py-3 rounded-xl font-bold transition-all text-on-surface-variant">راتب / دخل</button>
     </div>
-    <input id="commit-name" type="text" placeholder="الاسم (مثال: قسط السيارة، الراتب)" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container mb-4 text-right"/>
-    <div class="relative mb-4">
-      <input id="commit-amount" type="number" placeholder="المبلغ" inputmode="decimal" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container text-right"/>
-      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-body-md currency-unit">JOD</span>
+    <div class="relative mb-6 bg-white/5 rounded-[32px] p-6 border border-white/5">
+      <input id="commit-amount" type="number" placeholder="0.00" inputmode="decimal" class="w-full bg-transparent border-none text-4xl font-black text-on-surface placeholder:text-on-surface-variant/20 focus:ring-0 text-center number-font"/>
+      <span class="absolute left-8 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">JOD</span>
     </div>
-    <select id="commit-account" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right appearance-none"></select>
-    <div class="flex gap-3 mb-4">
-      <div class="flex-1 flex flex-col gap-1">
-        <label class="font-label-caps text-label-caps text-on-surface-variant text-right">يوم الخصم/الإيداع</label>
-        <input id="commit-day" type="number" min="1" max="31" value="1" class="h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 text-center font-body-md text-on-surface focus:outline-none focus:border-primary-container"/>
+    <input id="commit-name" type="text" placeholder="الاسم (قسط، إيجار، راتب...)" class="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface focus:border-primary transition-all text-right mb-4"/>
+    
+    <div class="flex flex-col gap-2 mb-6">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2">الحساب المرتبط</label>
+      <div id="commit-account-chips" class="grid grid-cols-2 gap-3 max-h-[120px] overflow-y-auto scrollbar-hide flex-row-reverse"></div>
+    </div>
+    
+    <div class="flex flex-col gap-3 mb-6">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2 block">الفئة المرتبطة</label>
+      <div id="commit-categories" class="grid grid-cols-4 gap-3 max-h-[160px] overflow-y-auto pr-1 flex-row-reverse scrollbar-hide"></div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-6 text-right">
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-on-surface-variant pr-2">يوم التنفيذ شهرياً</label>
+        <input id="commit-day" type="number" min="1" max="31" value="1" class="h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-center text-on-surface"/>
       </div>
-      <div class="flex-1 flex flex-col gap-1">
-        <label class="font-label-caps text-label-caps text-on-surface-variant text-right">تاريخ البدء</label>
-        <input id="commit-start" type="date" class="h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-3 font-body-md text-on-surface focus:outline-none focus:border-primary-container"/>
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-on-surface-variant pr-2">تاريخ البدء</label>
+        <input id="commit-start" type="date" class="h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface"/>
       </div>
     </div>
-    <div class="flex flex-col gap-1 mb-4">
-      <label class="font-label-caps text-label-caps text-on-surface-variant text-right">تاريخ الانتهاء (اختياري)</label>
-      <input id="commit-end" type="date" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container"/>
-    </div>
+
     <div id="commit-edit-actions" class="hidden mb-3">
       <button onclick="deleteCommitment()" class="w-full h-12 bg-error/20 text-error font-label-caps text-label-caps rounded-full hover:bg-error/30 transition-colors">إيقاف الالتزام</button>
     </div>
@@ -266,7 +275,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 <script src="js/app.js"></script>
 <script src="js/db.js"></script>
 <script>
-let state={categories:[],accounts:[],commitments:[],editCat:null,editCommit:null,catType:'expense',commitType:'expense'};
+let state={categories:[],accounts:[],commitments:[],editCat:null,editCommit:null,catType:'expense',commitType:'expense',selectedAccountId:null,selectedCategoryId:null};
 
 auth.onAuthStateChanged(async u=>{
   if(!u){window.location.href='index.html';return;}
@@ -287,7 +296,7 @@ async function loadAll(){
     DB.getCommitments(app.user.uid)
   ]);
   state.categories=cats; state.accounts=accs; state.commitments=commits;
-  renderCategories(); renderCommitments(); populateAccountSelect();
+  renderCategories(); renderCommitments();
 }
 
 function renderProfile(u){
@@ -445,10 +454,38 @@ function renderCommitments(){
 
 function fmt(n){return Number(n).toLocaleString('en-JO',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
-function populateAccountSelect(){
-  document.getElementById('commit-account').innerHTML=
-    '<option value="">اختر الحساب...</option>'+
-    state.accounts.map(a=>`<option value="${a.id}">${a.icon||'💰'} ${a.name}</option>`).join('');
+function renderAccountChips() {
+  const container = document.getElementById('commit-account-chips');
+  container.innerHTML = state.accounts.map(a => `
+    <button onclick="selectAccount('${a.id}')" 
+      class="flex items-center justify-end gap-2 p-3 rounded-2xl border transition-all duration-300
+      ${state.selectedAccountId === a.id ? 'bg-primary/20 border-primary text-on-surface' : 'bg-white/5 border-white/5 text-on-surface-variant'}">
+      <span class="text-xs font-bold truncate">${a.name}</span>
+      <span class="text-xl shrink-0">${a.icon || '💰'}</span>
+    </button>`).join('');
+}
+
+function selectAccount(id) {
+  state.selectedAccountId = id;
+  renderAccountChips();
+}
+
+function renderCategoryChips() {
+  const container = document.getElementById('commit-categories');
+  if (!container) return;
+  const filtered = state.categories.filter(c => c.type === state.commitType);
+  container.innerHTML = filtered.map(c => `
+    <button type="button" onclick="selectCategory('${c.id}')" 
+      class="flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-1
+      ${state.selectedCategoryId === c.id ? 'bg-primary/20 border-primary text-primary shadow-lg' : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20'}">
+      <span class="text-2xl">${c.emoji}</span>
+      <span class="text-[10px] font-bold truncate w-full text-center">${c.name}</span>
+    </button>`).join('');
+}
+
+function selectCategory(id) {
+  state.selectedCategoryId = id;
+  renderCategoryChips();
 }
 
 // CATEGORY MODAL
@@ -503,6 +540,8 @@ async function deleteCategory(){
 // COMMITMENT MODAL
 function openCommitModal(){
   state.editCommit=null;
+  state.selectedAccountId = state.accounts[0]?.id || null;
+  state.selectedCategoryId = null;
   document.getElementById('commit-modal-title').textContent='التزام ثابت جديد';
   document.getElementById('commit-name').value='';
   document.getElementById('commit-amount').value='';
@@ -511,18 +550,23 @@ function openCommitModal(){
   document.getElementById('commit-end').value='';
   document.getElementById('commit-edit-actions').classList.add('hidden');
   setCommitType('expense');
+  renderAccountChips();
+  renderCategoryChips();
   document.getElementById('commit-modal').classList.add('active');
 }
 function openEditCommit(id){
   const c = state.commitments.find(com => com.id === id);
   state.editCommit=c;
+  state.selectedAccountId = c.accountId;
+  state.selectedCategoryId = c.categoryId;
   document.getElementById('commit-modal-title').textContent='تعديل الالتزام';
   document.getElementById('commit-name').value=c.name;
   document.getElementById('commit-amount').value=c.amount;
   document.getElementById('commit-day').value=c.dayOfMonth||1;
-  document.getElementById('commit-account').value=c.accountId||'';
   document.getElementById('commit-edit-actions').classList.remove('hidden');
   setCommitType(c.type||'expense');
+  renderAccountChips();
+  renderCategoryChips();
   document.getElementById('commit-modal').classList.add('active');
 }
 function closeCommitModal(){document.getElementById('commit-modal').classList.remove('active');}
@@ -530,11 +574,12 @@ function setCommitType(t){
   state.commitType=t;
   document.getElementById('commit-expense-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='expense'?'bg-error text-white':'text-on-surface-variant');
   document.getElementById('commit-income-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='income'?'bg-[#39FF14] text-background':'text-on-surface-variant');
+  renderCategoryChips();
 }
 async function submitCommitment(){
   const name=document.getElementById('commit-name').value.trim();
   const amount=parseFloat(document.getElementById('commit-amount').value);
-  const accountId=document.getElementById('commit-account').value;
+  const accountId=state.selectedAccountId;
   const dayOfMonth=parseInt(document.getElementById('commit-day').value)||1;
   const startDate=document.getElementById('commit-start').value;
   const endDate=document.getElementById('commit-end').value||null;
@@ -543,10 +588,10 @@ async function submitCommitment(){
   if(!accountId){showToast('اختر الحساب','error');return;}
   try{
     if(state.editCommit){
-      await DB.updateCommitment(state.editCommit.id,{name,amount,type:state.commitType,accountId,dayOfMonth});
+      await DB.updateCommitment(state.editCommit.id,{name,amount,type:state.commitType,accountId,dayOfMonth,categoryId: state.selectedCategoryId});
       showToast('تم التعديل ✅');
     }else{
-      await DB.addCommitment(app.user.uid,{name,amount,type:state.commitType,accountId,dayOfMonth,startDate,endDate});
+      await DB.addCommitment(app.user.uid,{name,amount,type:state.commitType,accountId,dayOfMonth,startDate,endDate,categoryId: state.selectedCategoryId});
       showToast('تم الإضافة ✅');
     }
     closeCommitModal(); await loadAll();

@@ -36,6 +36,20 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .animate-card { animation: cardEntry 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 
 .mesh-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(at 0% 0%, rgba(255, 45, 120, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(57, 255, 20, 0.03) 0px, transparent 50%), #020205; }
+
+/* Dynamic Modal Themes */
+.modal-sheet.theme-expense { --modal-accent: #ff2d78; --modal-accent-soft: rgba(255, 45, 120, 0.08); --modal-glow: rgba(255, 45, 120, 0.2); }
+.modal-sheet.theme-income { --modal-accent: #39FF14; --modal-accent-soft: rgba(57, 255, 20, 0.08); --modal-glow: rgba(57, 255, 20, 0.2); }
+
+.dynamic-field { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.theme-expense .dynamic-field { background-color: var(--modal-accent-soft); border-color: rgba(255, 45, 120, 0.15); }
+.theme-income .dynamic-field { background-color: var(--modal-accent-soft); border-color: rgba(57, 255, 20, 0.15); }
+
+.theme-expense .amount-glow { box-shadow: 0 15px 35px -10px var(--modal-glow); border-color: rgba(255, 45, 120, 0.3); }
+.theme-income .amount-glow { box-shadow: 0 15px 35px -10px var(--modal-glow); border-color: rgba(57, 255, 20, 0.3); }
+
+.theme-expense .submit-btn { background: var(--modal-accent); color: white; box-shadow: 0 8px 25px rgba(255, 45, 120, 0.3); }
+.theme-income .submit-btn { background: var(--modal-accent); color: #0a0a12; box-shadow: 0 8px 25px rgba(57, 255, 20, 0.3); }
 </style>
 </head>
 <body class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
@@ -132,35 +146,63 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 
 <!-- ADD MODAL -->
 <div id="add-modal" class="modal-overlay" onclick="if(event.target===this)closeAddModal()">
-  <div class="modal-sheet">
-    <div class="flex justify-between items-center mb-6 flex-row-reverse">
-      <h2 class="font-headline-md text-headline-md text-on-surface">إضافة حركة</h2>
-      <button onclick="closeAddModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+  <div class="modal-sheet max-w-lg border border-white/10 backdrop-blur-2xl bg-[#121218]/95 shadow-2xl">
+    <div class="flex justify-between items-center mb-8 flex-row-reverse border-b border-white/5 pb-4">
+      <h2 class="text-2xl font-black text-on-surface">حركة جديدة</h2>
+      <button onclick="closeAddModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-on-surface-variant hover:bg-white/10 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
-    <div class="flex rounded-full bg-surface-container-highest p-1 mb-4 gap-1">
-      <button id="type-expense" onclick="setTxType('expense')" class="flex-1 py-2 rounded-full font-label-caps text-label-caps bg-error text-white transition-colors">مصروف</button>
-      <button id="type-income"  onclick="setTxType('income')"  class="flex-1 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant transition-colors">دخل</button>
+    <div class="flex rounded-2xl bg-white/5 p-1.5 mb-8 gap-1.5 border border-white/5">
+      <button id="type-expense" onclick="setTxType('expense')" class="flex-1 py-3 rounded-xl font-bold transition-all bg-error text-white">مصروف</button>
+      <button id="type-income"  onclick="setTxType('income')"  class="flex-1 py-3 rounded-xl font-bold transition-all text-on-surface-variant">دخل</button>
     </div>
-    <input id="tx-amount" type="number" placeholder="0.00" inputmode="decimal" class="w-full h-14 bg-surface-container-highest border border-outline-variant rounded-xl px-4 text-display-lg font-bold text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container text-center mb-4"/>
-    <input id="tx-note" type="text" placeholder="ملاحظة" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container mb-4 text-right"/>
-    <select id="tx-account" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right appearance-none"></select>
-    <div id="tx-categories" class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 mb-4 flex-row-reverse"></div>
-    <input id="tx-date" type="date" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4"/>
-    <div class="flex items-center justify-between flex-row-reverse mb-4 p-4 bg-surface-container-highest rounded-xl">
-      <div class="flex flex-col items-end"><span class="font-body-md text-body-md text-on-surface">التزام ثابت</span></div>
+    <div class="relative mb-8 bg-white/5 rounded-[32px] p-6 border border-white/5">
+      <input id="tx-amount" type="number" placeholder="0.00" inputmode="decimal" class="w-full bg-transparent border-none text-5xl font-black text-on-surface placeholder:text-on-surface-variant/20 focus:ring-0 text-center number-font"/>
+      <span class="absolute left-8 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">JOD</span>
+    </div>
+    <input id="tx-note" type="text" placeholder="الملاحظة" class="w-full h-14 dynamic-field bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface focus:ring-1 focus:ring-[var(--modal-accent)] transition-all text-right mb-6"/>
+    
+    <div class="flex flex-col gap-3 mb-6">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2">الحساب المستخدم</label>
+      <div id="tx-account-chips" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[160px] overflow-y-auto pr-1 scrollbar-hide flex-row-reverse"></div>
+    </div>
+
+    <div class="flex flex-col gap-3 mb-6">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2">تاريخ الحركة</label>
+      <input id="tx-date" type="date" class="w-full h-14 dynamic-field bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface focus:ring-1 focus:ring-[var(--modal-accent)] transition-all"/>
+    </div>
+
+    <div class="mb-8">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2 mb-3 block">اختر الفئة</label>
+      <div id="tx-categories" class="grid grid-cols-4 gap-3 max-h-[220px] overflow-y-auto pr-1 flex-row-reverse scrollbar-hide"></div>
+    </div>
+
+   <!-- Recurring Toggle Block -->
+    <div class="flex items-center justify-between flex-row-reverse mb-8 p-5 dynamic-field bg-white/5 rounded-3xl border border-white/5">
+      <div class="flex items-center gap-3 flex-row-reverse">
+        <span class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">autorenew</span></span>
+        <div class="flex flex-col items-end">
+          <span id="recurring-label" class="font-bold text-on-surface">تكرار شهري؟</span>
+          <span id="recurring-sub" class="text-[10px] text-on-surface-variant">سيتم الخصم تلقائياً كل شهر</span>
+        </div>
+      </div>
       <div id="recurring-toggle" class="toggle-track" onclick="toggleRecurring()"><div class="toggle-thumb"></div></div>
     </div>
-    <div id="recurring-options" class="hidden flex flex-col gap-3 mb-4 p-4 bg-surface-container rounded-xl border border-outline-variant">
+
+    <!-- Recurring Options -->
+    <div id="recurring-options" class="hidden flex flex-col gap-3 mb-8 p-4 bg-white/5 rounded-2xl border border-white/5">
       <div class="flex items-center justify-between flex-row-reverse">
-        <label class="font-body-md text-body-md text-on-surface-variant">يوم الشهر</label>
-        <input id="tx-day" type="number" min="1" max="31" value="1" class="w-20 h-10 bg-surface-container-highest border border-outline-variant rounded-xl px-3 text-center text-on-surface focus:outline-none"/>
+        <label class="text-xs font-bold text-on-surface-variant">يوم الشهر</label>
+        <input id="tx-day" type="number" min="1" max="31" value="1" class="w-20 h-10 bg-white/5 border border-white/10 rounded-xl px-3 text-center text-on-surface"/>
       </div>
       <div class="flex items-center justify-between flex-row-reverse">
-        <label class="font-body-md text-body-md text-on-surface-variant">تاريخ الانتهاء</label>
-        <input id="tx-end-date" type="date" class="w-48 h-10 bg-surface-container-highest border border-outline-variant rounded-xl px-3 text-on-surface focus:outline-none"/>
+        <label class="text-xs font-bold text-on-surface-variant">تاريخ الانتهاء</label>
+        <input id="tx-end-date" type="date" class="w-48 h-10 bg-white/5 border border-white/10 rounded-xl px-3 text-on-surface"/>
       </div>
     </div>
-    <button onclick="submitTransaction()" class="w-full h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">حفظ</button>
+
+    <button onclick="submitTransaction()" class="w-full h-16 submit-btn text-xl font-black rounded-[24px] hover:opacity-90 transition-all duration-500">حفظ الحركة</button>
   </div>
 </div>
 
@@ -211,19 +253,39 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 </div>
 
 <div id="edit-modal" class="modal-overlay" onclick="if(event.target===this)closeEditModal()">
-  <div class="modal-sheet">
-    <div class="flex justify-between items-center mb-6 flex-row-reverse">
-      <h2 class="font-headline-md text-headline-md text-on-surface">تعديل الحركة</h2>
-      <button onclick="closeEditModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+  <div class="modal-sheet max-w-lg border border-white/10 backdrop-blur-2xl bg-[#121218]/95 shadow-2xl">
+    <div class="flex justify-between items-center mb-8 flex-row-reverse border-b border-white/5 pb-4">
+      <h2 class="text-2xl font-black text-on-surface">تعديل الحركة</h2>
+      <button onclick="closeEditModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-on-surface-variant hover:bg-white/10 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
-    <input id="edit-amount" type="number" placeholder="0.00" class="w-full h-14 bg-surface-container-highest border border-outline-variant rounded-xl px-4 text-display-lg font-bold text-on-surface focus:outline-none focus:border-primary-container text-center mb-4"/>
-    <input id="edit-note" type="text" placeholder="ملاحظة" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right"/>
-    <select id="edit-account" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right appearance-none"></select>
-    <div id="edit-categories" class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 mb-4 flex-row-reverse"></div>
-    <input id="edit-date" type="date" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4"/>
-    <div class="flex gap-3">
-      <button onclick="deleteTransaction()" class="flex-1 h-14 bg-error/20 text-error font-headline-md font-bold rounded-full hover:bg-error/30 transition-colors">حذف</button>
-      <button onclick="submitEdit()" class="flex-1 h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">حفظ</button>
+    
+    <div class="relative mb-8 bg-white/5 rounded-[32px] p-6 border border-white/10">
+      <input id="edit-amount" type="number" placeholder="0.00" class="w-full bg-transparent border-none text-5xl font-black text-on-surface text-center number-font focus:ring-0"/>
+      <span class="absolute left-8 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">JOD</span>
+    </div>
+
+    <input id="edit-note" type="text" placeholder="الملاحظة" class="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface text-right mb-4 focus:border-primary outline-none transition-all"/>
+    
+    <div class="flex flex-col gap-2 mb-6 text-right">
+      <label class="text-xs font-bold text-on-surface-variant pr-2">تاريخ الحركة</label>
+      <input id="edit-date" type="date" class="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface"/>
+    </div>
+
+    <div class="flex flex-col gap-3 mb-6">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2">الحساب</label>
+      <div id="edit-account-chips" class="grid grid-cols-2 gap-3 flex-row-reverse"></div>
+    </div>
+
+    <div class="flex flex-col gap-3 mb-8">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2">الفئة</label>
+      <div id="edit-categories" class="grid grid-cols-4 gap-3 max-h-[160px] overflow-y-auto pr-1 flex-row-reverse scrollbar-hide"></div>
+    </div>
+
+    <div class="flex gap-4">
+      <button onclick="deleteTransaction()" class="flex-1 h-16 bg-error/10 text-error font-bold rounded-2xl hover:bg-error/20 transition-all">حذف</button>
+      <button onclick="submitEdit()" class="flex-[2] h-16 bg-[#39FF14] text-background text-xl font-black rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-[#39FF14]/10">حفظ التعديلات</button>
     </div>
   </div>
 </div>
@@ -239,9 +301,13 @@ auth.onAuthStateChanged(async u=>{
   app.user=u;
   const [accs,cats]=await Promise.all([DB.getAccounts(u.uid),DB.getCategories(u.uid)]);
   state.accounts=accs; state.categories=cats;
-  populateAccountSelects();
   await loadMonth();
 });
+
+function selectEditAccount(id) {
+  state.editTx.accountId = id;
+  renderAccountChips('edit-account-chips', selectEditAccount, id);
+}
 
 async function loadMonth(){
   renderSkeleton();
@@ -368,41 +434,83 @@ function getAccountName(id){return state.accounts.find(a=>a.id===id)?.name||'';}
 function openAddModal(type='expense'){
   setTxType(type);
   document.getElementById('tx-date').value=new Date().toISOString().split('T')[0];
-  document.getElementById('tx-amount').value='';
-  document.getElementById('tx-note').value='';
+  
+  // تصفير قيم الحقول
+  document.getElementById('tx-amount').value = '';
+  document.getElementById('tx-note').value = '';
+
   state.selectedCatId=null;
-  renderCategoryChips('tx-categories',state.txType,state.selectedCatId,id=>{state.selectedCatId=id;renderCategoryChips('tx-categories',state.txType,state.selectedCatId,arguments.callee);});
+  state.selectedAccountId = state.accounts[0]?.id || null;
+  
+  renderCategoryChips('tx-categories', state.txType, state.selectedCatId, (id) => {
+    state.selectedCatId = id;
+  });
+  
   document.getElementById('add-modal').classList.add('active');
 }
 function closeAddModal(){document.getElementById('add-modal').classList.remove('active');}
 function setTxType(type){
   state.txType=type;
+  renderAccountChips('tx-account-chips', (id) => state.selectedAccountId = id);
+  renderCategoryChips('tx-categories', type, state.selectedCatId, (id) => state.selectedCatId = id);
+
+  const modalSheet = document.querySelector('#add-modal .modal-sheet');
+  const recLabel = document.getElementById('recurring-label');
+  const recSub = document.getElementById('recurring-sub');
+
+  if (type === 'income') {
+    if (recLabel) recLabel.textContent = 'إيداع دوري؟';
+    if (recSub) recSub.textContent = 'سيتم الإضافة تلقائياً كل شهر';
+    modalSheet.classList.add('theme-income');
+    modalSheet.classList.remove('theme-expense');
+  } else {
+    if (recLabel) recLabel.textContent = 'تكرار شهري؟';
+    if (recSub) recSub.textContent = 'سيتم الخصم تلقائياً كل شهر';
+    modalSheet.classList.add('theme-expense');
+    modalSheet.classList.remove('theme-income');
+  }
   document.getElementById('type-expense').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(type==='expense'?'bg-error text-white':'text-on-surface-variant');
   document.getElementById('type-income').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(type==='income'?'bg-[#39FF14] text-background':'text-on-surface-variant');
-  renderCategoryChips('tx-categories',type,state.selectedCatId,id=>{state.selectedCatId=id;renderCategoryChips('tx-categories',type,state.selectedCatId,arguments.callee);});
 }
 function toggleRecurring(){
   state.isRecurring=!state.isRecurring;
   document.getElementById('recurring-toggle').classList.toggle('on',state.isRecurring);
   document.getElementById('recurring-options').classList.toggle('hidden',!state.isRecurring);
 }
-function renderCategoryChips(containerId,type,selId,onSelect){
-  const cats=state.categories.filter(c=>c.type===type);
-  document.getElementById(containerId).innerHTML=cats.map(c=>`
-    <button onclick="(${onSelect.toString()})('${c.id}')" class="shrink-0 flex items-center gap-1 px-3 py-2 rounded-full border font-label-caps text-label-caps transition-colors ${selId===c.id?'border-primary-fixed bg-primary-container/20 text-primary-fixed':'border-outline-variant text-on-surface-variant hover:border-primary-fixed'}">
-      <span>${c.emoji}</span><span>${c.name}</span>
+function renderAccountChips(containerId, onSelect, selectedId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = state.accounts.map(a => `
+    <button onclick="(${onSelect.toString()})('${a.id}'); renderAccountChips('${containerId}', ${onSelect.toString()}, '${a.id}')" 
+      class="flex items-center justify-end gap-2 p-3 rounded-2xl border transition-all duration-300
+      ${(selectedId || state.selectedAccountId) === a.id ? 'bg-[var(--modal-accent-soft)] border-[var(--modal-accent)] text-on-surface' : 'bg-white/5 border-white/5 text-on-surface-variant'}">
+      <span class="text-[10px] font-bold truncate">${a.name}</span>
+      <span class="text-lg shrink-0">${a.icon || '💰'}</span>
     </button>`).join('');
 }
-function populateAccountSelects(){
-  ['tx-account','edit-account'].forEach(id=>{
-    const sel=document.getElementById(id);
-    if(!sel)return;
-    sel.innerHTML='<option value="">اختر الحساب...</option>'+state.accounts.map(a=>`<option value="${a.id}">${a.icon||'💰'} ${a.name}</option>`).join('');
-  });
+
+function renderCategoryChips(containerId, type, selId, onSelect) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const cats = state.categories.filter(c => c.type === type);
+  container.innerHTML = cats.map(c => `
+    <button type="button" onclick="handleCatSelection('${containerId}', '${type}', '${c.id}', ${onSelect.toString()})" 
+      class="flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-1 
+      ${selId === c.id ? 'bg-primary/20 border-primary text-primary shadow-lg shadow-primary/10' : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20'}">
+      <span class="text-2xl">${c.emoji}</span>
+      <span class="text-[10px] font-bold truncate w-full text-center">${c.name}</span>
+    </button>`).join('');
 }
+
+function handleCatSelection(containerId, type, catId, callback) {
+  callback(catId);
+  renderCategoryChips(containerId, type, catId, callback);
+}
+
 async function submitTransaction(){
-  const amount=parseFloat(document.getElementById('tx-amount').value);
-  const accountId=document.getElementById('tx-account').value;
+  const amountEl = document.getElementById('tx-amount');
+  const amount=parseFloat(amountEl?.value || 0);
+  const accountId=state.selectedAccountId;
   const note=document.getElementById('tx-note').value;
   const date=document.getElementById('tx-date').value;
   if(!amount||amount<=0){showToast('أدخل مبلغاً صحيحاً','error');return;}
@@ -438,19 +546,28 @@ function closeViewModal(){document.getElementById('view-modal').classList.remove
 function openEditModal(tx){
   closeViewModal();
   state.editTx=tx;
-  state.editCatId=tx.categoryId||null;
+  state.editCatId=tx.categoryId;
   document.getElementById('edit-amount').value=tx.amount;
   document.getElementById('edit-note').value=tx.note||'';
-  document.getElementById('edit-account').value=tx.accountId;
   const d=tx.date?.seconds?new Date(tx.date.seconds*1000):new Date(tx.date);
   document.getElementById('edit-date').value=d.toISOString().split('T')[0];
-  renderCategoryChips('edit-categories',tx.type,state.editCatId,id=>{state.editCatId=id;renderCategoryChips('edit-categories',tx.type,state.editCatId,arguments.callee);});
+  
+  renderAccountChips('edit-account-chips', selectEditAccount, tx.accountId);
+  renderCategoryChips('edit-categories', tx.type, state.editCatId, (id) => state.editCatId = id);
   document.getElementById('edit-modal').classList.add('active');
 }
 function closeEditModal(){document.getElementById('edit-modal').classList.remove('active');}
 async function submitEdit(){
   const tx=state.editTx;
-  const newData={accountId:document.getElementById('edit-account').value,categoryId:state.editCatId,amount:parseFloat(document.getElementById('edit-amount').value),type:tx.type,date:document.getElementById('edit-date').value,note:document.getElementById('edit-note').value};
+  const accountId = state.editTx.accountId; 
+  const newData = {
+    accountId: accountId,
+    categoryId: state.editCatId,
+    amount: parseFloat(document.getElementById('edit-amount').value),
+    type: tx.type,
+    date: document.getElementById('edit-date').value,
+    note: document.getElementById('edit-note').value
+  };
   try{
     await DB.updateTransaction(tx.id,tx,newData);
     showToast('تم التعديل ✅');

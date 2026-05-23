@@ -162,6 +162,20 @@ tailwind.config = {
   .hero-glow {
     background: radial-gradient(circle at 50% -20%, rgba(255, 55, 95, 0.15) 0%, transparent 70%);
   }
+
+  /* Dynamic Modal Themes */
+  .modal-sheet.theme-expense { --modal-accent: #ff2d78; --modal-accent-soft: rgba(255, 45, 120, 0.08); --modal-glow: rgba(255, 45, 120, 0.2); }
+  .modal-sheet.theme-income { --modal-accent: #39FF14; --modal-accent-soft: rgba(57, 255, 20, 0.08); --modal-glow: rgba(57, 255, 20, 0.2); }
+
+  .dynamic-field { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+  .theme-expense .dynamic-field { background-color: var(--modal-accent-soft); border-color: rgba(255, 45, 120, 0.15); }
+  .theme-income .dynamic-field { background-color: var(--modal-accent-soft); border-color: rgba(57, 255, 20, 0.15); }
+  
+  .theme-expense .amount-glow { box-shadow: 0 15px 35px -10px var(--modal-glow); border-color: rgba(255, 45, 120, 0.3); }
+  .theme-income .amount-glow { box-shadow: 0 15px 35px -10px var(--modal-glow); border-color: rgba(57, 255, 20, 0.3); }
+  
+  .theme-expense .submit-btn { background: var(--modal-accent); color: white; box-shadow: 0 8px 25px rgba(255, 45, 120, 0.3); }
+  .theme-income .submit-btn { background: var(--modal-accent); color: #0a0a12; box-shadow: 0 8px 25px rgba(57, 255, 20, 0.3); }
   
   .wrapped-trigger-card {
     background: linear-gradient(135deg, rgba(255, 55, 95, 0.1) 0%, rgba(114, 9, 183, 0.1) 100%);
@@ -446,54 +460,59 @@ tailwind.config = {
     </button>
 </nav>
 
-<!-- ── ADD TRANSACTION MODAL ─────────────────────────────────── -->
+<!-- ── REDESIGNED ADD TRANSACTION MODAL ──────────────────────── -->
 <div id="add-modal" class="modal-overlay" onclick="if(event.target===this)closeAddModal()">
-  <div class="modal-sheet">
-    <div class="flex justify-between items-center mb-6 flex-row-reverse">
-      <h2 class="font-headline-md text-headline-md text-on-surface">إضافة حركة جديدة</h2>
-      <button onclick="closeAddModal()" class="text-on-surface-variant hover:opacity-80">
+  <div class="modal-sheet max-w-lg border border-white/10 backdrop-blur-2xl bg-[#121218]/95 shadow-2xl">
+    <div class="flex justify-between items-center mb-8 flex-row-reverse border-b border-white/5 pb-4">
+      <h2 class="text-2xl font-black text-on-surface">إضافة حركة مالية</h2>
+      <button onclick="closeAddModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-on-surface-variant hover:bg-white/10 transition-colors">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
 
-    <!-- Type Toggle -->
-    <div class="flex rounded-full bg-surface-container-highest p-1 mb-6 gap-1">
-      <button id="type-expense" onclick="setTxType('expense')" class="flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors bg-error text-white">مصروف</button>
-      <button id="type-income"  onclick="setTxType('income')"  class="flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors text-on-surface-variant">دخل</button>
+    <div class="flex rounded-2xl bg-white/5 p-1.5 mb-8 gap-1.5 border border-white/5">
+      <button id="type-expense" onclick="setTxType('expense')" class="flex-1 py-3 rounded-xl font-bold transition-all bg-error text-white shadow-lg shadow-error/20">مصروف</button>
+      <button id="type-income"  onclick="setTxType('income')"  class="flex-1 py-3 rounded-xl font-bold transition-all text-on-surface-variant hover:bg-white/5">دخل</button>
     </div>
 
-    <!-- Amount -->
-    <div class="relative mb-4">
+    <div class="relative mb-8 dynamic-field amount-glow bg-white/5 rounded-[32px] p-6 border border-white/5">
+      <span class="block text-center text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-2">المبلغ المالي</span>
       <input id="tx-amount" type="number" placeholder="0.00" inputmode="decimal"
-        class="w-full h-14 bg-surface-container-highest border border-outline-variant rounded-xl px-4 text-display-lg font-bold text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container text-center number-font"/>
-      <span class="absolute left-4 top-1/2 -translate-y-1/2 font-body-md text-on-surface-variant currency-unit">JOD</span>
+        class="w-full bg-transparent border-none text-5xl font-black text-on-surface placeholder:text-on-surface-variant/20 focus:ring-0 text-center number-font"/>
+      <span class="absolute left-8 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant currency-unit">JOD</span>
     </div>
 
-    <!-- Note -->
-    <input id="tx-note" type="text" placeholder="ملاحظة (اختياري)"
-      class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container mb-4 text-right"/>
+    <div class="flex flex-col gap-3 mb-6">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2">الحساب المستخدم</label>
+      <div id="tx-account-chips" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[160px] overflow-y-auto pr-1 scrollbar-hide flex-row-reverse"></div>
+    </div>
 
-    <!-- Account -->
-    <select id="tx-account" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4 text-right appearance-none">
-      <option value="">اختر الحساب...</option>
-    </select>
-
-    <!-- Category -->
-    <div id="tx-categories" class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 mb-4 flex-row-reverse"></div>
-
-    <!-- Date -->
-    <input id="tx-date" type="date"
-      class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container mb-4"/>
-
-    <!-- Recurring Toggle -->
-    <div class="flex items-center justify-between flex-row-reverse mb-4 p-4 bg-surface-container-highest rounded-xl">
-      <div class="flex flex-col items-end">
-        <span class="font-body-md text-body-md text-on-surface">التزام ثابت</span>
-        <span class="font-body-md text-number-sm text-on-surface-variant">تكرار شهري تلقائي</span>
+    <div class="grid grid-cols-1 gap-4 mb-6">
+      <div class="flex flex-col gap-2">
+        <label class="text-right text-xs font-bold text-on-surface-variant pr-2">التاريخ</label>
+        <input id="tx-date" type="date" class="w-full h-14 dynamic-field bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface focus:ring-1 focus:ring-[var(--modal-accent)] transition-all"/>
       </div>
-      <div id="recurring-toggle" class="toggle-track" onclick="toggleRecurring()">
-        <div class="toggle-thumb"></div>
+    </div>
+
+    <div class="flex flex-col gap-2 mb-6">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2">الملاحظة</label>
+      <input id="tx-note" type="text" placeholder="ماذا اشتريت؟" class="w-full h-14 dynamic-field bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface focus:ring-1 focus:ring-[var(--modal-accent)] transition-all text-right"/>
+    </div>
+
+    <div class="flex flex-col gap-3 mb-8">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2">اختر الفئة</label>
+      <div id="tx-categories" class="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-[220px] overflow-y-auto pr-1 scrollbar-hide flex-row-reverse"></div>
+    </div>
+
+    <div class="flex items-center justify-between flex-row-reverse mb-8 p-5 dynamic-field bg-white/5 rounded-3xl border border-white/5">
+      <div class="flex items-center gap-3 flex-row-reverse">
+        <span class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">autorenew</span></span>
+        <div class="flex flex-col items-end">
+          <span id="recurring-label" class="font-bold text-on-surface">تكرار شهري؟</span>
+          <span id="recurring-sub" class="text-[10px] text-on-surface-variant">سيتم الخصم تلقائياً كل شهر</span>
+        </div>
       </div>
+      <div id="recurring-toggle" class="toggle-track" onclick="toggleRecurring()"><div class="toggle-thumb"></div></div>
     </div>
 
     <!-- Recurring Options (hidden by default) -->
@@ -511,7 +530,7 @@ tailwind.config = {
     </div>
 
     <!-- Submit -->
-    <button onclick="submitTransaction()" class="w-full h-14 pill-button font-headline-md text-headline-md font-bold hover:opacity-90 transition-opacity">
+    <button onclick="submitTransaction()" class="w-full h-14 submit-btn rounded-full font-headline-md text-headline-md font-bold hover:opacity-90 transition-all duration-500">
       حفظ الحركة
     </button>
   </div>
@@ -611,7 +630,6 @@ async function loadDashboard(user) {
   renderRecentTransactions(stats.transactions.slice(0, 8), categories, accounts);
   renderUpcomingCommitments(commitments);
   renderNetWorthChart();
-  populateModal(accounts, categories);
 
   // Run automation
   await runPendingCommitments(user.uid, commitments);
@@ -1034,17 +1052,14 @@ function toggleBalanceVisibility() {
 
 // ── Add Transaction Modal ─────────────────────────────────
 function openAddModal(type = 'expense') {
+  state.selectedAccountId = state.accounts[0]?.id || null;
+  state.selectedCategoryId = null;
   setTxType(type);
+
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('tx-date').value = today;
   document.getElementById('tx-amount').value = '';
   document.getElementById('tx-note').value   = '';
-  state.selectedCategoryId = null;
-  
-  // Populate account options
-  const accountSelect = document.getElementById('tx-account');
-  accountSelect.innerHTML = '<option value="">اختر الحساب...</option>' + 
-    state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
   
   document.getElementById('add-modal').classList.add('active');
 }
@@ -1055,6 +1070,25 @@ function closeAddModal() {
 
 function setTxType(type) {
   state.txType = type;
+  // إعادة رندر الحسابات والفئات لتغيير ألوان التحديد
+  renderAccountChips();
+  renderCategoryChips();
+
+  const modalSheet = document.querySelector('#add-modal .modal-sheet');
+  const recLabel = document.getElementById('recurring-label');
+  const recSub = document.getElementById('recurring-sub');
+
+  if (type === 'income') {
+    if (recLabel) recLabel.textContent = 'إيداع دوري؟';
+    if (recSub) recSub.textContent = 'سيتم الإضافة تلقائياً كل شهر';
+    modalSheet.classList.add('theme-income');
+    modalSheet.classList.remove('theme-expense');
+  } else {
+    if (recLabel) recLabel.textContent = 'تكرار شهري؟';
+    if (recSub) recSub.textContent = 'سيتم الخصم تلقائياً كل شهر';
+    modalSheet.classList.add('theme-expense');
+    modalSheet.classList.remove('theme-income');
+  }
   const expBtn = document.getElementById('type-expense');
   const incBtn = document.getElementById('type-income');
   expBtn.className = 'flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors ' +
@@ -1072,20 +1106,32 @@ function toggleRecurring() {
   opts.classList.toggle('hidden', !state.isRecurring);
 }
 
-function populateModal(accounts, categories) {
-  const sel = document.getElementById('tx-account');
-  sel.innerHTML = '<option value="">اختر الحساب...</option>' +
-    accounts.map(a=>`<option value="${a.id}">${a.icon||'💰'} ${a.name}</option>`).join('');
-  renderCategoryChips();
+function renderAccountChips() {
+  const container = document.getElementById('tx-account-chips');
+  if (!container) return;
+  container.innerHTML = state.accounts.map(a => `
+    <button onclick="selectAccount('${a.id}')" 
+      class="flex items-center justify-end gap-2 p-3 rounded-2xl border transition-all duration-300
+      ${state.selectedAccountId === a.id ? 'bg-[var(--modal-accent-soft)] border-[var(--modal-accent)] text-on-surface shadow-lg' : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20'}">
+      <span class="text-xs font-bold truncate">${a.name}</span>
+      <span class="text-xl shrink-0">${a.icon || '💰'}</span>
+    </button>`).join('');
+}
+
+function selectAccount(id) {
+  state.selectedAccountId = id;
+  renderAccountChips();
 }
 
 function renderCategoryChips() {
   const filtered = state.categories.filter(c=>c.type===state.txType);
-  document.getElementById('tx-categories').innerHTML = filtered.map(c =>
-    `<button onclick="selectCategory('${c.id}')" id="cat-${c.id}"
-      class="shrink-0 flex items-center gap-1 px-3 py-2 rounded-full border font-label-caps text-label-caps transition-colors
-      ${state.selectedCategoryId===c.id ? 'border-primary-fixed bg-primary-container/20 text-primary-fixed' : 'border-outline-variant text-on-surface-variant hover:border-primary-fixed'}">
-      <span>${c.emoji}</span><span>${c.name}</span>
+  const container = document.getElementById('tx-categories');
+  container.innerHTML = filtered.map(c => `
+    <button onclick="selectCategory('${c.id}')" id="cat-${c.id}"
+      class="flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-1
+      ${state.selectedCategoryId===c.id ? 'bg-primary/20 border-primary text-primary shadow-lg shadow-primary/10' : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20'}">
+      <span class="text-2xl">${c.emoji}</span>
+      <span class="text-[10px] font-bold truncate w-full text-center">${c.name}</span>
     </button>`
   ).join('');
 }
@@ -1097,7 +1143,7 @@ function selectCategory(id) {
 
 async function submitTransaction() {
   const amount    = parseFloat(document.getElementById('tx-amount').value);
-  const accountId = document.getElementById('tx-account').value;
+  const accountId = state.selectedAccountId;
   const note      = document.getElementById('tx-note').value;
   const date      = document.getElementById('tx-date').value;
 
