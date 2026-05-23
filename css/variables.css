@@ -85,20 +85,21 @@
 }
 
 html.light {
-  --bg-primary: #f8fafc;
+  --bg-primary: #ffffff;
   --bg-secondary: #ffffff;
   --bg-tertiary: #f1f5f9;
   --bg-glass: rgba(255, 255, 255, 0.7);
   --bg-variant: #e2e8f0;
 
   --text-primary: #0f172a;
-  --text-secondary: #475569;
+  --text-secondary: #5a5068;
   --text-muted: #94a3b8;
   --text-inverse: #ffffff;
 
   --color-outline: rgba(0, 0, 0, 0.08);
   --color-outline-variant: rgba(0, 0, 0, 0.04);
   --glass-border: 1px solid rgba(0, 0, 0, 0.08);
+  --color-primary: #d81b60;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }

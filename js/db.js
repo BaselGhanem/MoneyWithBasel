@@ -57,7 +57,18 @@ async function updateAccount(accountId, data) {
 }
 
 async function deleteAccount(accountId) {
-    await db.collection('accounts').doc(accountId).delete();
+    const batch = db.batch();
+    batch.delete(db.collection('accounts').doc(accountId));
+
+    // Get and delete all associated transactions
+    const txSnap = await db.collection('transactions').where('accountId', '==', accountId).get();
+    txSnap.forEach(doc => batch.delete(doc.ref));
+
+    // Get and delete all associated commitments
+    const commSnap = await db.collection('commitments').where('accountId', '==', accountId).get();
+    commSnap.forEach(doc => batch.delete(doc.ref));
+
+    await batch.commit();
 }
 
 async function updateAccountBalance(accountId, amount, type) {
@@ -323,6 +334,39 @@ async function getMonthlyStats(uid, year, month) {
     return { income, expense, net: income - expense, byCategory, transactions: txs };
 }
 
+async function getFinancialHealth(uid) {
+    const now = new Date();
+    const stats = await getMonthlyStats(uid, now.getFullYear(), now.getMonth());
+    const accounts = await getAccounts(uid);
+    const commitments = await getCommitments(uid);
+    const totalBalance = accounts.reduce((s, a) => s + (a.balance || 0), 0);
+
+    // 1. فحص الالتزامات (دين مرتفع)
+    const dueThisMonth = commitments.filter(c => c.isActive).reduce((s, c) => s + (c.type === 'expense' ? c.amount : 0), 0);
+    const commitmentDanger = totalBalance < (dueThisMonth * 1.1); // رصيد لا يغطي الالتزامات مع هامش 10%
+
+    // 2. فحص سرعة الصرف (آخر 7 أيام)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentTxs = await getTransactions(uid, { startDate: sevenDaysAgo, type: 'expense' });
+    const recentSpending = recentTxs.reduce((s, t) => s + t.amount, 0);
+    const dangerousSpeed = recentSpending > (stats.income * 0.4) && stats.income > 0;
+
+    // 3. فحص المدى الزمني (قرب نفاد الراتب)
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysRemaining = daysInMonth - now.getDate();
+    const avgDailySpend = stats.expense / (now.getDate() || 1);
+    const lowRunway = daysRemaining > 5 && (totalBalance / (avgDailySpend || 1)) < (daysRemaining * 0.7);
+
+    const isEmergency = commitmentDanger || dangerousSpeed || lowRunway;
+
+    return {
+        isEmergency,
+        reasons: { commitmentDanger, dangerousSpeed, lowRunway },
+        data: { totalBalance, dueThisMonth, recentSpending, daysRemaining, avgDailySpend }
+    };
+}
+
 async function getNetWorth(uid) {
     const accounts = await getAccounts(uid);
     return accounts.reduce((s, a) => s + (a.balance || 0), 0);
@@ -370,10 +414,6 @@ async function clearAllUserData(uid, keepProfile = true) {
     }
 
     await batch.commit();
-    
-    if (keepProfile) {
-        await seedDefaultCategories(uid);
-    }
 }
 
 async function importData(uid, data) {
@@ -423,5 +463,5 @@ window.DB = {
     // Commitments
     getCommitments, addCommitment, updateCommitment, deleteCommitment, processCommitment,
     // Analytics
-    getMonthlyStats, getNetWorth
+    getMonthlyStats, getFinancialHealth, getNetWorth
 };

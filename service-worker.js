@@ -15,8 +15,7 @@ const STATIC = [
     './js/app.js',
     './js/auth.js',
     './js/db.js',
-    './js/ui.js',
-    './js/automation.js'
+    './js/ui.js'
 ];
 
 self.addEventListener('install', e => {

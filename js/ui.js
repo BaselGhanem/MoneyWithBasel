@@ -12,15 +12,44 @@
 
 const DEFAULT_CURRENCY = 'JOD';
 const CURRENCY_LABELS = { JOD: 'JOD', USD: 'USD', EUR: 'EUR' };
+const APP_VERSION = '2.1.0'; // غير هذا الرقم يدوياً لتصفير الكاش عند المستخدمين
+
+async function checkVersion() {
+  const lastVersion = localStorage.getItem('mwb_app_version');
+  if (lastVersion && lastVersion !== APP_VERSION) {
+    console.log('New version detected, clearing cache...');
+    // مسح الـ Caches
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    // إلغاء تسجيل الـ Service Worker لفرض تحديث الملفات
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    localStorage.setItem('mwb_app_version', APP_VERSION);
+    window.location.reload();
+  }
+  localStorage.setItem('mwb_app_version', APP_VERSION);
+  
+  // تحديث نص الإصدار في الواجهة عند تحميل الصفحة
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('app-version-display');
+    if (el) el.textContent = `الإصدار ${APP_VERSION}`;
+  });
+}
 
 function initTheme() {
   const saved = localStorage.getItem('theme') || 'dark';
   setTheme(saved);
+  checkVersion();
 }
 
 function setTheme(theme) {
-  document.documentElement.classList.toggle('dark', theme === 'dark');
-  document.documentElement.classList.toggle('light', theme === 'light');
+  const root = document.documentElement;
+  root.classList.toggle('dark', theme === 'dark');
+  root.classList.toggle('light', theme === 'light');
   localStorage.setItem('theme', theme);
 }
 
@@ -98,5 +127,5 @@ function signOut() {
 
 // Override app.js showToast to use this one
 window.showToast = showToast;
-window.UI = { initTheme, setTheme, getCurrency, setCurrency, updateCurrencyUnits, showToast, formatCurrency, formatDate, setLoading, getAvatar, signOut };
+window.UI = { initTheme, setTheme, getCurrency, setCurrency, updateCurrencyUnits, showToast, formatCurrency, formatDate, setLoading, getAvatar, signOut, APP_VERSION };
 initTheme();

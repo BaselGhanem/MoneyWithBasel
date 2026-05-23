@@ -14,6 +14,14 @@
 <script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-container-low":"#111118","on-surface-variant":"#a098b0","on-surface":"#e8e0f0",error:"#ff4444",background:"#0a0a12","surface-container-high":"#1e1e30",tertiary:"#ffe04a","surface-bright":"#1a1a2e",outline:"#5a5068","primary-fixed":"#ffe0ec","error-container":"#3d0f0f","surface-container":"#141422","outline-variant":"#302840","on-primary-container":"#ffe0ec","surface-container-lowest":"#0a0a12","surface-tint":"#ff2d78",secondary:"#00ffcc","surface-dim":"#0f0f1a","primary-container":"#b3004e","on-background":"#e8e0f0","on-primary":"#1a0010","surface-container-highest":"#28283e","primary-fixed-dim":"#ff80aa","surface-variant":"#1e1e30",primary:"#ff2d78",surface:"#0f0f1a"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"container-padding":"24px",unit:"8px","section-margin":"40px",gutter:"16px","card-gap":"20px"},fontFamily:{"label-caps":["Almarai","sans-serif"],"headline-md":["Almarai","sans-serif"],"body-lg":["Almarai","sans-serif"],"number-sm":["Almarai","sans-serif"],"display-lg":["Almarai","sans-serif"],"body-md":["Almarai","sans-serif"],"number-lg":["Almarai","sans-serif"],"headline-lg":["Almarai","sans-serif"]},fontSize:{"label-caps":["12px",{lineHeight:"16px",fontWeight:"700"}],"headline-md":["24px",{lineHeight:"32px",fontWeight:"600"}],"body-lg":["18px",{lineHeight:"28px",fontWeight:"400"}],"number-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-lg":["48px",{lineHeight:"56px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],"number-lg":["24px",{lineHeight:"32px",fontWeight:"500"}],"headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.01em",fontWeight:"600"}]}}}};
 </script>
 <style>
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+  --primary-aurora-blue: #01497c;
+  --primary-aurora-cyan: #00b4d8;
+  --primary-aurora-purple: #7209b7;
+}
+
 body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
 .fill-icon{font-variation-settings:'FILL' 1;}
@@ -24,9 +32,66 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .modal-sheet{background:#1E1E1E;border-radius:24px 24px 0 0;width:100%;max-width:640px;padding:24px;max-height:90vh;overflow-y:auto;}
 .transfer-modal{align-items:center;}
 .transfer-sheet{background:#1E1E1E;border-radius:24px;width:90%;max-width:500px;padding:24px;}
+
+/* Sad animation for deleting account cards */
+.card-surface.deleting {
+  animation: sad-account-delete 0.6s forwards ease-out;
+  pointer-events: none; /* Disable further interaction during animation */
+}
+
+@keyframes sad-account-delete {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.8) translateY(20px) opacity: 0; } /* Shrink, move down, and fade out */
+}
+
+.shader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: #000000;
+}
+
+.content-layer {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: 100vh;
+  color: #ffffff;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+.aurora-glow { text-shadow: 0 0 10px rgba(0, 180, 216, 0.5), 0 0 20px rgba(114, 9, 183, 0.3); }
+
+.aurora-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s ease;
+}
+
+.aurora-card:hover {
+  border-color: rgba(0, 180, 216, 0.4);
+  box-shadow: 0 0 20px rgba(0, 180, 216, 0.2);
+  transform: translateY(-2px);
+}
 </style>
 </head>
 <body class="bg-background text-on-background antialiased pb-[90px] md:pb-0">
+<div class="shader-container"></div>
+<div class="content-layer">
 
 <header class="sticky top-0 w-full bg-background border-b border-outline-variant/30 z-50">
   <div class="flex flex-row-reverse justify-between items-center px-container-padding h-16 max-w-[1200px] mx-auto">
@@ -68,20 +133,21 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
     <p class="font-body-lg text-body-lg text-on-surface-variant">لا توجد حسابات بعد</p>
     <button onclick="openAddModal()" class="px-6 py-3 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:opacity-80">أضف حسابك الأول</button>
   </div>
+  <p class="text-center font-label-caps text-label-caps text-on-surface-variant pb-8" id="app-version-display"></p>
 </main>
 
 <!-- BOTTOM NAV -->
 <!-- استخدم هذا الـ Nav فقط -->
-<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
+<nav class="aurora-card border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
     <a href="dashboard.html" class="nav-link" data-tooltip="الرئيسية">
-        <span class="material-symbols-outlined">home</span>
+        <span class="material-symbols-outlined aurora-glow">home</span>
         <span class="text-[10px] md:hidden font-bold">الرئيسية</span>
     </a>
     <a href="transactions.html" class="nav-link" data-tooltip="الحركات">
-        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="material-symbols-outlined aurora-glow">receipt_long</span>
         <span class="text-[10px] md:hidden font-bold">الحركات</span>
     </a>
-    <button onclick="openAddModal()" class="nav-main-btn" data-tooltip="إضافة حركة">
+    <button onclick="openAddModal()" class="nav-main-btn animate-float" data-tooltip="إضافة حركة">
         <span class="material-symbols-outlined">add</span>
     </button>
     <a href="accounts.html" class="nav-link active" data-tooltip="الحسابات">
@@ -136,6 +202,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
     <button onclick="submitAccount()" class="w-full h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">حفظ</button>
   </div>
 </div>
+</div>
 
 <!-- TRANSFER MODAL -->
 <div id="transfer-modal" class="modal-overlay transfer-modal" onclick="if(event.target===this)closeTransferModal()">
@@ -181,16 +248,25 @@ function renderAccounts(){
   empty.classList.add('hidden');
   const typeLabel={cash:'كاش',bank:'بنك',savings:'توفير',credit:'بطاقة'};
   grid.innerHTML=state.accounts.map(a=>`
-    <div class="card-surface p-6 flex flex-col gap-4 hover:border-primary-fixed/50 transition-colors cursor-pointer group" onclick="window.location.href='account-details.html?id=${a.id}'">
+    <div class="card-surface p-6 flex flex-col gap-6 aurora-card cursor-pointer group animate-card" onclick="window.location.href='account-details.html?id=${a.id}'">
       <div class="flex justify-between items-start flex-row-reverse">
         <div class="flex items-center gap-3 flex-row-reverse">
-          <span class="text-3xl">${a.icon||'💰'}</span>
+          <div class="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+            ${a.icon||'💰'}
+          </div>
           <div class="flex flex-col items-end">
-            <span class="font-body-lg text-body-lg font-bold text-on-surface">${a.name}</span>
+            <span class="text-xl font-black text-on-surface">${a.name}</span>
             <span class="font-label-caps text-label-caps text-on-surface-variant">${typeLabel[a.type]||a.type}</span>
           </div>
         </div>
-        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary-fixed transition-colors">edit</span>
+        <div class="flex gap-2">
+          <button onclick="event.stopPropagation(); openEditModal('${a.id}')" class="p-2 rounded-full hover:bg-white/10 text-on-surface-variant group-hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">edit</span>
+          </button>
+          <button onclick="event.stopPropagation(); confirmAndDeleteAccount(event, '${a.id}')" class="p-1 rounded-full hover:bg-white/10 text-on-surface-variant group-hover:text-error transition-colors">
+            <span class="material-symbols-outlined" data-delete-btn>delete</span>
+          </button>
+        </div>
       </div>
       <div class="flex flex-col items-end">
         <span class="font-display-lg text-[32px] leading-tight font-bold ${(a.balance||0)>=0?'text-primary-fixed':'text-error'}">${fmt(a.balance||0)}</span>
@@ -220,7 +296,11 @@ function openAddModal(){
   document.getElementById('acc-modal').classList.add('active');
 }
 
-function openEditModal(acc){
+function openEditModal(accOrId){
+  const acc = typeof accOrId === 'string' 
+    ? state.accounts.find(a => a.id === accOrId) 
+    : accOrId;
+  if(!acc) return;
   state.editAcc=acc;
   state.selectedIcon=acc.icon||'💰';
   document.getElementById('acc-modal-title').textContent='تعديل الحساب';
@@ -259,24 +339,57 @@ async function submitAccount(){
   }catch(e){console.error(e);showToast('خطأ','error');}
 }
 
-async function deleteAccount(){
-  if(!confirm('حذف هذا الحساب نهائياً؟'))return;
+async function deleteAccount(skipConfirm = false){
+  if(!skipConfirm) {
+    if(!confirm('سيتم حذف هذا الحساب وجميع الحركات والالتزامات المرتبطة به نهائياً. هل أنت متأكد؟')) return;
+  }
   try{
     await DB.deleteAccount(state.editAcc.id);
-    showToast('تم الحذف');
+    UI.showToast('تم الحذف ✅');
     closeAccModal();
     await loadAccounts();
-  }catch(e){showToast('خطأ','error');}
+  }catch(e){UI.showToast('خطأ أثناء الحذف','error');}
 }
 
 // TRANSFER MODAL
 function openTransferModal(){
+  // Populate 'from' and 'to' account selects
   const currency = UI.getCurrency();
   const opts='<option value="">اختر...</option>'+state.accounts.map(a=>`<option value="${a.id}">${a.icon||'💰'} ${a.name} — ${fmt(a.balance)} ${currency}</option>`).join('');
   document.getElementById('from-acc').innerHTML=opts;
   document.getElementById('to-acc').innerHTML=opts;
   document.getElementById('transfer-amount').value='';
   document.getElementById('transfer-modal').classList.add('active');
+}
+
+// New function to handle delete confirmation from the card
+async function confirmAndDeleteAccount(event, accountId) {
+  state.editAcc = state.accounts.find(acc => acc.id === accountId);
+  if (!state.editAcc) {
+    UI.showToast('الحساب غير موجود', 'error');
+    return;
+  }
+
+  if(!confirm('سيتم حذف هذا الحساب وجميع الحركات والالتزامات المرتبطة به نهائياً. هل أنت متأكد؟')) return;
+
+  const deleteButton = event.currentTarget;
+  const accountCard = deleteButton.closest('.card-surface');
+  const originalDeleteIcon = deleteButton.querySelector('.material-symbols-outlined').textContent;
+
+  try {
+    accountCard.classList.add('deleting');
+    deleteButton.querySelector('.material-symbols-outlined').textContent = 'sentiment_dissatisfied'; // Change icon to sad face
+    
+    // Small delay to allow the "sad" animation to be seen before the re-render
+    await new Promise(r => setTimeout(r, 400));
+    await deleteAccount(true); // تخطي التأكيد لأننا أكدنا بالفعل في confirmAndDeleteAccount
+  } catch(e) {
+    console.error('خطأ في حذف الحساب:', e);
+    UI.showToast('خطأ في حذف الحساب', 'error');
+    // Revert animation and icon on error
+    accountCard.classList.remove('deleting');
+    deleteButton.querySelector('.material-symbols-outlined').textContent = originalDeleteIcon;
+  }
 }
 function closeTransferModal(){document.getElementById('transfer-modal').classList.remove('active');}
 async function submitTransfer(){

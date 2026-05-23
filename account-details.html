@@ -21,11 +21,66 @@ body{font-family:'Almarai',sans-serif;min-height:100dvh;background:#020205;}
 .modal-sheet{background:#1E1E1E;border-radius:32px 32px 0 0;width:100%;max-width:640px;padding:28px;max-height:90vh;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);}
 .skeleton { background: linear-gradient(90deg, rgba(30, 30, 46, 0.4) 25%, rgba(60, 60, 80, 0.4) 50%, rgba(30, 30, 46, 0.4) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
 @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+  --primary-aurora-blue: #01497c;
+  --primary-aurora-cyan: #00b4d8;
+  --primary-aurora-purple: #7209b7;
+}
+
+.shader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: #000000;
+}
+
+.content-layer {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: 100vh;
+  color: #ffffff;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+.aurora-glow { text-shadow: 0 0 10px rgba(0, 180, 216, 0.5), 0 0 20px rgba(114, 9, 183, 0.3); }
+
+.aurora-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s ease;
+}
+
+.aurora-card:hover {
+  border-color: rgba(0, 180, 216, 0.4);
+  box-shadow: 0 0 20px rgba(0, 180, 216, 0.2);
+  transform: translateY(-2px);
+}
 </style>
 </head>
-<body class="text-[#e8e0f0] antialiased pb-[90px] md:pb-0 md:pr-20">
-  <div class="mesh-gradient"></div>
+<body class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
+  <div class="shader-container">
+    <div class="mesh-gradient"></div>
+  </div>
 
+  <div class="content-layer">
 <header class="sticky top-0 w-full bg-background/80 backdrop-blur-md border-b border-white/5 z-50">
   <div class="flex flex-row-reverse justify-between items-center px-6 h-16 max-w-[1200px] mx-auto">
     <div class="flex items-center gap-3 flex-row-reverse">
@@ -47,15 +102,17 @@ body{font-family:'Almarai',sans-serif;min-height:100dvh;background:#020205;}
   
   <!-- Transactions list -->
   <div id="tx-list" class="flex flex-col gap-4"></div>
+
+  <p class="text-center font-label-caps text-label-caps text-on-surface-variant py-8" id="app-version-display"></p>
 </main>
 
 <!-- NAV -->
-<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
-    <a href="dashboard.html" class="nav-link" data-tooltip="الرئيسية"><span class="material-symbols-outlined">home</span></a>
-    <a href="transactions.html" class="nav-link" data-tooltip="الحركات"><span class="material-symbols-outlined">receipt_long</span></a>
-    <a href="dashboard.html?openAdd=true" class="nav-main-btn"><span class="material-symbols-outlined">add</span></a>
-    <a href="accounts.html" class="nav-link active" data-tooltip="الحسابات"><span class="material-symbols-outlined">account_balance_wallet</span></a>
-    <a href="settings.html" class="nav-link" data-tooltip="الإعدادات"><span class="material-symbols-outlined">settings</span></a>
+<nav class="aurora-card border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
+    <a href="dashboard.html" class="nav-link" data-tooltip="الرئيسية"><span class="material-symbols-outlined aurora-glow">home</span></a>
+    <a href="transactions.html" class="nav-link" data-tooltip="الحركات"><span class="material-symbols-outlined aurora-glow">receipt_long</span></a>
+    <a href="dashboard.html?openAdd=true" class="nav-main-btn animate-float"><span class="material-symbols-outlined">add</span></a>
+    <a href="accounts.html" class="nav-link active" data-tooltip="الحسابات"><span class="material-symbols-outlined aurora-glow">account_balance_wallet</span></a>
+    <a href="settings.html" class="nav-link" data-tooltip="الإعدادات"><span class="material-symbols-outlined aurora-glow">settings</span></a>
     <button onclick="UI.signOut()" class="nav-link text-error" data-tooltip="خروج"><span class="material-symbols-outlined">logout</span></button>
 </nav>
 
@@ -149,13 +206,27 @@ async function loadTransactions(accId) {
 
 function renderList() {
     const list = document.getElementById('tx-list');
-    if (!state.txs.length) {
-        list.innerHTML = `<div class="card-surface p-12 text-center text-on-surface-variant">لا توجد حركات مسجلة لهذا الحساب</div>`;
-        return;
-    }
+    
+    // Calculate the opening balance based on current balance and all movements
+    let netChange = 0;
+    state.txs.forEach(t => {
+        netChange += (t.type === 'income' ? t.amount : -t.amount);
+    });
+    const openingBalValue = (state.account.balance || 0) - netChange;
+
+    const openingTx = {
+        id: 'opening_' + state.account.id,
+        amount: Math.abs(openingBalValue),
+        type: openingBalValue >= 0 ? 'income' : 'expense',
+        note: 'رصيد افتتاحي',
+        date: state.account.createdAt || new Date(),
+        isOpening: true
+    };
+
+    const allItems = [...state.txs, openingTx];
 
     const groups = {};
-    state.txs.forEach(t => {
+    allItems.forEach(t => {
         const d = t.date?.toDate ? t.date.toDate() : new Date(t.date);
         const key = d.toLocaleDateString('ar-JO', { month: 'long', year: 'numeric' });
         if (!groups[key]) groups[key] = [];
@@ -178,13 +249,13 @@ function txRow(t) {
     const date = (t.date?.toDate ? t.date.toDate() : new Date(t.date)).toLocaleDateString('ar-JO', { day: 'numeric', month: 'short' });
     
     return `
-        <div class="flex flex-row-reverse items-center justify-between p-4 border-b border-white/5 last:border-0 hover:bg-white/5 cursor-pointer transition-colors" onclick='openViewModal(${JSON.stringify({...t, date: (t.date?.toDate ? t.date.toDate().toISOString() : t.date)})})'>
+        <div class="flex flex-row-reverse items-center justify-between p-4 border-b border-white/5 last:border-0 hover:bg-white/5 cursor-pointer transition-colors" onclick="openViewModal('${t.id}')">
             <div class="flex flex-row-reverse items-center gap-4">
                 <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl border border-white/5">
-                    ${cat?.emoji || '📄'}
+                    ${t.isOpening ? '🏁' : (cat?.emoji || '📄')}
                 </div>
                 <div class="flex flex-col items-end">
-                    <span class="font-bold">${t.note || cat?.name || 'بدون ملاحظة'}</span>
+                    <span class="font-bold">${t.isOpening ? 'رصيد افتتاحي' : (t.note || cat?.name || 'بدون ملاحظة')}</span>
                     <span class="text-xs text-on-surface-variant">${date}</span>
                 </div>
             </div>
@@ -193,15 +264,21 @@ function txRow(t) {
     `;
 }
 
-function openViewModal(tx) {
+function openViewModal(txId) {
+    let tx;
+    if (txId.startsWith('opening_')) {
+        tx = { id: txId, amount: Math.abs(state.account.balance), type: 'income', note: 'رصيد افتتاحي', isOpening: true, date: state.account.createdAt };
+    } else {
+        tx = state.txs.find(t => t.id === txId);
+    }
     state.viewTx = tx;
     const cat = state.categories.find(c => c.id === tx.categoryId);
     const date = new Date(tx.date).toLocaleDateString('ar-JO', { dateStyle: 'full' });
     
     document.getElementById('view-content').innerHTML = `
         <div class="flex flex-col items-center text-center p-6 bg-white/5 rounded-3xl gap-2">
-            <span class="text-6xl mb-2">${cat?.emoji || '📄'}</span>
-            <span class="text-on-surface-variant font-bold">${cat?.name || 'فئة غير محددة'}</span>
+            <span class="text-6xl mb-2">${tx.isOpening ? '🏁' : (cat?.emoji || '📄')}</span>
+            <span class="text-on-surface-variant font-bold">${tx.isOpening ? 'رصيد افتتاحي' : (cat?.name || 'فئة غير محددة')}</span>
             <span class="text-4xl font-black ${tx.type === 'income' ? 'text-[#39FF14]' : 'text-on-surface'}">
                 ${tx.type === 'income' ? '+' : '-'}${UI.formatCurrency(tx.amount)} ${UI.getCurrency()}
             </span>
@@ -234,11 +311,16 @@ function openEditModal(tx) {
     document.getElementById('edit-date').value = new Date(tx.date).toISOString().split('T')[0];
     
     const cats = state.categories.filter(c => c.type === tx.type);
-    document.getElementById('edit-categories').innerHTML = cats.map(c => `
-        <button onclick="state.editCatId='${c.id}'; renderEditCats()" class="edit-cat-chip shrink-0 px-4 py-2 rounded-full border transition-all ${state.editCatId === c.id ? 'bg-primary border-primary text-white' : 'border-white/10 text-on-surface-variant'}" data-id="${c.id}">
-            ${c.emoji} ${c.name}
-        </button>
-    `).join('');
+    const catContainer = document.getElementById('edit-categories');
+    if (tx.isOpening) {
+        catContainer.innerHTML = '<p class="text-on-surface-variant text-sm py-2 px-1">الرصيد الافتتاحي لا يتبع فئة محددة</p>';
+    } else {
+        catContainer.innerHTML = cats.map(c => `
+            <button onclick="state.editCatId='${c.id}'; renderEditCats()" class="edit-cat-chip shrink-0 px-4 py-2 rounded-full border transition-all ${state.editCatId === c.id ? 'bg-primary border-primary text-white' : 'border-white/10 text-on-surface-variant'}" data-id="${c.id}">
+                ${c.emoji} ${c.name}
+            </button>
+        `).join('');
+    }
 
     closeViewModal();
     document.getElementById('edit-modal').classList.add('active');
@@ -261,11 +343,19 @@ async function submitEdit() {
     if(!amount || amount <= 0) return UI.showToast('المبلغ غير صحيح', 'error');
 
     try {
-        await DB.updateTransaction(state.editTx.id, state.editTx, {
-            ...state.editTx,
-            amount, note, date,
-            categoryId: state.editCatId
-        });
+        if (state.editTx.isOpening) {
+            // Calculate the difference between old and new initial balance
+            const oldVal = state.editTx.type === 'income' ? state.editTx.amount : -state.editTx.amount;
+            const newVal = state.editTx.type === 'income' ? amount : -amount;
+            const diff = newVal - oldVal;
+            await DB.updateAccount(state.account.id, { balance: state.account.balance + diff });
+        } else {
+            await DB.updateTransaction(state.editTx.id, state.editTx, {
+                ...state.editTx,
+                amount, note, date,
+                categoryId: state.editCatId
+            });
+        }
         UI.showToast('تم التعديل ✅');
         window.location.reload();
     } catch(e) { UI.showToast('حدث خطأ', 'error'); }
@@ -274,11 +364,18 @@ async function submitEdit() {
 async function deleteTransaction() {
     if(!confirm('هل تريد حذف هذه الحركة؟')) return;
     try {
-        await DB.deleteTransaction(state.editTx.id, state.editTx);
+        if (state.editTx.isOpening) {
+            // Deleting opening balance sets it to zero
+            const reversal = state.editTx.type === 'income' ? -state.editTx.amount : state.editTx.amount;
+            await DB.updateAccount(state.account.id, { balance: state.account.balance + reversal });
+        } else {
+            await DB.deleteTransaction(state.editTx.id, state.editTx);
+        }
         UI.showToast('تم الحذف ✅');
         window.location.reload();
     } catch(e) { UI.showToast('حدث خطأ', 'error'); }
 }
 </script>
+</div>
 </body>
 </html>

@@ -38,7 +38,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .mesh-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(at 0% 0%, rgba(255, 45, 120, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(57, 255, 20, 0.03) 0px, transparent 50%), #020205; }
 </style>
 </head>
-<body class="bg-[#020205] text-[#e8e0f0] antialiased pb-[90px] md:pb-0 md:pr-20">
+<body class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
   <div class="mesh-gradient"></div>
 
 <!-- TOP BAR -->
@@ -100,27 +100,28 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
     <p class="font-body-lg text-body-lg text-on-surface-variant">لا توجد حركات</p>
     <button onclick="openAddModal()" class="px-6 py-2.5 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:opacity-90">إضافة أول حركة</button>
   </div>
+  <p class="text-center font-label-caps text-label-caps text-on-surface-variant pb-8" id="app-version-display"></p>
 </main>
 
 <!-- ── BOTTOM NAV (Mobile) ───────────────────────────────────── -->
-<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
+<nav class="aurora-card border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
     <a href="dashboard.html" class="nav-link" data-tooltip="الرئيسية">
-        <span class="material-symbols-outlined">home</span>
+        <span class="material-symbols-outlined aurora-glow">home</span>
         <span class="text-[10px] md:hidden font-bold">الرئيسية</span>
     </a>
     <a href="transactions.html" class="nav-link active" data-tooltip="الحركات">
-        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="material-symbols-outlined aurora-glow">receipt_long</span>
         <span class="text-[10px] md:hidden font-bold">الحركات</span>
     </a>
-    <button onclick="openAddModal()" class="nav-main-btn" data-tooltip="إضافة حركة">
+    <button onclick="openAddModal()" class="nav-main-btn animate-float" data-tooltip="إضافة حركة">
         <span class="material-symbols-outlined">add</span>
     </button>
     <a href="accounts.html" class="nav-link" data-tooltip="الحسابات">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span class="material-symbols-outlined aurora-glow">account_balance_wallet</span>
         <span class="text-[10px] md:hidden font-bold">الحسابات</span>
     </a>
     <a href="settings.html" class="nav-link" data-tooltip="الإعدادات">
-        <span class="material-symbols-outlined">settings</span>
+        <span class="material-symbols-outlined aurora-glow">settings</span>
         <span class="text-[10px] md:hidden font-bold">الإعدادات</span>
     </a>
     <button onclick="UI.signOut()" class="nav-link text-error" data-tooltip="خروج">
@@ -343,7 +344,7 @@ function txCard(t){
   const sign=t.type==='income'?'+':'-';
   const color=t.type==='income'?'text-[#39FF14]':'text-on-surface';
   const badge=t.isRecurring?'<span class="font-label-caps text-label-caps px-2 py-0.5 rounded-full bg-tertiary/20 text-tertiary ml-1">ثابت</span>':'';
-  return `<div class="flex flex-row-reverse items-center justify-between py-3 px-4 border-b border-surface-container-high last:border-0 hover:bg-surface-container/50 transition-colors cursor-pointer" onclick='openViewModal(${JSON.stringify({...t,date:t.date?.toDate?t.date.toDate().toISOString():t.date})})'>
+  return `<div class="flex flex-row-reverse items-center justify-between py-3 px-4 border-b border-surface-container-high last:border-0 hover:bg-surface-container/50 transition-colors cursor-pointer" onclick="openViewModal('${t.id}')">
     <div class="flex flex-row-reverse items-center gap-3">
       <div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-xl border border-outline-variant/30">
         ${cat?.emoji||(t.type==='income'?'💵':'💸')}
@@ -420,8 +421,9 @@ async function submitTransaction(){
 }
 
 // EDIT MODAL
-function openViewModal(tx){
-  state.viewTx=tx;
+function openViewModal(txId){
+  const tx = state.allTx.find(t => t.id === txId);
+  state.viewTx = tx;
   const date = tx.date?.seconds ? new Date(tx.date.seconds*1000) : new Date(tx.date);
   document.getElementById('view-amount').textContent = `${tx.type==='income'?'+':'-'}${fmt(tx.amount)} ${UI.getCurrency()}`;
   document.getElementById('view-account').textContent = getAccountName(tx.accountId);

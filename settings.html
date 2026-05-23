@@ -15,9 +15,9 @@
 </script>
 <style>
 body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
-.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;} /* Keep this for general icon styling */
 .fill-icon{font-variation-settings:'FILL' 1;}
-.card-surface{background-color:#1E1E1E;border:1px solid #2D2D2D;border-radius:16px;}
+.card-surface{background:var(--bg-glass);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.05);border-radius:24px;}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:flex-end;justify-content:center;}
 .modal-overlay.active{display:flex;}
 .modal-sheet{background:#1E1E1E;border-radius:24px 24px 0 0;width:100%;max-width:640px;padding:24px;max-height:90vh;overflow-y:auto;}
@@ -25,11 +25,15 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .toggle-track.on{background:#39FF14;}
 .toggle-thumb{position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:9999px;transition:transform 0.2s;}
 .toggle-track.on .toggle-thumb{transform:translateX(-22px);}
-.setting-row{display:flex;flex-direction:row-reverse;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #2D2D2D;}
+.setting-row{display:flex;flex-direction:row-reverse;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.3s;}
+.setting-row:hover{background:rgba(255,255,255,0.02);}
 .setting-row:last-child{border-bottom:none;}
+.premium-icon-box {
+    width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+}
 </style>
-</head>
-<body style="display: none; background:#0a0a12;" class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
+<body style="display: none;" class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
   
 <header class="sticky top-0 w-full bg-background border-b border-outline-variant/30 z-50">
   <div class="flex flex-row-reverse justify-between items-center px-container-padding h-16 max-w-[1200px] mx-auto">
@@ -43,14 +47,14 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 <main class="max-w-[1200px] mx-auto px-container-padding pt-6 flex flex-col gap-6">
 
   <!-- Profile card -->
-  <div class="card-surface p-container-padding flex flex-row-reverse items-center gap-4">
+  <div class="aurora-card p-8 flex flex-row-reverse items-center gap-6 rounded-[32px]">
     <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
-    <div id="profile-avatar" onclick="document.getElementById('avatar-upload').click()" class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border-2 border-primary-container cursor-pointer hover:opacity-80 transition-opacity group relative">
-      <span class="material-symbols-outlined text-on-surface-variant text-[32px]">person</span>
+    <div id="profile-avatar" onclick="document.getElementById('avatar-upload').click()" class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center overflow-hidden border-2 border-primary cursor-pointer hover:scale-105 transition-transform group relative shadow-glow">
+      <span class="material-symbols-outlined text-on-surface-variant text-[40px]">person</span>
     </div>
     <div class="flex flex-col items-end flex-grow">
-      <span id="profile-name" class="font-headline-md text-headline-md font-bold text-on-surface">—</span>
-      <span id="profile-email" class="font-body-md text-body-md text-on-surface-variant">—</span>
+      <span id="profile-name" class="text-2xl font-black text-on-surface">—</span>
+      <span id="profile-email" class="text-on-surface-variant font-medium">—</span>
     </div>
     <button onclick="UI.signOut()" class="px-3 py-2 rounded-full border border-error/50 text-error font-label-caps text-label-caps hover:bg-error/10 transition-colors text-sm">
       تسجيل الخروج
@@ -161,7 +165,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
     </div>
   </div>
 
-  <p class="text-center font-label-caps text-label-caps text-on-surface-variant pb-4">Money with Basel v1.0</p>
+  <p class="text-center font-label-caps text-label-caps text-on-surface-variant pb-4">Money with Basel <span id="app-version-display"></span></p>
 </main>
 
 <!-- BOTTOM NAV -->
@@ -271,7 +275,7 @@ auth.onAuthStateChanged(async u=>{
   
   app.user=u;
   renderProfile(u);
-  initTheme();
+  updateToggleUI();
   initPreferences();
   await loadAll();
 });
@@ -320,14 +324,51 @@ function handleAvatarUpload(event) {
   reader.readAsDataURL(file);
 }
 
-function initTheme(){
-  document.getElementById('dark-toggle').classList.toggle('on', localStorage.getItem('theme') !== 'light');
+async function exportData() {
+  try {
+    UI.setLoading(true);
+    const data = await DB.exportFullData(app.user.uid);
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `money_basel_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    showToast('تم تحميل النسخة الاحتياطية بنجاح ✅');
+  } catch (e) {
+    console.error(e);
+    showToast('حدث خطأ أثناء التصدير', 'error');
+  } finally {
+    UI.setLoading(false);
+  }
 }
+
+async function resetData() {
+  if (!confirm('تحذير: سيتم حذف جميع البيانات (الحسابات، الحركات، الفئات، الالتزامات). هل أنت متأكد؟')) return;
+  try {
+    UI.setLoading(true);
+    await DB.clearAllUserData(app.user.uid);
+    showToast('تم تصفير الحساب بنجاح ✅');
+    window.location.reload();
+  } catch (e) {
+    console.error(e);
+    showToast('حدث خطأ أثناء تصفير البيانات', 'error');
+  } finally {
+    UI.setLoading(false);
+  }
+}
+
 function toggleTheme(){
   const current = localStorage.getItem('theme') || 'dark';
   const next = current === 'dark' ? 'light' : 'dark';
+
   UI.setTheme(next);
-  document.getElementById('dark-toggle').classList.toggle('on', next === 'dark');
+  updateToggleUI();
+  showToast(next === 'dark' ? 'تم تفعيل الوضع الداكن 🌙' : 'تم تفعيل الوضع الفاتح ☀️');
+}
+function updateToggleUI(){
+  const isDark = (localStorage.getItem('theme') || 'dark') === 'dark';
+  document.getElementById('dark-toggle').classList.toggle('on', isDark);
 }
 function initPreferences(){
   const currency = UI.getCurrency();
@@ -372,7 +413,7 @@ function renderCategories(){
 }
 
 function catRow(c){
-  return `<div class="setting-row cursor-pointer hover:bg-surface-container/50 transition-colors" onclick='openEditCat(${JSON.stringify(c)})'>
+  return `<div class="setting-row cursor-pointer hover:bg-surface-container/50 transition-colors" onclick="openEditCat('${c.id}')">
     <div class="flex items-center gap-3 flex-row-reverse">
       <span class="text-2xl">${c.emoji}</span>
       <span class="font-body-md text-body-md text-on-surface">${c.name}</span>
@@ -389,7 +430,7 @@ function renderCommitments(){
     const next=c.nextRunDate?.toDate?c.nextRunDate.toDate():new Date(c.nextRunDate);
     const daysLeft=Math.ceil((next-new Date())/86400000);
     const typeColor=c.type==='income'?'text-[#39FF14]':'text-error';
-    return `<div class="setting-row cursor-pointer hover:bg-surface-container/50 transition-colors" onclick='openEditCommit(${JSON.stringify({...c,nextRunDate:null,startDate:null,endDate:null,createdAt:null,lastRunDate:null})})'>
+    return `<div class="setting-row cursor-pointer hover:bg-surface-container/50 transition-colors" onclick="openEditCommit('${c.id}')">
       <div class="flex flex-col items-end">
         <span class="font-body-md text-body-md text-on-surface">${c.name}</span>
         <span class="font-number-sm text-number-sm text-on-surface-variant">بعد ${daysLeft} يوم · يوم ${c.dayOfMonth} شهرياً</span>
@@ -421,7 +462,8 @@ function openCatModal(){
   setCatType('expense');
   document.getElementById('cat-modal').classList.add('active');
 }
-function openEditCat(cat){
+function openEditCat(id){
+  const cat = state.categories.find(c => c.id === id);
   state.editCat=cat;
   document.getElementById('cat-modal-title').textContent='تعديل الفئة';
   document.getElementById('cat-name').value=cat.name;
@@ -471,7 +513,8 @@ function openCommitModal(){
   setCommitType('expense');
   document.getElementById('commit-modal').classList.add('active');
 }
-function openEditCommit(c){
+function openEditCommit(id){
+  const c = state.commitments.find(com => com.id === id);
   state.editCommit=c;
   document.getElementById('commit-modal-title').textContent='تعديل الالتزام';
   document.getElementById('commit-name').value=c.name;
@@ -511,8 +554,48 @@ async function submitCommitment(){
 }
 async function deleteCommitment(){
   if(!confirm('إيقاف هذا الالتزام؟'))return;
-  await DB.deleteCommitment(state.editCommit.id);
-  showToast('تم الإيقاف'); closeCommitModal(); await loadAll();
+  try {
+    await DB.deleteCommitment(state.editCommit.id);
+    showToast('تم الإيقاف'); closeCommitModal(); await loadAll();
+  } catch(e) { showToast('خطأ في إيقاف الالتزام', 'error'); }
+}
+
+async function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!confirm('سيتم مسح البيانات الحالية واستبدالها بالنسخة الاحتياطية. استمرار؟')) return;
+      UI.setLoading(true);
+      await DB.importData(app.user.uid, data);
+      showToast('تم استيراد البيانات بنجاح ✅');
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      showToast('الملف غير صالح أو حدث خطأ', 'error');
+    } finally {
+      UI.setLoading(false);
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function deleteAccountPermanently() {
+  if (!confirm('تحذير نهائي: سيتم حذف حسابك بالكامل وجميع بياناتك من النظام ولن تتمكن من استعادتها. هل أنت متأكد؟')) return;
+  try {
+    UI.setLoading(true);
+    await DB.clearAllUserData(app.user.uid, false);
+    await app.user.delete();
+    window.location.href = 'index.html';
+  } catch (e) {
+    console.error(e);
+    if (e.code === 'auth/requires-recent-login') {
+      alert('يجب إعادة تسجيل الدخول للقيام بهذه العملية الحساسة.');
+      UI.signOut();
+    } else { showToast('حدث خطأ أثناء الحذف', 'error'); }
+  } finally { UI.setLoading(false); }
 }
 
 </script>
