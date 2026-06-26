@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mwb-v2.2.0-theme';
+const CACHE_NAME = 'mwb-v2.2.1-theme-fix';
 const STATIC = [
     './',
     './index.html',
@@ -8,6 +8,8 @@ const STATIC = [
     './settings.html',
     './account-details.html',
     './manifest.json',
+    './favicon.ico',
+    './premium-theme.css',
     './css/variables.css',
     './css/base.css',
     './css/layout.css',
@@ -19,48 +21,57 @@ const STATIC = [
     './js/ui.js'
 ];
 
-self.addEventListener('install', e => {
-    e.waitUntil(
-        caches.open(CACHE_NAME).then(c => {
-            // Use map to attempt adding each file individually so one 404 doesn't break everything
-            return Promise.allSettled(STATIC.map(url => c.add(url)));
-        }).then(() => self.skipWaiting())
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => Promise.allSettled(STATIC.map(url => cache.add(url))))
+            .then(() => self.skipWaiting())
     );
 });
 
-self.addEventListener('activate', e => {
-    e.waitUntil(
+self.addEventListener('activate', event => {
+    event.waitUntil(
         caches.keys()
-            .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+            .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
             .then(() => self.clients.claim())
     );
 });
 
-self.addEventListener('fetch', e => {
-    if (e.request.method !== 'GET') return;
+self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
 
-    // Ignore external requests (Firebase, CDNs)
-    if (!e.request.url.startsWith(self.location.origin)) return;
+self.addEventListener('fetch', event => {
+    if (event.request.method !== 'GET') return;
+    if (!event.request.url.startsWith(self.location.origin)) return;
 
-    // ملفات محلية → Cache first, fallback network
-    e.respondWith(
-        caches.match(e.request).then(cached => {
-            if (cached) return cached;
-            return fetch(e.request).then(response => {
-                // Check if we received a valid response
-                if (!response || response.status !== 200 || response.type !== 'basic') {
+    const url = new URL(event.request.url);
+    const isFreshAsset = url.pathname.endsWith('.html') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('manifest.json') || url.pathname.endsWith('favicon.ico');
+
+    if (isFreshAsset) {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    if (response && response.status === 200 && response.type === 'basic') {
+                        const clone = response.clone();
+                        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                    }
                     return response;
-                }
+                })
+                .catch(() => caches.match(event.request).then(cached => cached || caches.match('./index.html')))
+        );
+        return;
+    }
 
-                // IMPORTANT: Clone the response. A response is a stream
-                // and can only be consumed once. We must consume the clone
-                // to put it into the cache and return the original to the browser.
-                const responseToCache = response.clone();
-                caches.open(CACHE_NAME).then(cache => {
-                    cache.put(e.request, responseToCache);
-                });
+    event.respondWith(
+        caches.match(event.request)
+            .then(cached => cached || fetch(event.request).then(response => {
+                if (response && response.status === 200 && response.type === 'basic') {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                }
                 return response;
-            });
-        }).catch(() => caches.match('./index.html'))
+            }))
+            .catch(() => caches.match('./index.html'))
     );
 });

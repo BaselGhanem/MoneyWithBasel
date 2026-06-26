@@ -17,15 +17,19 @@ const app = {
 };
 
 function showToast(message, type = 'default') {
+    if (window.UI && typeof window.UI.showToast === 'function') {
+        window.UI.showToast(message, type);
+        return;
+    }
     document.querySelector('.toast')?.remove();
     const toast = document.createElement('div');
-    const bg    = type === 'error' ? '#ff4444' : type === 'success' ? '#39FF14' : '#28283e';
-    const color = type === 'success' ? '#0a0a12' : '#e8e0f0';
+    const bg    = type === 'error' ? '#ef4444' : type === 'success' ? '#099999' : '#28283e';
+    const color = '#ffffff';
     toast.className = 'toast';
     toast.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
         background:${bg};color:${color};padding:12px 24px;border-radius:9999px;
-        font-family:Almarai,sans-serif;font-size:14px;font-weight:700;z-index:9999;
-        box-shadow:0 4px 20px rgba(0,0,0,0.4);white-space:nowrap;`;
+        font-family:Almarai,sans-serif;font-size:14px;font-weight:800;z-index:9999;
+        box-shadow:0 16px 40px rgba(0,0,0,0.22);white-space:nowrap;`;
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => {

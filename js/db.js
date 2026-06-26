@@ -13,7 +13,7 @@ async function createUserProfile(user) {
             email: user.email,
             displayName: user.displayName || '',
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            preferences: { theme: 'dark', currency: 'JOD' }
+            preferences: { theme: 'dark', currency: 'JOD', primaryColor: '#099999', textColor: '#e8e0f0' }
         });
         await seedDefaultCategories(user.uid);
     }
@@ -25,7 +25,7 @@ async function getUserProfile(uid) {
 }
 
 async function updateUserPreferences(uid, preferences) {
-    await db.collection('users').doc(uid).update({ preferences });
+    await db.collection('users').doc(uid).set({ preferences }, { merge: true });
 }
 
 // ── ACCOUNTS ─────────────────────────────────────────────────
@@ -375,7 +375,8 @@ async function getNetWorth(uid) {
 // ── DATA MANAGEMENT (Export / Import / Reset) ───────────────
 
 async function exportFullData(uid) {
-    const [accounts, categories, transactions, commitments] = await Promise.all([
+    const [profile, accounts, categories, transactions, commitments] = await Promise.all([
+        getUserProfile(uid),
         getAccounts(uid),
         getCategories(uid),
         getTransactions(uid),
@@ -395,6 +396,7 @@ async function exportFullData(uid) {
 
     return {
         exportDate: new Date().toISOString(),
+        preferences: profile?.preferences || null,
         accounts: processDocs(accounts),
         categories: processDocs(categories),
         transactions: processDocs(transactions),
@@ -419,6 +421,10 @@ async function clearAllUserData(uid, keepProfile = true) {
 async function importData(uid, data) {
     // 1. Clear current data first to avoid duplicates/conflicts
     await clearAllUserData(uid, true);
+
+    if (data.preferences && typeof data.preferences === 'object') {
+        await updateUserPreferences(uid, data.preferences);
+    }
 
     const batch = db.batch();
 
