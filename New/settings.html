@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar" style="background:#0a0a12;">
+<head>
+<script src="js/ui.js"></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>الإعدادات - Money with Basel</title>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-container-low":"#111118","on-surface-variant":"#a098b0","on-surface":"#e8e0f0",error:"#ff4444",background:"#0a0a12","surface-container-high":"#1e1e30",tertiary:"#ffe04a","surface-bright":"#1a1a2e",outline:"#5a5068","primary-fixed":"#ffe0ec","error-container":"#3d0f0f","surface-container":"#141422","outline-variant":"#302840","on-primary-container":"#ffe0ec","surface-container-lowest":"#0a0a12","surface-tint":"#ff2d78",secondary:"#00ffcc","surface-dim":"#0f0f1a","primary-container":"#b3004e","on-background":"#e8e0f0","on-primary":"#1a0010","surface-container-highest":"#28283e","primary-fixed-dim":"#ff80aa","surface-variant":"#1e1e30",primary:"#ff2d78",surface:"#0f0f1a"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"container-padding":"24px",unit:"8px","section-margin":"40px",gutter:"16px","card-gap":"20px"},fontFamily:{"label-caps":["Almarai","sans-serif"],"headline-md":["Almarai","sans-serif"],"body-lg":["Almarai","sans-serif"],"number-sm":["Almarai","sans-serif"],"display-lg":["Almarai","sans-serif"],"body-md":["Almarai","sans-serif"],"number-lg":["Almarai","sans-serif"],"headline-lg":["Almarai","sans-serif"]},fontSize:{"label-caps":["12px",{lineHeight:"16px",fontWeight:"700"}],"headline-md":["24px",{lineHeight:"32px",fontWeight:"600"}],"body-lg":["18px",{lineHeight:"28px",fontWeight:"400"}],"number-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-lg":["48px",{lineHeight:"56px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],"number-lg":["24px",{lineHeight:"32px",fontWeight:"500"}],"headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.01em",fontWeight:"600"}]}}}};
+</script>
+<style>
+body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;} /* Keep this for general icon styling */
+.fill-icon{font-variation-settings:'FILL' 1;}
+.card-surface{background:var(--bg-glass);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.05);border-radius:24px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:flex-end;justify-content:center;}
+.modal-overlay.active{display:flex;}
+.modal-sheet{background:#1E1E1E;border-radius:24px 24px 0 0;width:100%;max-width:640px;padding:24px;max-height:90vh;overflow-y:auto;}
+.toggle-track{background:#2D2D2D;width:48px;height:26px;border-radius:9999px;position:relative;cursor:pointer;transition:background 0.2s;}
+.toggle-track.on{background:#39FF14;}
+.toggle-thumb{position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:9999px;transition:transform 0.2s;}
+.toggle-track.on .toggle-thumb{transform:translateX(-22px);}
+.setting-row{display:flex;flex-direction:row-reverse;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.3s;}
+.setting-row:hover{background:rgba(255,255,255,0.02);}
+.setting-row:last-child{border-bottom:none;}
+.premium-icon-box {
+    width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+}
+</style>
+
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#099999"/>
+<link href="css/product-upgrade.css?v=20260626_world_class" rel="stylesheet"/>
+</head>
+<body style="display: none;" class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
+  
+<header class="sticky top-0 w-full bg-background border-b border-outline-variant/30 z-50">
+  <div class="flex flex-row-reverse justify-between items-center px-container-padding h-16 max-w-[1200px] mx-auto">
+    <h1 class="font-headline-md text-headline-md font-bold text-primary">الإعدادات</h1>
+    <div id="hdr-avatar" class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant flex items-center justify-center">
+      <span class="material-symbols-outlined text-on-surface-variant">person</span>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1200px] mx-auto px-container-padding pt-6 flex flex-col gap-6">
+
+  <!-- Profile card -->
+  <div class="aurora-card p-8 flex flex-row-reverse items-center gap-6 rounded-[32px]">
+    <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+    <div id="profile-avatar" onclick="document.getElementById('avatar-upload').click()" class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center overflow-hidden border-2 border-primary cursor-pointer hover:scale-105 transition-transform group relative shadow-glow">
+      <span class="material-symbols-outlined text-on-surface-variant text-[40px]">person</span>
+    </div>
+    <div class="flex flex-col items-end flex-grow">
+      <span id="profile-name" class="text-2xl font-black text-on-surface">—</span>
+      <span id="profile-email" class="text-on-surface-variant font-medium">—</span>
+    </div>
+    <button onclick="UI.signOut()" class="px-3 py-2 rounded-full border border-error/50 text-error font-label-caps text-label-caps hover:bg-error/10 transition-colors text-sm">
+      تسجيل الخروج
+    </button>
+  </div>
+
+  <!-- Appearance -->
+  <div class="card-surface overflow-hidden">
+    <div class="px-container-padding py-3 border-b border-outline-variant">
+      <h2 class="font-label-caps text-label-caps text-on-surface-variant">المظهر</h2>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">الوضع الداكن</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">مناسب للأماكن المعتمة</span>
+      </div>
+      <div id="dark-toggle" class="toggle-track on" onclick="toggleTheme()"><div class="toggle-thumb"></div></div>
+    </div>
+  </div>
+
+  <!-- Preferences -->
+  <div class="card-surface overflow-hidden">
+    <div class="px-container-padding py-3 border-b border-outline-variant">
+      <h2 class="font-label-caps text-label-caps text-on-surface-variant">التفضيلات</h2>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">العملة الافتراضية</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">يتم عرض المبالغ بهذه العملة</span>
+      </div>
+      <select id="currency-select" onchange="setCurrency(this.value)" class="bg-surface-container-highest border border-outline-variant rounded-xl px-4 py-2 text-on-surface font-body-md outline-none">
+        <option value="JOD">JOD</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">تسجيل الدخول بالبصمة</span>
+        <span id="biometric-note" class="font-body-md text-number-sm text-on-surface-variant">متاحة على المتصفحات الداعمة</span>
+      </div>
+      <div id="biometric-toggle" class="toggle-track" onclick="toggleBiometric()"><div class="toggle-thumb"></div></div>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="card-surface overflow-hidden">
+    <div class="px-container-padding py-3 border-b border-outline-variant flex justify-between items-center flex-row-reverse">
+      <h2 class="font-label-caps text-label-caps text-on-surface-variant">الفئات</h2>
+      <button onclick="openCatModal()" class="flex items-center gap-1 text-primary-fixed font-label-caps text-label-caps hover:opacity-80">
+        <span class="material-symbols-outlined text-[16px]">add</span> إضافة
+      </button>
+    </div>
+    <div id="categories-list" class="flex flex-col"></div>
+  </div>
+
+  <!-- Commitments -->
+  <div class="card-surface overflow-hidden">
+    <div class="px-container-padding py-3 border-b border-outline-variant flex justify-between items-center flex-row-reverse">
+      <h2 class="font-label-caps text-label-caps text-on-surface-variant">الالتزامات الثابتة والراتب</h2>
+      <button onclick="openCommitModal()" class="flex items-center gap-1 text-primary-fixed font-label-caps text-label-caps hover:opacity-80">
+        <span class="material-symbols-outlined text-[16px]">add</span> إضافة
+      </button>
+    </div>
+    <div id="commitments-list" class="flex flex-col"></div>
+  </div>
+
+  <!-- Data Management -->
+  <div class="card-surface overflow-hidden">
+    <div class="px-container-padding py-3 border-b border-outline-variant">
+      <h2 class="font-label-caps text-label-caps text-on-surface-variant">إدارة البيانات</h2>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">نسخة احتياطية</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">تحميل كافة البيانات في ملف JSON</span>
+      </div>
+      <button onclick="exportData()" class="px-4 py-2 rounded-full bg-surface-container-highest text-on-surface font-label-caps text-label-caps hover:bg-surface-bright transition-colors">تحميل</button>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">استيراد بيانات</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">رفع ملف نسخة احتياطية سابقة</span>
+      </div>
+      <input type="file" id="import-file" accept=".json" class="hidden" onchange="handleImport(event)">
+      <button onclick="document.getElementById('import-file').click()" class="px-4 py-2 rounded-full bg-surface-container-highest text-on-surface font-label-caps text-label-caps hover:bg-surface-bright transition-colors">استيراد</button>
+    </div>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="card-surface overflow-hidden border border-error/20">
+    <div class="px-container-padding py-3 border-b border-outline-variant">
+      <h2 class="font-label-caps text-label-caps text-error">منطقة الخطر</h2>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">تصفير الحساب</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">حذف جميع الحركات والحسابات والبدء من جديد</span>
+      </div>
+      <button onclick="resetData()" class="px-4 py-2 rounded-full bg-error/10 text-error font-label-caps text-label-caps hover:bg-error/20 transition-colors">تصفير</button>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface text-error font-bold">حذف الحساب نهائياً</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">سيتم حذف البريد الإلكتروني وكافة البيانات</span>
+      </div>
+      <button onclick="deleteAccountPermanently()" class="px-4 py-2 rounded-full border border-error text-error font-label-caps text-label-caps hover:bg-error/10 transition-colors">حذف نهائي</button>
+    </div>
+  </div>
+
+  <p class="text-center font-label-caps text-label-caps text-on-surface-variant pb-4">Money with Basel <span id="app-version-display"></span></p>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bg-surface/95 backdrop-blur border-t border-surface-variant md:border-t-0 md:border-l md:border-surface-variant fixed bottom-0 md:top-0 md:right-0 w-full md:w-20 h-16 md:h-screen z-50 flex md:flex-col justify-around items-center px-2 py-2 pb-safe md:pb-0">
+    <a href="dashboard.html" class="nav-link" data-tooltip="الرئيسية">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[10px] md:hidden font-bold">الرئيسية</span>
+    </a>
+    <a href="transactions.html" class="nav-link" data-tooltip="الحركات">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="text-[10px] md:hidden font-bold">الحركات</span>
+    </a>
+    <button onclick="window.location.href='dashboard.html?openAdd=true'" class="nav-main-btn" data-tooltip="إضافة حركة">
+        <span class="material-symbols-outlined">add</span>
+    </button>
+    <a href="accounts.html" class="nav-link" data-tooltip="الحسابات">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span class="text-[10px] md:hidden font-bold">الحسابات</span>
+    </a>
+    <a href="settings.html" class="nav-link active" data-tooltip="الإعدادات">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="text-[10px] md:hidden font-bold">الإعدادات</span>
+    </a>
+    <button onclick="UI.signOut()" class="nav-link text-error" data-tooltip="خروج">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-[10px] md:hidden font-bold">خروج</span>
+    </button>
+</nav>
+<style>
+  @media (min-width: 768px) {
+    body { padding-right: 80px; }
+}
+</style>
+<!-- CATEGORY MODAL -->
+<div id="cat-modal" class="modal-overlay" onclick="if(event.target===this)closeCatModal()">
+  <div class="modal-sheet">
+    <div class="flex justify-between items-center mb-6 flex-row-reverse">
+      <h2 id="cat-modal-title" class="font-headline-md text-headline-md text-on-surface">فئة جديدة</h2>
+      <button onclick="closeCatModal()" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <!-- Emoji -->
+    <div class="flex items-center gap-3 mb-4 flex-row-reverse">
+      <button id="emoji-btn" onclick="document.getElementById('emoji-input').focus()" class="w-14 h-14 bg-surface-container-highest rounded-2xl text-3xl flex items-center justify-center border border-outline-variant hover:border-primary-fixed transition-colors">📦</button>
+      <input id="emoji-input" type="text" placeholder="أو اكتب إيموجي" maxlength="2"
+        class="flex-1 h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface focus:outline-none focus:border-primary-container text-right"
+        oninput="document.getElementById('emoji-btn').textContent=this.value||'📦'"/>
+    </div>
+    <input id="cat-name" type="text" placeholder="اسم الفئة" class="w-full h-12 bg-surface-container-highest border border-outline-variant rounded-xl px-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary-container mb-4 text-right"/>
+    <div class="flex rounded-full bg-surface-container-highest p-1 mb-4 gap-1">
+      <button id="cat-expense-btn" onclick="setCatType('expense')" class="flex-1 py-2 rounded-full font-label-caps text-label-caps bg-error text-white transition-colors">مصروف</button>
+      <button id="cat-income-btn"  onclick="setCatType('income')"  class="flex-1 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant transition-colors">دخل</button>
+    </div>
+    <div id="cat-edit-actions" class="hidden mb-3">
+      <button onclick="deleteCategory()" class="w-full h-12 bg-error/20 text-error font-label-caps text-label-caps rounded-full hover:bg-error/30 transition-colors">حذف الفئة</button>
+    </div>
+    <button onclick="submitCategory()" class="w-full h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">حفظ</button>
+  </div>
+</div>
+
+<!-- COMMITMENT MODAL -->
+<div id="commit-modal" class="modal-overlay" onclick="if(event.target===this)closeCommitModal()">
+  <div class="modal-sheet max-w-lg border border-white/10 backdrop-blur-2xl bg-[#121218]/95 shadow-2xl">
+    <div class="flex justify-between items-center mb-8 flex-row-reverse border-b border-white/5 pb-4">
+      <h2 id="commit-modal-title" class="text-2xl font-black text-on-surface">إعداد الالتزام</h2>
+      <button onclick="closeCommitModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-on-surface-variant hover:bg-white/10 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="flex rounded-2xl bg-white/5 p-1.5 mb-8 gap-1.5">
+      <button id="commit-expense-btn" onclick="setCommitType('expense')" class="flex-1 py-3 rounded-xl font-bold transition-all bg-error text-white">مصروف ثابت</button>
+      <button id="commit-income-btn"  onclick="setCommitType('income')"  class="flex-1 py-3 rounded-xl font-bold transition-all text-on-surface-variant">راتب / دخل</button>
+    </div>
+    <div class="relative mb-6 bg-white/5 rounded-[32px] p-6 border border-white/5">
+      <input id="commit-amount" type="number" placeholder="0.00" inputmode="decimal" class="w-full bg-transparent border-none text-4xl font-black text-on-surface placeholder:text-on-surface-variant/20 focus:ring-0 text-center number-font"/>
+      <span class="absolute left-8 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">JOD</span>
+    </div>
+    <input id="commit-name" type="text" placeholder="الاسم (قسط، إيجار، راتب...)" class="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface focus:border-primary transition-all text-right mb-4"/>
+    
+    <div class="flex flex-col gap-2 mb-6">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2">الحساب المرتبط</label>
+      <div id="commit-account-chips" class="grid grid-cols-2 gap-3 max-h-[120px] overflow-y-auto scrollbar-hide flex-row-reverse"></div>
+    </div>
+    
+    <div class="flex flex-col gap-3 mb-6">
+      <label class="text-right text-xs font-bold text-on-surface-variant pr-2 block">الفئة المرتبطة</label>
+      <div id="commit-categories" class="grid grid-cols-4 gap-3 max-h-[160px] overflow-y-auto pr-1 flex-row-reverse scrollbar-hide"></div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-6 text-right">
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-on-surface-variant pr-2">يوم التنفيذ شهرياً</label>
+        <input id="commit-day" type="number" min="1" max="31" value="1" class="h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-center text-on-surface"/>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-on-surface-variant pr-2">تاريخ البدء</label>
+        <input id="commit-start" type="date" class="h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-on-surface"/>
+      </div>
+    </div>
+
+    <div id="commit-edit-actions" class="hidden mb-3">
+      <button onclick="deleteCommitment()" class="w-full h-12 bg-error/20 text-error font-label-caps text-label-caps rounded-full hover:bg-error/30 transition-colors">إيقاف الالتزام</button>
+    </div>
+    <button onclick="submitCommitment()" class="w-full h-14 bg-[#39FF14] text-background font-headline-md font-bold rounded-full hover:opacity-90 transition-opacity">حفظ</button>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/db.js"></script>
+<script>
+let state={categories:[],accounts:[],commitments:[],editCat:null,editCommit:null,catType:'expense',commitType:'expense',selectedAccountId:null,selectedCategoryId:null};
+
+auth.onAuthStateChanged(async u=>{
+  if(!u){window.location.href='index.html';return;}
+  // إظهار الصفحة بعد التحقق
+  document.body.style.display = 'block';
+  
+  app.user=u;
+  renderProfile(u);
+  updateToggleUI();
+  initPreferences();
+  await loadAll();
+});
+
+async function loadAll(){
+  const [cats,accs,commits]=await Promise.all([
+    DB.getCategories(app.user.uid),
+    DB.getAccounts(app.user.uid),
+    DB.getCommitments(app.user.uid)
+  ]);
+  state.categories=cats; state.accounts=accs; state.commitments=commits;
+  renderCategories(); renderCommitments();
+}
+
+function renderProfile(u){
+  document.getElementById('profile-name').textContent=u.displayName||'المستخدم';
+  document.getElementById('profile-email').textContent=u.email;
+  const photo = UI.getAvatar(u.uid, u.photoURL);
+  if(photo){
+    const img=`<img src="${photo}" class="w-full h-full object-cover" alt=""/>`;
+    document.getElementById('profile-avatar').innerHTML=img;
+    document.getElementById('hdr-avatar').innerHTML=img;
+  }
+}
+
+function handleAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Basic size check (e.g., 2MB) to prevent localStorage bloat
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('الصورة كبيرة جداً، يرجى اختيار صورة أصغر من 2 ميجابايت', 'error');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64String = e.target.result;
+    localStorage.setItem(`user_avatar_${app.user.uid}`, base64String);
+    
+    const img = `<img src="${base64String}" class="w-full h-full object-cover" alt=""/>`;
+    document.getElementById('profile-avatar').innerHTML = img;
+    document.getElementById('hdr-avatar').innerHTML = img;
+    showToast('تم تحديث الصورة الشخصية بنجاح ✅');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function exportData() {
+  try {
+    UI.setLoading(true);
+    const data = await DB.exportFullData(app.user.uid);
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `money_basel_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    showToast('تم تحميل النسخة الاحتياطية بنجاح ✅');
+  } catch (e) {
+    console.error(e);
+    showToast('حدث خطأ أثناء التصدير', 'error');
+  } finally {
+    UI.setLoading(false);
+  }
+}
+
+async function resetData() {
+  if (!confirm('تحذير: سيتم حذف جميع البيانات (الحسابات، الحركات، الفئات، الالتزامات). هل أنت متأكد؟')) return;
+  try {
+    UI.setLoading(true);
+    await DB.clearAllUserData(app.user.uid);
+    showToast('تم تصفير الحساب بنجاح ✅');
+    window.location.reload();
+  } catch (e) {
+    console.error(e);
+    showToast('حدث خطأ أثناء تصفير البيانات', 'error');
+  } finally {
+    UI.setLoading(false);
+  }
+}
+
+function toggleTheme(){
+  const current = localStorage.getItem('theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+
+  UI.setTheme(next);
+  updateToggleUI();
+  showToast(next === 'dark' ? 'تم تفعيل الوضع الداكن 🌙' : 'تم تفعيل الوضع الفاتح ☀️');
+}
+function updateToggleUI(){
+  const isDark = (localStorage.getItem('theme') || 'dark') === 'dark';
+  document.getElementById('dark-toggle').classList.toggle('on', isDark);
+}
+function initPreferences(){
+  const currency = UI.getCurrency();
+  const select = document.getElementById('currency-select');
+  if (select) select.value = currency;
+  UI.updateCurrencyUnits();
+  const biomButton = document.getElementById('biometric-toggle');
+  const biomNote = document.getElementById('biometric-note');
+  const enabled = localStorage.getItem('biometricEnabled') === 'true';
+  if (!('credentials' in navigator)) {
+    biomNote.textContent = 'البصمة غير مدعومة في متصفحك';
+    biomButton.style.opacity = '0.5';
+    biomButton.style.pointerEvents = 'none';
+    biomButton.classList.remove('on');
+    return;
+  }
+  biomButton.style.opacity = '';
+  biomButton.style.pointerEvents = '';
+  biomButton.classList.toggle('on', enabled);
+  biomNote.textContent = enabled ? 'مفعل. استخدم زر البصمة في صفحة الدخول.' : 'مطفأ. احفظ بيانات الدخول بالبصمة من صفحة الدخول.';
+}
+function setCurrency(value){
+  UI.setCurrency(value);
+  showToast('تم حفظ العملة الافتراضية');
+}
+function toggleBiometric(){
+  if (!('credentials' in navigator)) { showToast('البصمة غير مدعومة'); return; }
+  const enabled = localStorage.getItem('biometricEnabled') === 'true';
+  localStorage.setItem('biometricEnabled', enabled ? 'false' : 'true');
+  document.getElementById('biometric-toggle').classList.toggle('on', !enabled);
+  document.getElementById('biometric-note').textContent = !enabled ? 'مفعل. اضغط زر البصمة في صفحة الدخول.' : 'مطفأ. احفظ بيانات الدخول بالبصمة من صفحة الدخول.';
+  showToast(!enabled ? 'تم تفعيل الدخول بالبصمة' : 'تم إيقاف الدخول بالبصمة');
+}
+
+function renderCategories(){
+  const list=document.getElementById('categories-list');
+  if(!state.categories.length){list.innerHTML='<div class="px-4 py-6 text-center text-on-surface-variant font-body-md text-body-md">لا توجد فئات. أضف فئة جديدة.</div>';return;}
+  const grouped={expense:state.categories.filter(c=>c.type==='expense'),income:state.categories.filter(c=>c.type==='income')};
+  list.innerHTML=`
+    ${grouped.expense.length?`<div class="px-4 pt-3 pb-1"><span class="font-label-caps text-label-caps text-error">مصروفات</span></div>${grouped.expense.map(c=>catRow(c)).join('')}`:''}
+    ${grouped.income.length?`<div class="px-4 pt-3 pb-1"><span class="font-label-caps text-label-caps text-[#39FF14]">دخل</span></div>${grouped.income.map(c=>catRow(c)).join('')}`:''}`;
+}
+
+function catRow(c){
+  return `<div class="setting-row cursor-pointer hover:bg-surface-container/50 transition-colors" onclick="openEditCat('${c.id}')">
+    <div class="flex items-center gap-3 flex-row-reverse">
+      <span class="text-2xl">${c.emoji}</span>
+      <span class="font-body-md text-body-md text-on-surface">${c.name}</span>
+    </div>
+    <span class="material-symbols-outlined text-on-surface-variant text-[18px]">edit</span>
+  </div>`;
+}
+
+function renderCommitments(){
+  const list=document.getElementById('commitments-list');
+  const active=state.commitments.filter(c=>c.isActive);
+  if(!active.length){list.innerHTML='<div class="px-4 py-6 text-center text-on-surface-variant font-body-md text-body-md">لا توجد التزامات ثابتة.</div>';return;}
+  list.innerHTML=active.map(c=>{
+    const next=c.nextRunDate?.toDate?c.nextRunDate.toDate():new Date(c.nextRunDate);
+    const daysLeft=Math.ceil((next-new Date())/86400000);
+    const typeColor=c.type==='income'?'text-[#39FF14]':'text-error';
+    return `<div class="setting-row cursor-pointer hover:bg-surface-container/50 transition-colors" onclick="openEditCommit('${c.id}')">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">${c.name}</span>
+        <span class="font-number-sm text-number-sm text-on-surface-variant">بعد ${daysLeft} يوم · يوم ${c.dayOfMonth} شهرياً</span>
+      </div>
+      <div class="flex flex-col items-start">
+        <span class="font-body-md text-body-md font-bold ${typeColor}">${fmt(c.amount)} ${UI.getCurrency()}</span>
+        <span class="material-symbols-outlined text-on-surface-variant text-[18px]">edit</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmt(n){return Number(n).toLocaleString('en-JO',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function renderAccountChips() {
+  const container = document.getElementById('commit-account-chips');
+  container.innerHTML = state.accounts.map(a => `
+    <button onclick="selectAccount('${a.id}')" 
+      class="flex items-center justify-end gap-2 p-3 rounded-2xl border transition-all duration-300
+      ${state.selectedAccountId === a.id ? 'bg-primary/20 border-primary text-on-surface' : 'bg-white/5 border-white/5 text-on-surface-variant'}">
+      <span class="text-xs font-bold truncate">${a.name}</span>
+      <span class="text-xl shrink-0">${a.icon || '💰'}</span>
+    </button>`).join('');
+}
+
+function selectAccount(id) {
+  state.selectedAccountId = id;
+  renderAccountChips();
+}
+
+function renderCategoryChips() {
+  const container = document.getElementById('commit-categories');
+  if (!container) return;
+  const filtered = state.categories.filter(c => c.type === state.commitType);
+  container.innerHTML = filtered.map(c => `
+    <button type="button" onclick="selectCategory('${c.id}')" 
+      class="flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-1
+      ${state.selectedCategoryId === c.id ? 'bg-primary/20 border-primary text-primary shadow-lg' : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20'}">
+      <span class="text-2xl">${c.emoji}</span>
+      <span class="text-[10px] font-bold truncate w-full text-center">${c.name}</span>
+    </button>`).join('');
+}
+
+function selectCategory(id) {
+  state.selectedCategoryId = id;
+  renderCategoryChips();
+}
+
+// CATEGORY MODAL
+function openCatModal(){
+  state.editCat=null;
+  document.getElementById('cat-modal-title').textContent='فئة جديدة';
+  document.getElementById('cat-name').value='';
+  document.getElementById('emoji-input').value='';
+  document.getElementById('emoji-btn').textContent='📦';
+  document.getElementById('cat-edit-actions').classList.add('hidden');
+  setCatType('expense');
+  document.getElementById('cat-modal').classList.add('active');
+}
+function openEditCat(id){
+  const cat = state.categories.find(c => c.id === id);
+  state.editCat=cat;
+  document.getElementById('cat-modal-title').textContent='تعديل الفئة';
+  document.getElementById('cat-name').value=cat.name;
+  document.getElementById('emoji-btn').textContent=cat.emoji||'📦';
+  document.getElementById('emoji-input').value=cat.emoji||'';
+  document.getElementById('cat-edit-actions').classList.remove('hidden');
+  setCatType(cat.type);
+  document.getElementById('cat-modal').classList.add('active');
+}
+function closeCatModal(){document.getElementById('cat-modal').classList.remove('active');}
+function setCatType(t){
+  state.catType=t;
+  document.getElementById('cat-expense-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='expense'?'bg-error text-white':'text-on-surface-variant');
+  document.getElementById('cat-income-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='income'?'bg-[#39FF14] text-background':'text-on-surface-variant');
+}
+async function submitCategory(){
+  const name=document.getElementById('cat-name').value.trim();
+  const emoji=document.getElementById('emoji-input').value||document.getElementById('emoji-btn').textContent||'📦';
+  if(!name){showToast('أدخل اسم الفئة','error');return;}
+  try{
+    if(state.editCat){
+      await DB.updateCategory(state.editCat.id,{name,emoji,type:state.catType});
+      showToast('تم التعديل ✅');
+    }else{
+      await DB.addCategory(app.user.uid,{name,emoji,type:state.catType});
+      showToast('تم الإضافة ✅');
+    }
+    closeCatModal(); await loadAll();
+  }catch(e){showToast('خطأ','error');}
+}
+async function deleteCategory(){
+  if(!confirm('حذف هذه الفئة؟'))return;
+  await DB.deleteCategory(state.editCat.id);
+  showToast('تم الحذف'); closeCatModal(); await loadAll();
+}
+
+// COMMITMENT MODAL
+function openCommitModal(){
+  state.editCommit=null;
+  state.selectedAccountId = state.accounts[0]?.id || null;
+  state.selectedCategoryId = null;
+  document.getElementById('commit-modal-title').textContent='التزام ثابت جديد';
+  document.getElementById('commit-name').value='';
+  document.getElementById('commit-amount').value='';
+  document.getElementById('commit-day').value='1';
+  document.getElementById('commit-start').value=new Date().toISOString().split('T')[0];
+  document.getElementById('commit-end').value='';
+  document.getElementById('commit-edit-actions').classList.add('hidden');
+  setCommitType('expense');
+  renderAccountChips();
+  renderCategoryChips();
+  document.getElementById('commit-modal').classList.add('active');
+}
+function openEditCommit(id){
+  const c = state.commitments.find(com => com.id === id);
+  state.editCommit=c;
+  state.selectedAccountId = c.accountId;
+  state.selectedCategoryId = c.categoryId;
+  document.getElementById('commit-modal-title').textContent='تعديل الالتزام';
+  document.getElementById('commit-name').value=c.name;
+  document.getElementById('commit-amount').value=c.amount;
+  document.getElementById('commit-day').value=c.dayOfMonth||1;
+  document.getElementById('commit-edit-actions').classList.remove('hidden');
+  setCommitType(c.type||'expense');
+  renderAccountChips();
+  renderCategoryChips();
+  document.getElementById('commit-modal').classList.add('active');
+}
+function closeCommitModal(){document.getElementById('commit-modal').classList.remove('active');}
+function setCommitType(t){
+  state.commitType=t;
+  document.getElementById('commit-expense-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='expense'?'bg-error text-white':'text-on-surface-variant');
+  document.getElementById('commit-income-btn').className='flex-1 py-2 rounded-full font-label-caps text-label-caps transition-colors '+(t==='income'?'bg-[#39FF14] text-background':'text-on-surface-variant');
+  renderCategoryChips();
+}
+async function submitCommitment(){
+  const name=document.getElementById('commit-name').value.trim();
+  const amount=parseFloat(document.getElementById('commit-amount').value);
+  const accountId=state.selectedAccountId;
+  const dayOfMonth=parseInt(document.getElementById('commit-day').value)||1;
+  const startDate=document.getElementById('commit-start').value;
+  const endDate=document.getElementById('commit-end').value||null;
+  if(!name){showToast('أدخل اسماً','error');return;}
+  if(!amount||amount<=0){showToast('أدخل مبلغاً','error');return;}
+  if(!accountId){showToast('اختر الحساب','error');return;}
+  try{
+    if(state.editCommit){
+      await DB.updateCommitment(state.editCommit.id,{name,amount,type:state.commitType,accountId,dayOfMonth,categoryId: state.selectedCategoryId});
+      showToast('تم التعديل ✅');
+    }else{
+      await DB.addCommitment(app.user.uid,{name,amount,type:state.commitType,accountId,dayOfMonth,startDate,endDate,categoryId: state.selectedCategoryId});
+      showToast('تم الإضافة ✅');
+    }
+    closeCommitModal(); await loadAll();
+  }catch(e){console.error(e);showToast('خطأ','error');}
+}
+async function deleteCommitment(){
+  if(!confirm('إيقاف هذا الالتزام؟'))return;
+  try {
+    await DB.deleteCommitment(state.editCommit.id);
+    showToast('تم الإيقاف'); closeCommitModal(); await loadAll();
+  } catch(e) { showToast('خطأ في إيقاف الالتزام', 'error'); }
+}
+
+async function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!confirm('سيتم مسح البيانات الحالية واستبدالها بالنسخة الاحتياطية. استمرار؟')) return;
+      UI.setLoading(true);
+      await DB.importData(app.user.uid, data);
+      showToast('تم استيراد البيانات بنجاح ✅');
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      showToast('الملف غير صالح أو حدث خطأ', 'error');
+    } finally {
+      UI.setLoading(false);
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function deleteAccountPermanently() {
+  if (!confirm('تحذير نهائي: سيتم حذف حسابك بالكامل وجميع بياناتك من النظام ولن تتمكن من استعادتها. هل أنت متأكد؟')) return;
+  try {
+    UI.setLoading(true);
+    await DB.clearAllUserData(app.user.uid, false);
+    await app.user.delete();
+    window.location.href = 'index.html';
+  } catch (e) {
+    console.error(e);
+    if (e.code === 'auth/requires-recent-login') {
+      alert('يجب إعادة تسجيل الدخول للقيام بهذه العملية الحساسة.');
+      UI.signOut();
+    } else { showToast('حدث خطأ أثناء الحذف', 'error'); }
+  } finally { UI.setLoading(false); }
+}
+
+</script>
+
+<script src="js/product-upgrade.js?v=20260626_world_class"></script>
+</body>
+</html>

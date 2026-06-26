@@ -1,1 +1,464 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<script src="js/ui.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money with Basel - تسجيل الدخول</title>
+    <meta name="theme-color" content="#0a0a12">
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css"> 
+    <style>
+        .auth-box {
+            width: 100%;
+            max-width: 420px;
+        }
 
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-logo {
+            font-size: 56px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff2d78 0%, #ff80aa 100%) !important;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px !important;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: #a098b0;
+        }
+
+        .auth-card {
+            background: rgba(30, 30, 46, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 32px;
+            padding: 28px;
+            animation: cardEntry 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: rgba(40, 40, 62, 0.5);
+            border-radius: 9999px;
+            padding: 4px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px 0;
+            text-align: center;
+            cursor: pointer;
+            color: #a098b0;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .auth-tab.active {
+            background: var(--color-primary-gradient);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 45, 120, 0.3);
+        }
+
+        .auth-tab-content { display: none; }
+        .auth-tab-content.active { display: block; }
+
+        .input-group { margin-bottom: 16px; }
+
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #a098b0;
+            margin-bottom: 6px;
+            text-align: right;
+        }
+
+        .input-field {
+            width: 100%;
+            height: 48px;
+            background: rgba(20, 20, 35, 0.5);
+            border: 1px solid #302840;
+            border-radius: 12px;
+            padding: 0 16px;
+            font-family: 'Almarai', sans-serif;
+            font-size: 16px;
+            color: #e8e0f0;
+            text-align: right;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .input-field:focus {
+            border-color: #ff2d78;
+        }
+
+        .btn-primary {
+            width: 100%;
+            height: 52px;
+            background: var(--color-secondary-gradient);
+            color: #0a0a12;
+            border: none;
+            border-radius: 9999px;
+            font-family: 'Almarai', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover { opacity: 0.9; transform: scale(1.02); box-shadow: 0 8px 25px rgba(57, 255, 20, 0.4); }
+        .btn-primary:active { opacity: 0.8; }
+
+        .btn-secondary {
+            width: 100%;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 9999px;
+            font-family: 'Almarai', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 45, 120, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background-color: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: #ff4444;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: none;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .error-message.active { display: block; }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            color: #a098b0;
+            font-size: 14px;
+        }
+
+        .loading.active { display: flex; }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #302840;
+            border-top-color: #ff2d78;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #5a5068;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+            color: #5a5068;
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #302840;
+        }
+
+        /* Premium Aurora Background */
+        .shader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            background-color: #000000;
+        }
+        .mesh-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(at 15% 15%, rgba(255, 45, 120, 0.45) 0px, transparent 50%), 
+                        radial-gradient(at 85% 85%, rgba(0, 180, 216, 0.35) 0px, transparent 50%),
+                        radial-gradient(at 50% 50%, rgba(114, 9, 183, 0.25) 0px, transparent 50%),
+                        #020205;
+            filter: blur(40px);
+            animation: mesh-float 15s ease infinite alternate;
+            opacity: 1 !important;
+        }
+        @keyframes mesh-float {
+            0% { transform: scale(1.1) translate(-2%, -2%); }
+            100% { transform: scale(1.4) translate(2%, 2%); }
+        }
+        .content-layer {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* فرض التوسط وإلغاء إزاحة القائمة الجانبية */
+        body {
+            padding-right: 0 !important;
+            padding-left: 0 !important;
+            margin: 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+        }
+    </style>
+
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#099999"/>
+<link href="css/product-upgrade.css?v=20260626_world_class" rel="stylesheet"/>
+</head>
+<body class="bg-background text-on-background min-h-screen flex items-center justify-center p-6 overflow-hidden">
+    <!-- Premium Motion Background -->
+    <div class="shader-container">
+        <div class="mesh-gradient"></div>
+    </div>
+
+    <div class="content-layer min-h-screen">
+    <div class="auth-box">
+        <div class="auth-header">
+            <span class="auth-logo">💰</span>
+            <h1 class="auth-title">Money with Basel</h1>
+            <p class="auth-subtitle">لوحة قيادة مالية احترافية</p>
+        </div>
+
+        <div class="auth-card">
+            <div id="error-message" class="error-message"></div>
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">تسجيل الدخول</div>
+                <div class="auth-tab" data-tab="signup">حساب جديد</div>
+            </div>
+
+            <!-- Login -->
+            <div class="auth-tab-content active" id="login-tab">
+                <div class="input-group">
+                    <label class="input-label">البريد الإلكتروني</label>
+                    <input type="email" class="input-field" id="login-email" placeholder="example@email.com">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">كلمة المرور</label>
+                    <input type="password" class="input-field" id="login-password" placeholder="••••••••">
+                </div>
+                <button class="btn-primary" id="login-btn">دخول</button>
+            </div>
+
+            <!-- Signup -->
+            <div class="auth-tab-content" id="signup-tab">
+                <div class="input-group">
+                    <label class="input-label">الاسم الكامل</label>
+                    <input type="text" class="input-field" id="signup-name" placeholder="باسل محمد">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">البريد الإلكتروني</label>
+                    <input type="email" class="input-field" id="signup-email" placeholder="example@email.com">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">كلمة المرور</label>
+                    <input type="password" class="input-field" id="signup-password" placeholder="6 أحرف على الأقل">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">تأكيد كلمة المرور</label>
+                    <input type="password" class="input-field" id="signup-confirm" placeholder="••••••••">
+                </div>
+                <button class="btn-primary" id="signup-btn">إنشاء الحساب</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <span>جاري المعالجة...</span>
+            </div>
+
+            <div class="divider">أو</div>
+            <button class="btn-secondary" id="demo-btn">🎮 جرب النسخة التجريبية</button>
+        </div>
+
+        <div class="auth-footer">
+            <p id="firebase-status">⏳ جاري الاتصال...</p>
+            <p class="mt-2 text-[10px]" id="app-version-display"></p>
+        </div>
+    </div>
+    </div> <!-- Closing content-layer -->
+
+    <!-- Firebase v9 compat (نفس الإصدار المستخدم في باقي الملفات) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // ── Tab switching ──────────────────────────────────
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.auth-tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+                document.getElementById('error-message').classList.remove('active');
+            });
+        });
+
+        // ── Helpers ────────────────────────────────────────
+        function showError(msg) {
+            const el = document.getElementById('error-message');
+            el.textContent = msg;
+            el.classList.add('active');
+        }
+
+        function setLoading(show) {
+            document.getElementById('loading').classList.toggle('active', show);
+            ['login-btn','signup-btn','demo-btn'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = show;
+            });
+        }
+
+        // ── Auth state → redirect ──────────────────────────
+        auth.onAuthStateChanged(user => {
+            if (user) window.location.href = 'dashboard.html';
+            else document.getElementById('firebase-status').textContent = '✅ جاهز للدخول';
+        });
+
+        // ── Login ──────────────────────────────────────────
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email    = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            if (!email || !password) { showError('أدخل البريد وكلمة المرور'); return; }
+            setLoading(true);
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (e) {
+                const msgs = {
+                    'auth/user-not-found':  'البريد غير مسجل',
+                    'auth/wrong-password':  'كلمة المرور خاطئة',
+                    'auth/invalid-email':   'بريد إلكتروني غير صحيح',
+                    'auth/too-many-requests':'محاولات كثيرة، انتظر قليلاً'
+                };
+                showError('❌ ' + (msgs[e.code] || e.message));
+                setLoading(false);
+            }
+        });
+
+        // ── Signup ─────────────────────────────────────────
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            const name     = document.getElementById('signup-name').value.trim();
+            const email    = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirmPass = document.getElementById('signup-confirm').value;
+            if (!name || !email || !password || !confirmPass) { showError('يرجى ملأ جميع الحقول'); return; }
+            if (password !== confirmPass) { showError('كلمات المرور غير متطابقة'); return; }
+            if (password.length < 6)  { showError('كلمة المرور يجب أن تكون 6 أحرف على الأقل'); return; }
+            setLoading(true);
+            try {
+                const { user } = await auth.createUserWithEmailAndPassword(email, password);
+                await user.updateProfile({ displayName: name });
+            } catch (e) {
+                const msgs = {
+                    'auth/email-already-in-use': 'البريد مستخدم بالفعل',
+                    'auth/weak-password':        'كلمة المرور ضعيفة جداً'
+                };
+                showError('❌ ' + (msgs[e.code] || e.message));
+                setLoading(false);
+            }
+        });
+
+        // ── Demo ───────────────────────────────────────────
+        document.getElementById('demo-btn').addEventListener('click', async () => {
+            setLoading(true);
+            const demoEmail = 'demo@money-basel.com';
+            const demoPass  = 'Demo@123456';
+            try {
+                await auth.signInWithEmailAndPassword(demoEmail, demoPass);
+            } catch (e) {
+                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                    try {
+                        await auth.createUserWithEmailAndPassword(demoEmail, demoPass);
+                        await auth.currentUser.updateProfile({ displayName: 'باسل (تجريبي)' });
+                    } catch (e2) {
+                        showError('❌ ' + e2.message);
+                        setLoading(false);
+                    }
+                } else {
+                    showError('❌ ' + e.message);
+                    setLoading(false);
+                }
+            }
+        });
+
+        // ── Enter key support ──────────────────────────────
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Enter') return;
+            const activeTab = document.querySelector('.auth-tab.active')?.dataset.tab;
+            if (activeTab === 'login')  document.getElementById('login-btn').click();
+            if (activeTab === 'signup') document.getElementById('signup-btn').click();
+        });
+
+        // ── Service Worker ─────────────────────────────────
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+        }
+    </script>
+
+<script src="js/product-upgrade.js?v=20260626_world_class"></script>
+</body>
+</html>
