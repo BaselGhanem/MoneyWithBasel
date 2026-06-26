@@ -182,6 +182,7 @@ tailwind.config = {
     border: 2px solid rgba(255, 255, 255, 0.05);
   }
 </style>
+<link rel="stylesheet" href="css/premium-theme.css?v=20260626_theme_v2">
 </head>
 <body class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
   <div class="shader-container">
@@ -596,6 +597,7 @@ auth.onAuthStateChanged(async user => {
   if (!user) { window.location.href = 'index.html'; return; }
   app.user = user;
   await DB.createUserProfile(user);
+  await UI.loadUserPreferences(user.uid);
   await loadDashboard(user);
 
   // Check for openAdd query param

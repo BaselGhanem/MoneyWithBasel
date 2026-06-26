@@ -74,6 +74,7 @@ body{font-family:'Almarai',sans-serif;min-height:100dvh;background:#020205;}
   transform: translateY(-2px);
 }
 </style>
+<link rel="stylesheet" href="css/premium-theme.css?v=20260626_theme_v2">
 </head>
 <body class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
   <div class="shader-container">
@@ -158,6 +159,7 @@ let state = { account: null, txs: [], viewTx: null, editTx: null, editCatId: nul
 auth.onAuthStateChanged(async u => {
     if (!u) { window.location.href = 'index.html'; return; }
     app.user = u;
+    await UI.loadUserPreferences(u.uid);
     const urlParams = new URLSearchParams(window.location.search);
     const accId = urlParams.get('id');
     if (!accId) { window.location.href = 'accounts.html'; return; }

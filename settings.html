@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar" style="background:#0a0a12;">
+<html dir="rtl" lang="ar">
 <head>
 <script src="js/ui.js"></script>
 <meta charset="utf-8"/>
@@ -33,6 +33,8 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
     background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
 }
 </style>
+<link rel="stylesheet" href="css/premium-theme.css?v=20260626_theme_v2">
+</head>
 <body style="display: none;" class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
   
 <header class="sticky top-0 w-full bg-background border-b border-outline-variant/30 z-50">
@@ -72,6 +74,35 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
         <span class="font-body-md text-number-sm text-on-surface-variant">مناسب للأماكن المعتمة</span>
       </div>
       <div id="dark-toggle" class="toggle-track on" onclick="toggleTheme()"><div class="toggle-thumb"></div></div>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">لون الموقع الرئيسي</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">يتحكم بالأزرار، الروابط، الأيقونات النشطة، والتوهج</span>
+      </div>
+      <div class="theme-control-grid">
+        <div class="theme-color-row">
+          <input id="primary-color-picker" type="color" class="theme-color-picker" oninput="setMainColor(this.value)">
+          <input id="primary-color-text" type="text" class="theme-control-input" maxlength="7" placeholder="#099999" onchange="setMainColor(this.value)">
+        </div>
+        <div id="primary-color-swatches" class="theme-swatch-row"></div>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div class="flex flex-col items-end">
+        <span class="font-body-md text-body-md text-on-surface">لون الخط الأساسي</span>
+        <span class="font-body-md text-number-sm text-on-surface-variant">يحفظ لون النص الرئيسي حسب تفضيل المستخدم</span>
+      </div>
+      <div class="theme-control-grid">
+        <div class="theme-color-row">
+          <input id="text-color-picker" type="color" class="theme-color-picker" oninput="setFontColor(this.value)">
+          <input id="text-color-text" type="text" class="theme-control-input" maxlength="7" placeholder="#111827" onchange="setFontColor(this.value)">
+        </div>
+        <div class="settings-actions-inline">
+          <button onclick="saveAppearancePreferences()" class="premium-soft-btn">حفظ التفضيلات</button>
+          <button onclick="resetAppearanceColors()" class="premium-soft-btn">استعادة الافتراضي</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -283,6 +314,7 @@ auth.onAuthStateChanged(async u=>{
   document.body.style.display = 'block';
   
   app.user=u;
+  await UI.loadUserPreferences(u.uid);
   renderProfile(u);
   updateToggleUI();
   initPreferences();
@@ -373,6 +405,8 @@ function toggleTheme(){
 
   UI.setTheme(next);
   updateToggleUI();
+  initAppearanceControls();
+  queuePreferenceSave();
   showToast(next === 'dark' ? 'تم تفعيل الوضع الداكن 🌙' : 'تم تفعيل الوضع الفاتح ☀️');
 }
 function updateToggleUI(){
@@ -384,6 +418,7 @@ function initPreferences(){
   const select = document.getElementById('currency-select');
   if (select) select.value = currency;
   UI.updateCurrencyUnits();
+  initAppearanceControls();
   const biomButton = document.getElementById('biometric-toggle');
   const biomNote = document.getElementById('biometric-note');
   const enabled = localStorage.getItem('biometricEnabled') === 'true';
@@ -401,6 +436,7 @@ function initPreferences(){
 }
 function setCurrency(value){
   UI.setCurrency(value);
+  queuePreferenceSave();
   showToast('تم حفظ العملة الافتراضية');
 }
 function toggleBiometric(){
@@ -410,6 +446,78 @@ function toggleBiometric(){
   document.getElementById('biometric-toggle').classList.toggle('on', !enabled);
   document.getElementById('biometric-note').textContent = !enabled ? 'مفعل. اضغط زر البصمة في صفحة الدخول.' : 'مطفأ. احفظ بيانات الدخول بالبصمة من صفحة الدخول.';
   showToast(!enabled ? 'تم تفعيل الدخول بالبصمة' : 'تم إيقاف الدخول بالبصمة');
+}
+
+
+
+let preferenceSaveTimer = null;
+
+function queuePreferenceSave(){
+  clearTimeout(preferenceSaveTimer);
+  preferenceSaveTimer = setTimeout(() => {
+    if (app.user) UI.saveUserPreferences(app.user.uid).catch(console.error);
+  }, 450);
+}
+
+function initAppearanceControls(){
+  const primary = UI.getPrimaryColor();
+  const text = UI.getTextColor();
+  const primaryPicker = document.getElementById('primary-color-picker');
+  const primaryText = document.getElementById('primary-color-text');
+  const textPicker = document.getElementById('text-color-picker');
+  const textText = document.getElementById('text-color-text');
+  if (primaryPicker) primaryPicker.value = primary;
+  if (primaryText) primaryText.value = primary;
+  if (textPicker) textPicker.value = text;
+  if (textText) textText.value = text;
+  renderPrimarySwatches();
+}
+
+function setMainColor(value){
+  const safe = UI.setPrimaryColor(value);
+  const primaryPicker = document.getElementById('primary-color-picker');
+  const primaryText = document.getElementById('primary-color-text');
+  if (primaryPicker) primaryPicker.value = safe;
+  if (primaryText) primaryText.value = safe;
+  renderPrimarySwatches();
+  queuePreferenceSave();
+}
+
+function setFontColor(value){
+  const safe = UI.setTextColor(value);
+  const textPicker = document.getElementById('text-color-picker');
+  const textText = document.getElementById('text-color-text');
+  if (textPicker) textPicker.value = safe;
+  if (textText) textText.value = safe;
+  queuePreferenceSave();
+}
+
+function renderPrimarySwatches(){
+  const el = document.getElementById('primary-color-swatches');
+  if (!el) return;
+  const active = UI.getPrimaryColor();
+  el.innerHTML = UI.COLOR_PRESETS.map(color => `
+    <button type="button" aria-label="${color}" title="${color}"
+      class="theme-swatch ${active === color ? 'active' : ''}"
+      style="background:${color}" onclick="setMainColor('${color}')"></button>
+  `).join('');
+}
+
+async function saveAppearancePreferences(){
+  try{
+    await UI.saveUserPreferences(app.user?.uid);
+    showToast('تم حفظ تفضيلات المظهر ✅');
+  }catch(e){
+    console.error(e);
+    showToast('تعذر حفظ التفضيلات على الحساب، تم حفظها على الجهاز فقط', 'error');
+  }
+}
+
+function resetAppearanceColors(){
+  UI.resetAppearancePreferences();
+  initAppearanceControls();
+  queuePreferenceSave();
+  showToast('تمت استعادة ألوان المظهر الافتراضية');
 }
 
 function renderCategories(){

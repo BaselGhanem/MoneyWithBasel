@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mwb-v2';
+const CACHE_NAME = 'mwb-v2.2.0-theme';
 const STATIC = [
     './',
     './index.html',
@@ -12,6 +12,7 @@ const STATIC = [
     './css/base.css',
     './css/layout.css',
     './css/components.css',
+    './css/premium-theme.css',
     './js/app.js',
     './js/auth.js',
     './js/db.js',

@@ -1,0 +1,21 @@
+{
+  "name": "Money with Basel",
+  "short_name": "Money Basel",
+  "description": "تطبيق عربي لإدارة الحسابات، المصاريف، الدخل، والالتزامات المالية.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "ar",
+  "orientation": "portrait-primary",
+  "theme_color": "#099999",
+  "background_color": "#020205",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ]
+}

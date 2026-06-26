@@ -51,6 +51,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
 .theme-expense .submit-btn { background: var(--modal-accent); color: white; box-shadow: 0 8px 25px rgba(255, 45, 120, 0.3); }
 .theme-income .submit-btn { background: var(--modal-accent); color: #0a0a12; box-shadow: 0 8px 25px rgba(57, 255, 20, 0.3); }
 </style>
+<link rel="stylesheet" href="css/premium-theme.css?v=20260626_theme_v2">
 </head>
 <body class="bg-background text-on-background antialiased pb-[90px] md:pb-0 md:pr-20">
   <div class="mesh-gradient"></div>
@@ -299,6 +300,7 @@ auth.onAuthStateChanged(async u=>{
   if(!u){window.location.href='index.html';return;}
   document.body.style.display = 'block';
   app.user=u;
+  await UI.loadUserPreferences(u.uid);
   const [accs,cats]=await Promise.all([DB.getAccounts(u.uid),DB.getCategories(u.uid)]);
   state.accounts=accs; state.categories=cats;
   await loadMonth();

@@ -88,6 +88,7 @@ body{font-family:'Almarai',sans-serif;min-height:max(884px,100dvh);}
   transform: translateY(-2px);
 }
 </style>
+<link rel="stylesheet" href="css/premium-theme.css?v=20260626_theme_v2">
 </head>
 <body class="bg-background text-on-background antialiased pb-[90px] md:pb-0">
 <div class="shader-container"></div>
@@ -234,6 +235,7 @@ let state={accounts:[],editAcc:null,selectedIcon:'💰'};
 auth.onAuthStateChanged(async u=>{
   if(!u){window.location.href='index.html';return;}
   app.user=u;
+  await UI.loadUserPreferences(u.uid);
   await loadAccounts();
   UI.updateCurrencyUnits();
   renderAccounts();
